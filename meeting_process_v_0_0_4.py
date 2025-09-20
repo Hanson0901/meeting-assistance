@@ -29,7 +29,8 @@ class Qwen3MeetingRecordExtractor:
         print("正在載入Qwen/Qwen3-4B-Instruct-2507模型（記憶體優化版本）...")
         print("注意：首次載入可能需要數分鐘時間下載模型檔案")
 
-
+        # 獲取Huggingface token
+        token = os.getenv("Huggingface_token")
 
         # 載入tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(

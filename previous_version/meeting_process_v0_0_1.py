@@ -9,6 +9,7 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import warnings
 import pandas as pd
+import os
 from datetime import datetime
 warnings.filterwarnings("ignore")
 
@@ -32,7 +33,8 @@ class Qwen3KeyPointsExtractor:
             model_name,
             use_auth_token=token
         )
-        token = "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"
+                # 獲取Huggingface token
+        token = os.getenv("Huggingface_token")
 
         # 載入模型
         self.model = AutoModelForCausalLM.from_pretrained(

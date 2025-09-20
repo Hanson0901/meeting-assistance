@@ -25,7 +25,9 @@ class Qwen3MeetingRecordExtractor:
         """
         print("正在載入Qwen/Qwen3-4B-Instruct-2507模型（模塊化版本）...")
         print("注意：首次載入可能需要數分鐘時間下載模型檔案")
-
+        
+        # 獲取Huggingface token
+        token = os.getenv("Huggingface_token")
 
         # 載入tokenizer
         self.tokenizer = AutoTokenizer.from_pretrained(
@@ -36,7 +38,7 @@ class Qwen3MeetingRecordExtractor:
         # 載入模型
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name,
-            torch_dtype="auto",
+            dtype="auto",
             device_map=device_map,
             trust_remote_code=True,
             use_auth_token=token
