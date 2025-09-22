@@ -3,7 +3,7 @@
 """
 Qwen/Qwen3-14B-AWQ 會議記錄整理助手 (AI人物識別版本)
 專門用於處理CSV文件中的會議記錄並進行逐行重點整理，最後總結整個會議主題
-AI增強版：使用AI智能判斷是否為同一人物
+AI增強版：使用AI智能判斷是否為同一人物，並將人物信息匯出為CSV
 """
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -188,6 +188,76 @@ class Qwen3MeetingRecordExtractor:
         person_name = re.sub(r'[（(][^)）]*[)）]', '', person_name).strip()
 
         return person_name
+
+    def parse_person_info(self, person_info):
+        """
+        解析人物信息，分離姓名、職位和貢獻
+        """
+        # 移除出現次數標註
+        clean_info = re.sub(r'\s*\(AI識別出現\s*\d+\s*次\)', '', person_info).strip()
+
+        # 按分隔符分割
+        parts = clean_info.split('-')
+
+        name = parts[0].strip() if len(parts) > 0 else ""
+        position = parts[1].strip() if len(parts) > 1 else ""
+        contribution = parts[2].strip() if len(parts) > 2 else ""
+
+        # 提取出現次數
+        appearance_match = re.search(r'\(AI識別出現\s*(\d+)\s*次\)', person_info)
+        appearances = int(appearance_match.group(1)) if appearance_match else 1
+
+        return {
+            'name': name,
+            'position': position,
+            'contribution': contribution,
+            'appearances': appearances,
+            'full_info': person_info
+        }
+
+    def export_people_to_csv(self, people_info, output_path):
+        """
+        將人物信息匯出為CSV檔案
+        """
+        print(f"\n 正在匯出人物信息為CSV...")
+
+        # 解析人物信息
+        people_data = []
+        for i, person_info in enumerate(people_info, 1):
+            parsed = self.parse_person_info(person_info)
+
+            people_data.append({
+                '序號': i,
+                '姓名': parsed['name'],
+                '職位/角色': parsed['position'],
+                '主要貢獻': parsed['contribution'],
+                '出現次數': parsed['appearances'],
+                '完整描述': parsed['full_info']
+            })
+
+        # 創建DataFrame
+        people_df = pd.DataFrame(people_data)
+
+        # 按出現次數排序（多次出現的人物優先）
+        people_df = people_df.sort_values('出現次數', ascending=False).reset_index(drop=True)
+        people_df['序號'] = range(1, len(people_df) + 1)
+
+        # 保存為CSV
+        people_df.to_csv(output_path, index=False, encoding='utf-8-sig')
+
+        print(f" 人物信息已匯出至: {output_path}")
+        print(f" 共匯出 {len(people_df)} 位獨立人物")
+
+        # 顯示統計信息
+        total_appearances = people_df['出現次數'].sum()
+        multi_appearance = len(people_df[people_df['出現次數'] > 1])
+
+        print(f" 人物統計:")
+        print(f"  - 總出現次數: {total_appearances}")
+        print(f"  - 多次出現人物: {multi_appearance} 位")
+        print(f"  - 平均出現次數: {total_appearances/len(people_df):.1f}")
+
+        return people_df
 
     def merge_people_info(self, people_list):
         """
@@ -554,7 +624,7 @@ class Qwen3MeetingRecordExtractor:
 
     def process_csv_file(self, csv_file_path, output_file_path=None):
         """
-        處理CSV文件（AI人物識別版本）
+        處理CSV文件（AI人物識別版本，包含人物信息匯出）
         """
         try:
             # 讀取CSV文件
@@ -659,13 +729,18 @@ class Qwen3MeetingRecordExtractor:
                 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                 output_file_path = f'meeting_summary_ai_enhanced_{timestamp}.csv'
                 summary_file_path = f'meeting_overall_summary_ai_enhanced_{timestamp}.md'
+                people_file_path = f'meeting_people_list_{timestamp}.csv'
             else:
                 base_name = output_file_path.replace('.csv', '')
                 summary_file_path = f'{base_name}_overall_summary.md'
+                people_file_path = f'{base_name}_people_list.csv'
 
             # 保存逐行整理結果
             results_df.to_csv(output_file_path, index=False, encoding='utf-8-sig')
             print(f"\n 逐行整理結果已保存至: {output_file_path}")
+
+            # 匯出人物信息為CSV
+            people_df = self.export_people_to_csv(people_info, people_file_path)
 
             # 保存整體會議總結
             with open(summary_file_path, 'w', encoding='utf-8') as f:
@@ -686,7 +761,7 @@ class Qwen3MeetingRecordExtractor:
             # 顯示處理統計
             self.show_processing_stats(results_df, overall_summary, people_info, unique_people_count)
 
-            return results_df, overall_summary
+            return results_df, overall_summary, people_df
 
         except Exception as e:
             print(f"處理CSV文件時發生錯誤: {str(e)}")
@@ -715,8 +790,8 @@ class Qwen3MeetingRecordExtractor:
                 print(f"\n AI人物識別統計:")
                 print(f"AI識別到的獨立人物總數: {unique_people_count} 位")
                 print(f"人物信息條目總數: {len(people_info)} 條（含重複出現）")
-                print("所有重要人物預覽:")
-                for i, person in enumerate(people_info):
+                print("前5位重要人物預覽:")
+                for i, person in enumerate(people_info[:5]):
                     print(f"  {i+1}. {person}")
 
             # 顯示整體總結預覽
@@ -745,7 +820,7 @@ def process_meeting_records():
     try:
         print("="*60)
         print("Qwen3-4B-Instruct-2507 會議記錄整理系統")
-        print("AI人物識別版本 - 智能判斷同一人物")
+        print("AI人物識別版本 - 智能判斷同一人物 + 人物CSV匯出")
         print("="*60)
 
         # 初始化模型
@@ -761,7 +836,8 @@ def process_meeting_records():
             print(" AI人物識別模式成功運行")
             print(" 智能判斷同一人物並合併統計")
             print(" 五個模塊分別執行完成")
-            print(" 已生成逐行整理和整體總結兩個檔案")
+            print(" 人物信息已匯出為獨立CSV檔案")
+            print(" 已生成三個檔案：逐行整理、整體總結、人物列表")
         else:
             print("\n 處理失敗，請檢查文件格式和內容")
 
