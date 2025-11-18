@@ -1,6 +1,7 @@
 #To make sure your python environment is match or requirements
 import torch
 import transformers
+print(f"Python版本: {torch.__version__}")
 print(f"PyTorch版本: {torch.__version__}")
 print(f"Transformers版本: {transformers.__version__}")
 print(f"CUDA可用: {torch.cuda.is_available()}")
