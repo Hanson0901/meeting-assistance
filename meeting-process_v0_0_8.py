@@ -63,7 +63,7 @@ class SRTParser:
                             'text': subtitle_text
                         })
                     except Exception as e:
-                        print(f"     解析字幕塊失敗: {e}")
+                        print(f" 解析字幕塊失敗: {e}")
                         continue
 
             return subtitles
@@ -843,10 +843,11 @@ class MemoryOptimizedQwen3Extractor:
         print("="*60)
 
 
-def process_srt_file_optimized():
+def process_srt_file_optimized(srt_file=None):
     """記憶體優化的主要處理函數"""
     # 請根據實際情況修改SRT檔案路徑
-    srt_file = r"C:/Users/cbes1/Desktop/meeting assistence/meeting_record/Clipchamp_.srt"
+    if srt_file is None:
+        srt_file = r"C:/Users/cbes1/Desktop/meeting assistence/meeting_record/Clipchamp_.srt"
 
     if not os.path.exists(srt_file):
         print(f"錯誤：找不到檔案 {srt_file}")
