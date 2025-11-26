@@ -1,5 +1,5 @@
 # 忽略 Python 缓存和编译产物
-__pycache__/
+../**/__pycache__/
 *.py[cod]
 *$py.class
 
