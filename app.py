@@ -39,7 +39,7 @@ from funasr import AutoModel
 
 try:
 
-    from meeting_process import (
+    from meeting_process2 import (
 
         SRTParser, SRTSegmentizer, MemoryOptimizedQwen3Extractor
 
@@ -559,7 +559,7 @@ def transcribe_audio():
 
         base_name = os.path.splitext(filename)[0]
 
-        srt_filename = f"{session_id}_{base_name}.srt"
+        srt_filename = f"{session_id}.srt"
 
         srt_path = os.path.join(app.config['OUTPUT_FOLDER'], srt_filename)
 
@@ -1076,7 +1076,7 @@ def download_file(session_id, file_type):
 
             filename = f"{session_id}.srt"  # 確保副檔名是 .srt 而不是 .srt.txt
 
-            mime = 'application/x-subrip'
+            mime = 'text/plain; charset=utf-8'
 
         else:
 
