@@ -1,0 +1,13 @@
+# 忽略 Python 缓存和编译产物
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 忽略指定目录
+outputs/
+uploads/
+offload/
+
+# 忽略常见缓存目录
+cache/
+.cache/
