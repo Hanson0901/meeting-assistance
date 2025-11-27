@@ -39,9 +39,9 @@ from funasr import AutoModel
 
 try:
 
-    from meeting_process2 import (
+    from meeting_process5 import (
 
-        SRTParser, SRTSegmentizer, GPTQInt8Qwen3Extractor
+        SRTParser, SRTSegmentizer, LlamaCppQwen3Extractor
 
     )
 
@@ -63,7 +63,7 @@ except ImportError as e:
 
         pass
 
-    class MemoryOptimizedQwen3Extractor:
+    class LlamaCppQwen3Extractor:
 
         pass
 
@@ -169,7 +169,7 @@ def initialize_meeting_analyzer():
 
             print("正在加載會議記錄分析模型...")
 
-            extractor = GPTQInt8Qwen3Extractor()
+            extractor = LlamaCppQwen3Extractor()
 
             print("✓ 會議記錄模型加載完成")
 
@@ -778,7 +778,7 @@ def run_meeting_analysis(session_id, transcript):
 
         )
 
-        result = extractor.process_srt_file_optimized(
+        result = extractor.process_srt_file_aggregated(
 
             srt_filepath,
 
@@ -786,9 +786,14 @@ def run_meeting_analysis(session_id, transcript):
 
             max_duration=300,
 
-            max_chars=5000
+            max_chars=5000,
+
+            session_id=session_id,
+
+            processing_status=processing_status
 
         )
+
 
         if result is None:
 

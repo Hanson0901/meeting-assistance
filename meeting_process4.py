@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Qwen/Qwen3-4B-Instruct-2507-GPTQ-Int8 會議記錄整理助手 (Raspberry Pi 5 優化版 v4.0)
-專門用於 Raspberry Pi 5 + GPTQ INT8 量化模型
-核心優化：INT8 量化加載 + CPU 推論 + 極致記憶體管理
+Qwen3-4B-Q8_0 會議記錄整理助手 (Raspberry Pi 5 16GB 優化版 v5.2)
+專門針對 Pi 5 16GB 版本的最優配置
+核心優化：充分利用 16GB 記憶體 + 最大 context window
 """
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from transformers.utils.quantization_config import GPTQConfig
-from transformers.models.qwen3 import Qwen3ForCausalLM
+from llama_cpp import Llama
 import warnings
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 import gc
-import re
 import psutil
 import time
+
 warnings.filterwarnings("ignore")
 
 
@@ -60,7 +57,6 @@ class SRTParser:
             print(f"   ❌ 讀取 SRT 檔案失敗: {e}")
             return []
 
-
     @staticmethod
     def parse_time(time_str):
         """將 SRT 時間格式轉換為秒數"""
@@ -75,7 +71,6 @@ class SRTParser:
             print(f"   ⚠️ 時間解析失敗 '{time_str}': {e}")
             return 0
 
-
     @staticmethod
     def seconds_to_time_str(seconds):
         """將秒數轉換為時間字符串"""
@@ -86,17 +81,15 @@ class SRTParser:
         return f"{hours:02d}:{minutes:02d}:{secs:02d},{milliseconds:03d}"
 
 
-
 class SRTSegmentizer:
     """SRT 分段器 - 根據時間軸和字數分段"""
-    def __init__(self, max_duration=120, max_chars=1500):
+    def __init__(self, max_duration=120, max_chars=2000):
         """
-        初始化分段器（Pi 5 更激進）
-        Raspberry Pi 5 版本: 2分鐘 或 1500字（更激進）
+        初始化分段器（Pi 5 16GB 更激進）
+        Raspberry Pi 5 16GB 版本: 2分鐘 或 2000字
         """
         self.max_duration = max_duration
         self.max_chars = max_chars
-
 
     def segment_subtitles(self, subtitles):
         """將字幕分段，基於時間和字數"""
@@ -109,16 +102,13 @@ class SRTSegmentizer:
         current_chars = 0
         segment_start_idx = 0
 
-
         for i, subtitle in enumerate(subtitles):
             new_duration = subtitle['end_time'] - subtitles[segment_start_idx]['start_time']
             new_chars = current_chars + len(subtitle['text'])
 
-
             if current_segment and (new_duration > self.max_duration or new_chars > self.max_chars):
                 segment = self._create_segment(current_segment, segment_start_idx, i - 1, subtitles)
                 segments.append(segment)
-
 
                 current_segment = [subtitle]
                 segment_start_idx = i
@@ -129,14 +119,11 @@ class SRTSegmentizer:
                 current_duration = new_duration
                 current_chars = new_chars
 
-
         if current_segment:
             segment = self._create_segment(current_segment, segment_start_idx, len(subtitles) - 1, subtitles)
             segments.append(segment)
 
-
         return segments
-
 
     def _create_segment(self, segment_subs, start_idx, end_idx, all_subtitles):
         """創建分段對象"""
@@ -144,7 +131,6 @@ class SRTSegmentizer:
         end_time = segment_subs[-1]['end_time']
         duration = end_time - start_time
         full_text = '\n'.join([sub['text'] for sub in segment_subs])
-
 
         return {
             'start_idx': start_idx + 1,
@@ -161,7 +147,6 @@ class SRTSegmentizer:
             'speaker_segments': segment_subs
         }
 
-
     @staticmethod
     def _format_duration(seconds):
         """格式化時長顯示"""
@@ -170,93 +155,102 @@ class SRTSegmentizer:
         return f"{minutes}分{secs}秒"
 
 
-
-class GPTQInt8Qwen3Extractor:
+class LlamaCppQwen3Extractor:
     """
-    【Raspberry Pi 5 優化】GPTQ INT8 量化 Qwen3-4B-Instruct-2507
-    核心優化：INT8 量化 + CPU 推論 + 極致記憶體管理 + Pi 5 ARM64 支援
+    【Raspberry Pi 5 16GB 優化】llama.cpp GGUF INT8 Qwen3-4B
+    核心優化：充分利用 16GB 記憶體 + 最大 context window + 極致記憶體管理 + Pi 5 ARM64 支援
     """
-    def __init__(self, 
-                 model_name="JunHowie/Qwen3-4B-Instruct-2507-GPTQ-Int8", 
-                 device="cpu",  # ← Pi 5 用 CPU 推論
-                 token=None):
+    def __init__(self, model_path="../Qwen3-4B-Q8_0.gguf"):
         """
-        初始化模型（Raspberry Pi 5 GPTQ INT8 版本 v4.0）
+        初始化模型（Raspberry Pi 5 16GB llama.cpp GGUF 版本 v5.2）
+        【重點】針對 16GB 版本最優化配置
         """
         print("="*70)
-        print("🚀 Qwen3-4B-Instruct-2507 GPTQ INT8 (Raspberry Pi 5 優化版 v4.0)")
+        print("🚀 Qwen3-4B-Q8_0 會議記錄整理助手 (Pi 5 16GB 優化版 v5.2)")
         print("="*70)
         print("🔧 啟用優化策略：")
-        print("   ✓ GPTQ INT8 量化加載（~4GB 記憶體）")
-        print("   ✓ CPU 推論（適合 Pi 5 ARM64）")
-        print("   ✓ 超激進分段策略（2 分鐘/1500 字）")
+        print("   ✓ llama.cpp GGUF INT8 加載")
+        print("   ✓ 16GB 記憶體充分利用 (n_ctx=8192)")
+        print("   ✓ CPU 推論優化（適合 Pi 5 ARM64）")
+        print("   ✓ 激進分段策略（2 分鐘/2000 字）")
         print("   ✓ 實時記憶體監控與清理")
-        print("   ✓ 縮短生成長度（防止 OOM）")
+        print("   ✓ 最大推論品質")
         print("="*70)
 
         # 設置環境變數
         os.environ['TOKENIZERS_PARALLELISM'] = 'false'
         os.environ['OMP_NUM_THREADS'] = '4'  # Pi 5 有 4 核
 
-        token = token or os.getenv("Huggingface_token")
-
-        # Pi 5 記憶體配置
-        self.memory_threshold_gb = 6.5  # Pi 5 閾值：6.5GB
+        # Pi 5 16GB 記憶體配置【改進】
+        self.memory_threshold_gb = 10.0  # ← 【改】16GB 版本：留 6GB 給系統
         self.batch_size = 1
         self.max_retries = 3
-        self.device = device
-        self.generation_max_tokens = 200  # ← 縮短生成長度
+        self.model_path = model_path
+        self.generation_max_tokens = 250  # ← 【改】可生成更長的回應
         
-        # 載入 tokenizer
-        print("\n⏳ 載入 Tokenizer...")
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            model_name,
-            use_auth_token=token,
-            trust_remote_code=True
-        )
-        self.tokenizer.pad_token = self.tokenizer.eos_token
-        print("✓ Tokenizer 載入完成")
-
-        # 【關鍵】GPTQ 量化配置
-        print("\n⏳ 配置 GPTQ INT8 加載...")
-        gptq_config = GPTQConfig(
-            bits=8,                    # ← INT8 量化
-            group_size=128,            # ← 分組大小
-            desc_act=False,            # ← 激活排序
-            static_groups=False,
-        )
-        print("✓ GPTQ 量化配置完成")
-
-        # 模型加載配置（Pi 5 優化）
-        print("\n⏳ 載入 GPTQ INT8 模型（可能需要 2-3 分鐘）...")
-        model_config = {
-            "torch_dtype": torch.float16,
-            "device_map": device if device == "cpu" else "auto",
-            "quantization_config": gptq_config,
-            "trust_remote_code": True,
-            "use_auth_token": token,
-            "low_cpu_mem_usage": True,
-        }
-
+        # 載入模型
+        print(f"\n⏳ 載入 llama.cpp GGUF 模型: {model_path}")
+        print(f"   硬體: Raspberry Pi 5 16GB")
+        
+        if not os.path.exists(model_path):
+            print(f"❌ 模型檔案不存在: {model_path}")
+            print("\n📥 請確保模型路徑正確")
+            raise FileNotFoundError(f"Model not found: {model_path}")
+        
         try:
-            self.model = Qwen3ForCausalLM.from_pretrained(
-                model_name,
-                **model_config
+            # 【改進】16GB 版本的最優配置
+            available_mem_gb = psutil.virtual_memory().available / 1024**3
+            total_mem_gb = psutil.virtual_memory().total / 1024**3
+            
+            print(f"\n📊 記憶體狀況：")
+            print(f"   總記憶體: {total_mem_gb:.1f}GB")
+            print(f"   可用記憶體: {available_mem_gb:.1f}GB")
+            
+            # 【重點】16GB 版本配置
+            # Q8_0 需求：4.3GB 模型 + 2.6GB KV cache (n_ctx=8192) + 1GB 緩衝 = ~8GB
+            # 保留 ~6GB 給系統和其他應用
+            
+            if total_mem_gb >= 15:  # 16GB 版本
+                n_ctx = 8192          # ← 【新】充分利用！2倍於 4096
+                memory_threshold = 10.0
+                print(f"\n✅ Pi 5 16GB 版本檢測成功！")
+                print(f"   配置: n_ctx=8192（完整 context）")
+                print(f"   預期記憶體用量: ~8GB")
+                print(f"   預留給系統: ~6GB")
+                
+            elif total_mem_gb >= 7:  # 8GB 版本
+                n_ctx = 4096
+                memory_threshold = 6.0
+                print(f"⚠️ Pi 5 8GB 版本檢測")
+                print(f"   配置: n_ctx=4096")
+                
+            else:
+                n_ctx = 2048
+                memory_threshold = 4.0
+                print(f"⚠️ 記憶體版本偏低")
+                print(f"   配置: n_ctx=2048")
+            
+            self.model = Llama(
+                model_path=model_path,
+                n_gpu_layers=0,       # ← 全部在 CPU
+                n_threads=4,          # ← Pi 5 有 4 核
+                n_ctx=n_ctx,          # ← 【重點】8192 for 16GB
+                verbose=False,
             )
             
-            self.model.eval()
-            self.print_memory_usage("模型載入完成後")
+            self.max_context = n_ctx
+            self.memory_threshold_gb = memory_threshold
             
             print(f"\n✅ 模型載入成功！")
-            print(f"   量化方式: GPTQ INT8 ✓")
-            print(f"   推論設備: {device} ✓")
-            print(f"   模型參數: 4B ✓")
+            print(f"   量化方式: GGUF INT8 ✓")
+            print(f"   推論設備: CPU ✓")
+            print(f"   Context window: {self.max_context} tokens ✓")
+            print(f"   模型最大 context: 40960 tokens（已充分利用）✓")
             print("="*70 + "\n")
             
         except Exception as e:
             print(f"\n❌ 模型載入失敗: {e}")
             raise
-
 
     def get_memory_usage(self):
         """獲取當前記憶體使用情況"""
@@ -266,7 +260,6 @@ class GPTQInt8Qwen3Extractor:
             'cpu_used': psutil.virtual_memory().used / 1024**3,
         }
 
-
     def print_memory_usage(self, stage=""):
         """打印記憶體使用情況"""
         memory = self.get_memory_usage()
@@ -275,21 +268,40 @@ class GPTQInt8Qwen3Extractor:
         print(f"   CPU已用: {memory['cpu_used']:.1f}GB")
         print(f"   CPU可用: {memory['cpu_available']:.1f}GB")
 
-
     def aggressive_memory_cleanup(self):
         """超級激進的記憶體清理"""
         gc.collect()
         time.sleep(0.05)
 
-
     def check_memory_pressure(self):
         """檢查記憶體壓力"""
         memory = self.get_memory_usage()
-        return memory['cpu_percent'] > 85
+        return memory['cpu_percent'] > 90  # ← 【改】16GB 版本可以更激進
 
+    def _split_text_by_context(self, text, overlap=100):
+        """根據 context window 動態分割文本"""
+        # llama.cpp：用字符估算 (粗略: 1 token ≈ 4 字符)
+        # 保留 15% 的空間給提示詞（16GB 版本可以更激進）
+        max_chars = int((self.max_context * 0.85 - 100) * 4)
+        
+        segments = []
+        current_segment = ""
+        
+        for line in text.split('\n'):
+            if len(current_segment) + len(line) > max_chars:
+                if current_segment:
+                    segments.append(current_segment.strip())
+                current_segment = line
+            else:
+                current_segment += '\n' + line if current_segment else line
+        
+        if current_segment:
+            segments.append(current_segment.strip())
+        
+        return segments
 
-    def generate_response(self, prompt, max_tokens=200, retry_count=0):
-        """CPU 上的文字生成方法"""
+    def generate_response(self, prompt, max_tokens=250, retry_count=0):
+        """llama.cpp 文字生成方法"""
         if retry_count >= self.max_retries:
             return "記憶體不足，無法生成回應。"
         
@@ -299,50 +311,16 @@ class GPTQInt8Qwen3Extractor:
                 self.aggressive_memory_cleanup()
                 print(f"   ⚠️ 記憶體預先清理")
             
-            messages = [{"role": "user", "content": prompt}]
-            
-            text_input = self.tokenizer.apply_chat_template(
-                messages,
-                tokenize=False,
-                add_generation_prompt=True,
+            # llama.cpp 直接生成
+            response = self.model(
+                prompt,
+                max_tokens=max_tokens,
+                temperature=0.7,
+                top_p=0.8,
+                top_k=20,
             )
             
-            # 自動截斷超長文本（Pi 5 適應）
-            model_inputs = self.tokenizer(
-                [text_input], 
-                return_tensors="pt",
-                truncation=True,
-                max_length=1024,  # ← 縮短以節省記憶體
-            )
-            
-            model_inputs = {k: v.to(self.device) for k, v in model_inputs.items()}
-            
-            # 【優化】生成配置（CPU 推論）
-            generation_config = {
-                "max_new_tokens": max_tokens,
-                "do_sample": True,
-                "temperature": 0.7,
-                "top_p": 0.8,
-                "top_k": 20,
-                "pad_token_id": self.tokenizer.eos_token_id,
-                "eos_token_id": self.tokenizer.eos_token_id,
-                "use_cache": False,  # ← 禁用 KV Cache
-                "return_dict_in_generate": False,
-            }
-            
-            with torch.no_grad():
-                generated_ids = self.model.generate(
-                    **model_inputs,
-                    **generation_config
-                )
-            
-            output_ids = generated_ids[0][len(model_inputs['input_ids'][0]):].tolist()
-            response = self.tokenizer.decode(output_ids, skip_special_tokens=True)
-            
-            # 立即清理
-            del model_inputs, generated_ids, output_ids
-            
-            return response.strip()
+            return response['choices'][0]['text'].strip()
             
         except RuntimeError as e:
             if "out of memory" in str(e).lower():
@@ -351,17 +329,16 @@ class GPTQInt8Qwen3Extractor:
                 time.sleep(1)
                 return self.generate_response(
                     prompt, 
-                    max_tokens=max(80, max_tokens - 30), 
+                    max_tokens=max(100, max_tokens - 50), 
                     retry_count=retry_count + 1
                 )
             else:
                 raise e
 
-
     def extract_people(self, text):
         """提取會議中出現的人物"""
         print("    → 識別人物...")
-        prompt = f"""你是一位專業的人物識別專家，請從以下會議記錄中識別出現的人物。
+        prompt = f"""請從以下會議記錄中識別出現的人物。
 
 ### 任務要求 ###
 1. 使用繁體中文回答
@@ -375,20 +352,19 @@ class GPTQInt8Qwen3Extractor:
 （如本段無明確人物，則回覆"本段無具體人物提及"）
 
 ### 會議記錄內容 ###
-{text[:800]}
+{text[:2000]}
 
 請開始識別："""
-        return self.generate_response(prompt, max_tokens=150)
-
+        return self.generate_response(prompt, max_tokens=200)
 
     def extract_key_points(self, text):
         """提取核心要點"""
         print("    → 提取要點...")
-        prompt = f"""你是一位專業的內容分析專家，請從以下會議記錄中提取核心要點。
+        prompt = f"""請從以下會議記錄中提取最多3個核心要點。
 
 ### 任務要求 ###
 1. 使用繁體中文回答
-2. 提取最多2個最重要的核心要點
+2. 提取最多3個最重要的核心要點
 3. 每個要點應該簡潔明了
 4. 按重要性排序
 
@@ -396,18 +372,18 @@ class GPTQInt8Qwen3Extractor:
 ### 核心要點
 1. [關鍵要點] - 簡要說明
 2. [關鍵要點] - 簡要說明
+3. [關鍵要點] - 簡要說明
 
 ### 會議記錄內容 ###
-{text[:800]}
+{text[:2000]}
 
 請開始提取："""
-        return self.generate_response(prompt, max_tokens=150)
-
+        return self.generate_response(prompt, max_tokens=200)
 
     def extract_decisions(self, text):
         """提取決策事項"""
         print("    → 識別決策...")
-        prompt = f"""你是一位專業的決策分析專家，請從以下會議記錄中識別決策事項。
+        prompt = f"""請從以下會議記錄中識別決策事項。
 
 ### 任務要求 ###
 1. 使用繁體中文回答
@@ -420,16 +396,15 @@ class GPTQInt8Qwen3Extractor:
 （如無決策事項，則回覆"本段為討論性質，無具體決策"）
 
 ### 會議記錄內容 ###
-{text[:800]}
+{text[:2000]}
 
 請開始識別："""
-        return self.generate_response(prompt, max_tokens=120)
-
+        return self.generate_response(prompt, max_tokens=150)
 
     def extract_action_items(self, text):
         """提取行動項目"""
         print("    → 識別行動項目...")
-        prompt = f"""你是一位專業的行動規劃專家，請從以下會議記錄中識別行動項目。
+        prompt = f"""請從以下會議記錄中識別行動項目。
 
 ### 任務要求 ###
 1. 使用繁體中文回答
@@ -442,16 +417,15 @@ class GPTQInt8Qwen3Extractor:
 （如無行動項目，則回覆"本段無具體行動項目"）
 
 ### 會議記錄內容 ###
-{text[:800]}
+{text[:2000]}
 
 請開始識別："""
-        return self.generate_response(prompt, max_tokens=120)
-
+        return self.generate_response(prompt, max_tokens=150)
 
     def generate_summary(self, text):
         """生成總結"""
         print("    → 生成總結...")
-        prompt = f"""你是一位專業的會議總結專家，請為以下會議記錄生成簡潔總結。
+        prompt = f"""請為以下會議記錄生成簡潔總結。
 
 ### 任務要求 ###
 1. 使用繁體中文回答
@@ -463,12 +437,11 @@ class GPTQInt8Qwen3Extractor:
 [一句話總結本段會議內容的核心]
 
 ### 會議記錄內容 ###
-{text[:800]}
+{text[:2000]}
 
 請開始總結："""
         
-        return self.generate_response(prompt, max_tokens=80)
-
+        return self.generate_response(prompt, max_tokens=100)
 
     def process_single_segment(self, segment, index):
         """處理單個分段"""
@@ -514,7 +487,6 @@ class GPTQInt8Qwen3Extractor:
             print(f"   ❌ 第 {index} 段處理失敗: {str(e)}")
             return f"處理錯誤: {str(e)}"
 
-
     def process_batch_segments(self, batch_segments, batch_start_idx):
         """批次處理分段"""
         batch_results = []
@@ -553,7 +525,6 @@ class GPTQInt8Qwen3Extractor:
         
         return batch_results, batch_summaries
 
-
     def extract_key_elements_optimized(self, all_summaries_batch):
         """記憶體優化的關鍵元素提取"""
         key_themes = []
@@ -581,17 +552,16 @@ class GPTQInt8Qwen3Extractor:
                             person_info = line.lstrip('- ').strip()
                             if person_info and "本段無具體人物提及" not in person_info:
                                 raw_people_info.append(person_info)
-                        elif current_section == "themes" and len(key_themes) < 15:
+                        elif current_section == "themes" and len(key_themes) < 20:
                             key_themes.append(line.lstrip('- ').strip())
-                        elif current_section == "decisions" and len(decisions) < 12:
+                        elif current_section == "decisions" and len(decisions) < 15:
                             decisions.append(line.lstrip('- ').strip())
-                        elif current_section == "actions" and len(actions) < 12:
+                        elif current_section == "actions" and len(actions) < 15:
                             actions.append(line.lstrip('- ').strip())
 
         unique_people_count = len(set([self.extract_person_name(p) for p in raw_people_info]))
 
         return key_themes, decisions, actions, unique_people_count
-
 
     def extract_person_name(self, person_info):
         """從人物信息中提取姓名"""
@@ -603,20 +573,19 @@ class GPTQInt8Qwen3Extractor:
                 break
         return person_name
 
-
     def generate_overall_summary_optimized(self, key_themes, decisions, actions, unique_people_count, total_segments, total_duration):
         """記憶體優化的整體會議總結生成"""
         print("\n生成整體會議主題總結...")
 
-        max_themes = 8
-        max_decisions = 6
-        max_actions = 6
+        max_themes = 12
+        max_decisions = 10
+        max_actions = 10
 
         themes_text = "\n".join([f"- {theme}" for theme in key_themes[:max_themes]])
         decisions_text = "\n".join([f"- {decision}" for decision in decisions[:max_decisions]])
         actions_text = "\n".join([f"- {action}" for action in actions[:max_actions]])
 
-        prompt_template = f"""你是一位資深的會議分析專家，請基於以下提取的關鍵信息，總結整個會議的核心主題。
+        prompt_template = f"""請基於以下提取的關鍵信息，總結整個會議的核心主題。
 
 ### 會議基本信息 ###
 - 總分段數：{total_segments} 段
@@ -633,11 +602,12 @@ class GPTQInt8Qwen3Extractor:
 {actions_text}
 
 ### 任務要求 ###
-請基於以上信息，生成簡潔的整體會議總結：
+請生成詳盡的整體會議總結：
 1. 使用繁體中文回答
 2. 提取核心要點
 3. 總結會議的主要目的和成果
-4. 不超過 500 字
+4. 突出待辦事項
+5. 不超過 800 字
 
 ## 會議整體主題總結
 
@@ -645,30 +615,38 @@ class GPTQInt8Qwen3Extractor:
 [請幫會議訂定一個吸引人的標題，不超過12字]
 
 ### 會議核心主題
-[用1-2句話概括整場會議的主要目的]
+[用2-3句話概括整場會議的主要目的]
+
+### 參與人物
+[關鍵參與者與他們的角色]
 
 ### 主要討論焦點
 1. [焦點一]
 2. [焦點二]
 3. [焦點三]
+4. [焦點四]
 
 ### 重要成果
 - [成果一]
 - [成果二]
+- [成果三]
 
-### 待辦事項
-- [行動一]
-- [行動二]
+### 待辦事項與責任人
+- [行動一] - [負責人]
+- [行動二] - [負責人]
+- [行動三] - [負責人]
+
+### 後續會議建議
+[基於內容的後續建議]
 
 請開始總結："""
 
-        return self.generate_response(prompt_template, max_tokens=600)
+        return self.generate_response(prompt_template, max_tokens=800)
 
-
-    def process_srt_file_optimized(self, srt_file_path, output_file_path=None, max_duration=120, max_chars=1500):
+    def process_srt_file_optimized(self, srt_file_path, output_file_path=None, max_duration=120, max_chars=2000):
         """
-        【Raspberry Pi 5 優化】GPTQ INT8 SRT 檔案處理
-        預設分段：2 分鐘/1500 字（激進分段）
+        【Raspberry Pi 5 16GB 優化】llama.cpp GGUF SRT 檔案處理
+        預設分段：2 分鐘/2000 字（更激進）
         """
         try:
             print(f"\n📂 正在讀取 SRT 檔案: {srt_file_path}")
@@ -762,7 +740,7 @@ class GPTQInt8Qwen3Extractor:
 
             # 保存整體總結
             with open(summary_file_path, 'w', encoding='utf-8') as f:
-                f.write("# 會議整體主題總結（Raspberry Pi 5 GPTQ INT8 版本 v4.0）\n\n")
+                f.write("# 會議整體主題總結（Raspberry Pi 5 16GB llama.cpp GGUF INT8 版本 v5.2）\n\n")
                 f.write(f"**分析時間**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
                 f.write(f"**會議時長**: {total_duration_formatted}\n")
                 f.write(f"**總分段數**: {len(all_results)} 段\n")
@@ -781,17 +759,15 @@ class GPTQInt8Qwen3Extractor:
 
             return results_df, overall_summary
 
-
         except Exception as e:
             print(f"❌ 處理 SRT 檔案時發生錯誤: {str(e)}")
             self.aggressive_memory_cleanup()
             return None
 
-
     def show_processing_stats_optimized(self, results_df, total_duration, unique_people_count):
         """顯示處理統計信息"""
         print("\n" + "="*80)
-        print("📊 處理統計（Raspberry Pi 5 GPTQ INT8 版本 v4.0）")
+        print("📊 處理統計（Raspberry Pi 5 16GB llama.cpp GGUF INT8 版本 v5.2）")
         print("="*80)
 
         if len(results_df) > 0:
@@ -811,15 +787,14 @@ class GPTQInt8Qwen3Extractor:
         print("="*80 + "\n")
 
 
-
 if __name__ == "__main__":
     print("\n" + "="*80)
-    print("🚀 Qwen3-4B-Instruct-2507 GPTQ INT8 會議記錄整理系統")
-    print("   Raspberry Pi 5 優化版本 v4.0")
+    print("🚀 Qwen3-4B-Q8_0 會議記錄整理系統")
+    print("   Raspberry Pi 5 16GB 優化版本 v5.2 (llama.cpp GGUF)")
     print("="*80)
 
-    # 【關鍵改動】指定 CPU 推論設備
-    extractor = GPTQInt8Qwen3Extractor(device="cpu")
+    # 【重點改動】用 llama.cpp + GGUF 模型 + 16GB 最優配置
+    extractor = LlamaCppQwen3Extractor(model_path="../Qwen3-4B-Q8_0.gguf")
 
     print(f"\n✅ 模型初始化完成！")
     print("="*80 + "\n")
@@ -829,5 +804,5 @@ if __name__ == "__main__":
     # result = extractor.process_srt_file_optimized(
     #     srt_file,
     #     max_duration=120,   # 2 分鐘
-    #     max_chars=1500      # 1500 字
+    #     max_chars=2000      # 2000 字（更激進）
     # )
