@@ -41,7 +41,7 @@ try:
 
     from meeting_process2 import (
 
-        SRTParser, SRTSegmentizer, MemoryOptimizedQwen3Extractor
+        SRTParser, SRTSegmentizer, GPTQInt8Qwen3Extractor
 
     )
 
@@ -169,7 +169,7 @@ def initialize_meeting_analyzer():
 
             print("正在加載會議記錄分析模型...")
 
-            extractor = MemoryOptimizedQwen3Extractor()
+            extractor = GPTQInt8Qwen3Extractor()
 
             print("✓ 會議記錄模型加載完成")
 
