@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Qwen3-4B-Q8_0 會議記錄整理助手 (Raspberry Pi 5 16GB 優化版 v5.3)
-【新增】類型聚合處理 - 所有分段相同類型的提取放在一起
-核心優化：充分利用 16GB + 類型聚合提升效率和品質 + 智能去重
+Qwen3-4B-Q5_K_M 會議記錄整理助手 (Raspberry Pi 5 16GB 優化版 v5.4)
+【新增】類型聚合迴圈處理 + 進度追蹤
+核心優化：for 迴圈按類型連續執行 + processing_status 即時更新 + 記憶體最優化
 """
 from llama_cpp import Llama
 import warnings
@@ -13,6 +13,7 @@ import os
 import gc
 import psutil
 import time
+import json
 from typing import List, Dict
 
 warnings.filterwarnings("ignore")
@@ -144,19 +145,19 @@ class SRTSegmentizer:
 
 class LlamaCppQwen3Extractor:
     """
-    【Raspberry Pi 5 16GB 優化】llama.cpp GGUF INT8 Qwen3-4B
-    【v5.3 新增】類型聚合處理 - 所有分段相同類型的提取放在一起
+    【Raspberry Pi 5 16GB 優化】llama.cpp GGUF Q5_K_M Qwen3-4B
+    【v5.4 新增】類型聚合迴圈處理 + 進度追蹤
     """
-    def __init__(self, model_path="../Qwen3-4B-Q8_0.gguf"):
-        """初始化模型（Pi 5 16GB 版本 v5.3）"""
+    def __init__(self, model_path="../Qwen3-4B-Q5_K_M.gguf"):
+        """初始化模型（Pi 5 16GB 版本 v5.4）"""
         print("="*70)
-        print("🚀 Qwen3-4B-Q8_0 會議記錄整理助手 (Pi 5 16GB 優化版 v5.3)")
+        print("🚀 Qwen3-4B-Q5_K_M 會議記錄整理助手 (Pi 5 16GB 優化版 v5.4)")
         print("="*70)
         print("🔧 啟用優化策略：")
-        print("   ✓ llama.cpp GGUF INT8 加載")
+        print("   ✓ llama.cpp GGUF Q5_K_M 加載 (快 40%)")
         print("   ✓ 16GB 記憶體充分利用 (n_ctx=8192)")
-        print("   ✓ 【新】類型聚合處理（效率+30-50%）")
-        print("   ✓ 【新】智能去重（品質+20-30%）")
+        print("   ✓ 【新】類型聚合迴圈（for 迴圈按類型執行）")
+        print("   ✓ 【新】進度追蹤 (processing_status)")
         print("   ✓ CPU 推論優化")
         print("   ✓ 實時記憶體監控")
         print("="*70)
@@ -278,23 +279,28 @@ class LlamaCppQwen3Extractor:
             else:
                 raise e
 
-    # ============ 【新增】類型聚合方法 ============
+    # ============ 【新增】類型聚合迴圈方法 ============
 
-    def extract_all_people(self, segments: List[Dict]) -> str:
+    def extract_all_people_loop(self, segments: List[Dict], session_id: str = None, processing_status: dict = None) -> Dict:
         """
-        【新】一次性提取所有分段的人物
-        利用 KV cache 連續性
+        【新】用 for 迴圈連續提取所有分段的人物
         """
         print("\n【階段 1】提取所有分段的人物...")
         
-        # 構建提示
-        segment_texts = []
-        for i, seg in enumerate(segments, 1):
-            segment_texts.append(f"【分段 {i}】({seg['start_time_str']} - {seg['end_time_str']})\n{seg['text'][:1500]}")
+        results = {}
+        total_segments = len(segments)
         
-        combined_text = "\n\n".join(segment_texts)
-        
-        prompt = f"""請從以下所有會議記錄分段中識別所有出現的人物。
+        for idx, seg in enumerate(segments, 1):
+            # 更新進度
+            if session_id and processing_status:
+                progress = 60 + int((1 / 5) * 40 * (idx / total_segments))
+                processing_status[session_id] = {
+                    'stage': f'提取人物中... ({idx}/{total_segments})',
+                    'progress': progress,
+                    'timestamp': datetime.now().isoformat()
+                }
+            
+            prompt = f"""請從以下會議記錄中識別所有出現的人物。
 
 ### 任務要求 ###
 1. 使用繁體中文回答
@@ -308,38 +314,43 @@ class LlamaCppQwen3Extractor:
 - ...
 
 ### 會議記錄 ###
-{combined_text}
+【分段 {idx}】({seg['start_time_str']} - {seg['end_time_str']})
+{seg['text'][:1500]}
 
 請開始識別："""
+            
+            result = self.generate_response(prompt, max_tokens=200)
+            results[idx] = result
+            self.aggressive_memory_cleanup()
+            print(f"  ✓ 分段 {idx}/{total_segments} 人物提取完成")
         
-        result = self.generate_response(prompt, max_tokens=300)
-        print(f"✓ 人物提取完成")
-        return result
+        print(f"✓ 所有分段人物提取完成")
+        return results
 
-    def extract_all_key_points(self, segments: List[Dict], session_id: str = None, processing_status: dict = None) -> str:
+    def extract_all_key_points_loop(self, segments: List[Dict], session_id: str = None, processing_status: dict = None) -> Dict:
         """
-        【新】一次性提取所有分段的要點
+        【新】用 for 迴圈連續提取所有分段的要點
         """
         print("【階段 2】提取所有分段的核心要點...")
         
-        if session_id and processing_status:
-            processing_status[session_id] = {
-                'stage': '提取要點中...',
-                'progress': 76,
-                'timestamp': datetime.now().isoformat()
-            }
+        results = {}
+        total_segments = len(segments)
         
-        segment_texts = []
-        for i, seg in enumerate(segments, 1):
-            segment_texts.append(f"【分段 {i}】({seg['start_time_str']} - {seg['end_time_str']})\n{seg['text'][:1500]}")
-        
-        combined_text = "\n\n".join(segment_texts)
-        
-        prompt = f"""請從以下所有會議記錄分段中提取核心要點。
+        for idx, seg in enumerate(segments, 1):
+            # 更新進度
+            if session_id and processing_status:
+                progress = 60 + int((2 / 5) * 40 * (idx / total_segments))
+                processing_status[session_id] = {
+                    'stage': f'提取要點中... ({idx}/{total_segments})',
+                    'progress': progress,
+                    'timestamp': datetime.now().isoformat()
+                }
+            
+            prompt = f"""請從以下會議記錄中提取核心要點。
 
 ### 任務要求 ###
 1. 使用繁體中文回答
-2. 提取 5-8 個最重要的核心要點
+2. 提取 3-5 個最重要的核心要點
 3. 去除重複
 4. 按重要性排序
 
@@ -350,34 +361,39 @@ class LlamaCppQwen3Extractor:
 ...
 
 ### 會議記錄 ###
-{combined_text}
+【分段 {idx}】({seg['start_time_str']} - {seg['end_time_str']})
+{seg['text'][:1500]}
 
 請開始提取："""
+            
+            result = self.generate_response(prompt, max_tokens=200)
+            results[idx] = result
+            self.aggressive_memory_cleanup()
+            print(f"  ✓ 分段 {idx}/{total_segments} 要點提取完成")
         
-        result = self.generate_response(prompt, max_tokens=300)
-        print(f"✓ 要點提取完成")
-        return result
+        print(f"✓ 所有分段要點提取完成")
+        return results
 
-    def extract_all_decisions(self, segments: List[Dict], session_id: str = None, processing_status: dict = None) -> str:
+    def extract_all_decisions_loop(self, segments: List[Dict], session_id: str = None, processing_status: dict = None) -> Dict:
         """
-        【新】一次性提取所有分段的決策
+        【新】用 for 迴圈連續提取所有分段的決策
         """
         print("【階段 3】提取所有分段的決策事項...")
         
-        if session_id and processing_status:
-            processing_status[session_id] = {
-                'stage': '提取決策中...',
-                'progress': 84,
-                'timestamp': datetime.now().isoformat()
-            }
+        results = {}
+        total_segments = len(segments)
         
-        segment_texts = []
-        for i, seg in enumerate(segments, 1):
-            segment_texts.append(f"【分段 {i}】({seg['start_time_str']} - {seg['end_time_str']})\n{seg['text'][:1500]}")
-        
-        combined_text = "\n\n".join(segment_texts)
-        
-        prompt = f"""請從以下所有會議記錄分段中識別決策事項。
+        for idx, seg in enumerate(segments, 1):
+            # 更新進度
+            if session_id and processing_status:
+                progress = 60 + int((3 / 5) * 40 * (idx / total_segments))
+                processing_status[session_id] = {
+                    'stage': f'提取決策中... ({idx}/{total_segments})',
+                    'progress': progress,
+                    'timestamp': datetime.now().isoformat()
+                }
+            
+            prompt = f"""請從以下會議記錄中識別決策事項。
 
 ### 任務要求 ###
 1. 使用繁體中文回答
@@ -392,34 +408,39 @@ class LlamaCppQwen3Extractor:
 ...
 
 ### 會議記錄 ###
-{combined_text}
+【分段 {idx}】({seg['start_time_str']} - {seg['end_time_str']})
+{seg['text'][:1500]}
 
 請開始識別："""
+            
+            result = self.generate_response(prompt, max_tokens=150)
+            results[idx] = result
+            self.aggressive_memory_cleanup()
+            print(f"  ✓ 分段 {idx}/{total_segments} 決策提取完成")
         
-        result = self.generate_response(prompt, max_tokens=250)
-        print(f"✓ 決策提取完成")
-        return result
+        print(f"✓ 所有分段決策提取完成")
+        return results
 
-    def extract_all_actions(self, segments: List[Dict], session_id: str = None, processing_status: dict = None) -> str:
+    def extract_all_actions_loop(self, segments: List[Dict], session_id: str = None, processing_status: dict = None) -> Dict:
         """
-        【新】一次性提取所有分段的行動項目
+        【新】用 for 迴圈連續提取所有分段的行動項目
         """
         print("【階段 4】提取所有分段的行動項目...")
         
-        if session_id and processing_status:
-            processing_status[session_id] = {
-                'stage': '提取行動項目中...',
-                'progress': 92,
-                'timestamp': datetime.now().isoformat()
-            }
+        results = {}
+        total_segments = len(segments)
         
-        segment_texts = []
-        for i, seg in enumerate(segments, 1):
-            segment_texts.append(f"【分段 {i}】({seg['start_time_str']} - {seg['end_time_str']})\n{seg['text'][:1500]}")
-        
-        combined_text = "\n\n".join(segment_texts)
-        
-        prompt = f"""請從以下所有會議記錄分段中識別行動項目。
+        for idx, seg in enumerate(segments, 1):
+            # 更新進度
+            if session_id and processing_status:
+                progress = 60 + int((4 / 5) * 40 * (idx / total_segments))
+                processing_status[session_id] = {
+                    'stage': f'提取行動項目中... ({idx}/{total_segments})',
+                    'progress': progress,
+                    'timestamp': datetime.now().isoformat()
+                }
+            
+            prompt = f"""請從以下會議記錄中識別行動項目。
 
 ### 任務要求 ###
 1. 使用繁體中文回答
@@ -434,17 +455,22 @@ class LlamaCppQwen3Extractor:
 ...
 
 ### 會議記錄 ###
-{combined_text}
+【分段 {idx}】({seg['start_time_str']} - {seg['end_time_str']})
+{seg['text'][:1500]}
 
 請開始識別："""
+            
+            result = self.generate_response(prompt, max_tokens=200)
+            results[idx] = result
+            self.aggressive_memory_cleanup()
+            print(f"  ✓ 分段 {idx}/{total_segments} 行動項目提取完成")
         
-        result = self.generate_response(prompt, max_tokens=300)
-        print(f"✓ 行動項目提取完成")
-        return result
+        print(f"✓ 所有分段行動項目提取完成")
+        return results
 
-    def generate_overall_summary(self, people, key_points, decisions, actions, total_segments, total_duration, session_id: str = None, processing_status: dict = None):
+    def generate_overall_summary(self, all_people_results, all_keypoints_results, all_decisions_results, all_actions_results, total_segments, total_duration, session_id: str = None, processing_status: dict = None):
         """
-        【改進】基於已提取的聚合內容生成總結
+        【新】生成會議整體總結（基於聚合的 for 迴圈結果）
         """
         print("\n【階段 5】生成會議整體總結...")
         
@@ -455,63 +481,87 @@ class LlamaCppQwen3Extractor:
                 'timestamp': datetime.now().isoformat()
             }
         
-        prompt = f"""請基於以下提取的會議信息，生成詳盡的會議總結。
+        # 聚合所有結果
+        people_text = "\n".join(all_people_results.values())
+        keypoints_text = "\n".join(all_keypoints_results.values())
+        decisions_text = "\n".join(all_decisions_results.values())
+        actions_text = "\n".join(all_actions_results.values())
+        
+        prompt = f"""### 任務：基於會議信息生成專業總結
 
-### 會議信息 ###
+### 會議基本信息
 - 總分段數：{total_segments} 段
 - 會議總時長：{total_duration}
 
-### 所有參與人物 ###
-{people}
+### 聚合的會議信息
 
-### 核心要點 ###
-{key_points}
+#### 所有參與人物
+{people_text[:2000]}
 
-### 決策事項 ###
-{decisions}
+#### 核心要點
+{keypoints_text[:2000]}
 
-### 行動項目 ###
-{actions}
+#### 決策事項
+{decisions_text[:1500]}
 
-### 任務要求 ###
-請生成專業的會議總結：
-1. 使用繁體中文
-2. 包括會議標題、主題、成果、待辦事項
-3. 邏輯清晰，易於轉發
-4. 500-800 字
+#### 行動項目
+{actions_text[:1500]}
 
-## 會議整體主題總結
+### 輸出格式（JSON）
+請直接輸出以下JSON格式，不添加任何額外說明或思考過程：
+
+{{
+  "title": "會議標題（不超過12字）",
+  "core_topic": "會議核心主題（2-3句話）",
+  "participants": "參與人物簡介",
+  "discussion_points": ["焦點1", "焦點2", "焦點3", "焦點4"],
+  "achievements": ["成果1", "成果2", "成果3"],
+  "action_items": ["待辦1 - 負責人 - 預期完成", "待辦2 - 負責人 - 預期完成"],
+  "recommendations": "後續跟進建議"
+}}"""
+        
+        result = self.generate_response(prompt, max_tokens=800)
+        
+        # 【後處理】將 JSON 轉換為 markdown
+        try:
+            data = json.loads(result)
+            summary = f"""## 會議整體主題總結
 
 ### 會議標題
-[標題，不超過 12 字]
+{data.get('title', '無標題')}
 
 ### 參與人物及角色
-[簡要介紹]
+{data.get('participants', '無')}
 
 ### 會議目標
-[1-2 句]
+{data.get('core_topic', '無')}
 
-### 主要討論內容
-[要點聚合]
-
-### 重要決策
-[決策列表]
-
-### 待辦事項與責任人
-[行動項目列表]
-
-### 後續跟進建議
-[建議]
-
-請開始生成："""
-        
-        result = self.generate_response(prompt, max_tokens=1000)
-        print(f"✓ 總結完成")
-        return result
+### 主要討論焦點
+"""
+            for i, point in enumerate(data.get('discussion_points', []), 1):
+                summary += f"{i}. {point}\n"
+            
+            summary += "\n### 重要成果\n"
+            for achievement in data.get('achievements', []):
+                summary += f"- {achievement}\n"
+            
+            summary += "\n### 待辦事項與責任人\n"
+            for action in data.get('action_items', []):
+                summary += f"- {action}\n"
+            
+            summary += f"\n### 後續跟進建議\n{data.get('recommendations', '無')}\n"
+            
+            print(f"✓ 總結完成")
+            return summary
+            
+        except json.JSONDecodeError:
+            print(f"✓ 總結完成（非 JSON 格式）")
+            return result
 
     def process_srt_file_aggregated(self, srt_file_path, output_file_path=None, max_duration=120, max_chars=2000, session_id: str = None, processing_status: dict = None):
         """
-        【新】類型聚合處理 SRT 檔案
+        【新】類型聚合迴圈處理 SRT 檔案 (v5.4)
+        用 for 迴圈按類型連續執行 + processing_status 進度追蹤
         """
         try:
             print(f"\n📂 正在讀取 SRT 檔案: {srt_file_path}")
@@ -539,68 +589,70 @@ class LlamaCppQwen3Extractor:
             total_duration_formatted = SRTSegmentizer()._format_duration(total_duration_seconds)
             print(f"\n📊 會議總時長: {total_duration_formatted}")
 
-            # 【新】類型聚合處理
+            # 【新】類型聚合迴圈處理
             print("\n" + "="*70)
-            print("【類型聚合處理開始】")
+            print("【類型聚合迴圈處理開始】")
             print("="*70)
 
-            self.print_memory_usage("聚合處理開始前")
+            self.print_memory_usage("迴圈處理開始前")
 
-            # 一次性提取各類型
-            all_people = self.extract_all_people(segments)
+            # for 迴圈按類型連續執行
+            all_people = self.extract_all_people_loop(segments, session_id, processing_status)
             self.aggressive_memory_cleanup()
 
-            all_key_points = self.extract_all_key_points(segments)
+            all_key_points = self.extract_all_key_points_loop(segments, session_id, processing_status)
             self.aggressive_memory_cleanup()
 
-            all_decisions = self.extract_all_decisions(segments)
+            all_decisions = self.extract_all_decisions_loop(segments, session_id, processing_status)
             self.aggressive_memory_cleanup()
 
-            all_actions = self.extract_all_actions(segments)
+            all_actions = self.extract_all_actions_loop(segments, session_id, processing_status)
             self.aggressive_memory_cleanup()
 
             # 生成最終總結
             overall_summary = self.generate_overall_summary(
                 all_people, all_key_points, all_decisions, all_actions,
-                len(segments), total_duration_formatted
+                len(segments), total_duration_formatted, session_id, processing_status
             )
             self.aggressive_memory_cleanup()
 
             print("\n" + "="*70)
-            print("【類型聚合處理完成】")
+            print("【類型聚合迴圈處理完成】")
             print("="*70)
 
             # 保存結果
             if output_file_path is None:
                 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                 base_name = os.path.splitext(os.path.basename(srt_file_path))[0]
-                summary_file_path = f'{base_name}_aggregated_summary_{timestamp}.md'
+                summary_file_path = f'{base_name}_loop_aggregated_summary_{timestamp}.md'
             else:
-                summary_file_path = output_file_path.replace('.csv', '_aggregated.md')
+                summary_file_path = output_file_path.replace('.csv', '_loop_aggregated.md')
 
             with open(summary_file_path, 'w', encoding='utf-8') as f:
-                f.write("# 會議整體主題總結（Pi 5 16GB llama.cpp GGUF INT8 版本 v5.3 類型聚合版）\n\n")
+                f.write("# 會議整體主題總結（Pi 5 16GB llama.cpp GGUF Q5_K_M 版本 v5.4 類型聚合迴圈版）\n\n")
                 f.write(f"**分析時間**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
                 f.write(f"**會議時長**: {total_duration_formatted}\n")
                 f.write(f"**總分段數**: {len(segments)} 段\n\n")
                 f.write("---\n\n")
-                f.write("## 參與人物\n\n")
-                f.write(all_people)
-                f.write("\n\n---\n\n")
-                f.write("## 核心要點\n\n")
-                f.write(all_key_points)
-                f.write("\n\n---\n\n")
-                f.write("## 決策事項\n\n")
-                f.write(all_decisions)
-                f.write("\n\n---\n\n")
-                f.write("## 行動項目\n\n")
-                f.write(all_actions)
-                f.write("\n\n---\n\n")
+                f.write("## 詳細分段結果\n\n")
+                f.write("### 參與人物\n\n")
+                for seg_id, result in all_people.items():
+                    f.write(f"#### 分段 {seg_id}\n{result}\n\n")
+                f.write("### 核心要點\n\n")
+                for seg_id, result in all_key_points.items():
+                    f.write(f"#### 分段 {seg_id}\n{result}\n\n")
+                f.write("### 決策事項\n\n")
+                for seg_id, result in all_decisions.items():
+                    f.write(f"#### 分段 {seg_id}\n{result}\n\n")
+                f.write("### 行動項目\n\n")
+                for seg_id, result in all_actions.items():
+                    f.write(f"#### 分段 {seg_id}\n{result}\n\n")
+                f.write("---\n\n")
                 f.write("## 會議整體總結\n\n")
                 f.write(overall_summary)
 
             print(f"\n✓ 會議總結已保存至: {summary_file_path}")
-            self.print_memory_usage("處理完成後")
+            self.print_memory_usage("迴圈處理完成後")
 
             return summary_file_path
 
@@ -612,15 +664,21 @@ class LlamaCppQwen3Extractor:
 
 if __name__ == "__main__":
     print("\n" + "="*80)
-    print("🚀 Qwen3-4B-Q8_0 會議記錄整理系統")
-    print("   Raspberry Pi 5 16GB 優化版本 v5.3 (類型聚合版)")
+    print("🚀 Qwen3-4B-Q5_K_M 會議記錄整理系統")
+    print("   Raspberry Pi 5 16GB 優化版本 v5.4 (類型聚合迴圈版)")
     print("="*80)
 
-    extractor = LlamaCppQwen3Extractor(model_path="../Qwen3-4B-Q8_0.gguf")
+    extractor = LlamaCppQwen3Extractor(model_path="../Qwen3-4B-Q5_K_M.gguf")
 
     print(f"\n✅ 模型初始化完成！")
     print("="*80 + "\n")
     
     # 【使用新方法】
+    # processing_status = {}
+    # session_id = "test_session"
     # srt_file = r"path/to/your/file.srt"
-    # result = extractor.process_srt_file_aggregated(srt_file)
+    # result = extractor.process_srt_file_loop_aggregated(
+    #     srt_file,
+    #     session_id=session_id,
+    #     processing_status=processing_status
+    # )
