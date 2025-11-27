@@ -2,7 +2,7 @@
 const CONFIG = {
   API_BASE_URL: 'http://192.168.31.208:5000', //ip of the raspberry pi
   MAX_FILE_SIZE: 500 * 1024 * 1024, // 500MB
-  POLLING_INTERVAL: 1000, // 1 second
+  POLLING_INTERVAL: 15000, // 15 seconds
   ALLOWED_FORMATS: ['wav', 'mp3', 'flac', 'm4a', 'ogg']
 };
 

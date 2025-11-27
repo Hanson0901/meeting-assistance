@@ -18,7 +18,7 @@ from typing import List, Dict
 
 warnings.filterwarnings("ignore")
 
-
+process_add=0
 class SRTParser:
     """SRT 檔案解析器"""
     @staticmethod
@@ -145,16 +145,16 @@ class SRTSegmentizer:
 
 class LlamaCppQwen3Extractor:
     """
-    【Raspberry Pi 5 16GB 優化】llama.cpp GGUF Q5_K_M Qwen3-4B
+    【Raspberry Pi 5 16GB 優化】llama.cpp GGUF Q8_0 Qwen3-4B
     【v5.4 新增】類型聚合迴圈處理 + 進度追蹤
     """
-    def __init__(self, model_path="../Qwen3-4B-Q5_K_M.gguf"):
+    def __init__(self, model_path="../Qwen3-4B-Q8_0.gguf"):
         """初始化模型（Pi 5 16GB 版本 v5.4）"""
         print("="*70)
-        print("🚀 Qwen3-4B-Q5_K_M 會議記錄整理助手 (Pi 5 16GB 優化版 v5.4)")
+        print("🚀 Qwen3-4B-Q8_0 會議記錄整理助手 (Pi 5 16GB 優化版 v5.4)")
         print("="*70)
         print("🔧 啟用優化策略：")
-        print("   ✓ llama.cpp GGUF Q5_K_M 加載 (快 40%)")
+        print("   ✓ llama.cpp GGUF Q8_0 加載 (快 40%)")
         print("   ✓ 16GB 記憶體充分利用 (n_ctx=8192)")
         print("   ✓ 【新】類型聚合迴圈（for 迴圈按類型執行）")
         print("   ✓ 【新】進度追蹤 (processing_status)")
@@ -293,7 +293,8 @@ class LlamaCppQwen3Extractor:
         for idx, seg in enumerate(segments, 1):
             # 更新進度
             if session_id and processing_status:
-                progress = 60 + int((1 / 5) * 40 * (idx / total_segments))
+                process_add=int( 8 * (idx / total_segments))
+                progress = 60 + process_add
                 processing_status[session_id] = {
                     'stage': f'提取人物中... ({idx}/{total_segments})',
                     'progress': progress,
@@ -315,7 +316,7 @@ class LlamaCppQwen3Extractor:
 
 ### 會議記錄 ###
 【分段 {idx}】({seg['start_time_str']} - {seg['end_time_str']})
-{seg['text'][:1500]}
+{seg['text']}
 
 請開始識別："""
             
@@ -339,7 +340,8 @@ class LlamaCppQwen3Extractor:
         for idx, seg in enumerate(segments, 1):
             # 更新進度
             if session_id and processing_status:
-                progress = 60 + int((2 / 5) * 40 * (idx / total_segments))
+                process_add=int( 8 * (idx / total_segments))
+                progress = 68 +process_add
                 processing_status[session_id] = {
                     'stage': f'提取要點中... ({idx}/{total_segments})',
                     'progress': progress,
@@ -362,7 +364,7 @@ class LlamaCppQwen3Extractor:
 
 ### 會議記錄 ###
 【分段 {idx}】({seg['start_time_str']} - {seg['end_time_str']})
-{seg['text'][:1500]}
+{seg['text']}
 
 請開始提取："""
             
@@ -386,7 +388,7 @@ class LlamaCppQwen3Extractor:
         for idx, seg in enumerate(segments, 1):
             # 更新進度
             if session_id and processing_status:
-                progress = 60 + int((3 / 5) * 40 * (idx / total_segments))
+                progress = 76 + int(8 * (idx / total_segments))
                 processing_status[session_id] = {
                     'stage': f'提取決策中... ({idx}/{total_segments})',
                     'progress': progress,
@@ -409,7 +411,7 @@ class LlamaCppQwen3Extractor:
 
 ### 會議記錄 ###
 【分段 {idx}】({seg['start_time_str']} - {seg['end_time_str']})
-{seg['text'][:1500]}
+{seg['text']}
 
 請開始識別："""
             
@@ -433,7 +435,7 @@ class LlamaCppQwen3Extractor:
         for idx, seg in enumerate(segments, 1):
             # 更新進度
             if session_id and processing_status:
-                progress = 60 + int((4 / 5) * 40 * (idx / total_segments))
+                progress = 84 + int(8 * (idx / total_segments))
                 processing_status[session_id] = {
                     'stage': f'提取行動項目中... ({idx}/{total_segments})',
                     'progress': progress,
@@ -456,7 +458,7 @@ class LlamaCppQwen3Extractor:
 
 ### 會議記錄 ###
 【分段 {idx}】({seg['start_time_str']} - {seg['end_time_str']})
-{seg['text'][:1500]}
+{seg['text']}
 
 請開始識別："""
             
@@ -477,7 +479,7 @@ class LlamaCppQwen3Extractor:
         if session_id and processing_status:
             processing_status[session_id] = {
                 'stage': '生成總結中...',
-                'progress': 100,
+                'progress': 84,
                 'timestamp': datetime.now().isoformat()
             }
         
@@ -502,10 +504,10 @@ class LlamaCppQwen3Extractor:
 {keypoints_text[:2000]}
 
 #### 決策事項
-{decisions_text[:1500]}
+{decisions_text}
 
 #### 行動項目
-{actions_text[:1500]}
+{actions_text}
 
 ### 輸出格式（JSON）
 請直接輸出以下JSON格式，不添加任何額外說明或思考過程：
