@@ -39,7 +39,7 @@ from funasr import AutoModel
 
 try:
 
-    from meeting_process5 import (
+    from meeting_process6 import (
 
         SRTParser, SRTSegmentizer, LlamaCppQwen3Extractor
 
