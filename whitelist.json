@@ -7,8 +7,16 @@
       "bonded": true,
       "rssi_threshold": -70,
       "added_at": "2025-12-24T09:51:31.726509"
+    },
+    {
+      "name": "PC",
+      "mac": "44:43:B3:48:76:A1",
+      "logical_id": null,
+      "bonded": true,
+      "rssi_threshold": -70,
+      "added_at": "2025-12-24T10:15:53.353402"
     }
   ],
-  "last_updated": "2025-12-24T09:51:31.726683",
+  "last_updated": "2025-12-24T10:15:53.353571",
   "note": "MAC addresses are post-bonding resolved addresses"
 }

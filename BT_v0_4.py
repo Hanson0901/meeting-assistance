@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
-import asyncio
+import sys
 import json
 import os
-import sys
+import time
 import binascii
-from datetime import datetime
 from pathlib import Path
-
-import pydbus
+from datetime import datetime
 from gi.repository import GLib
+import pydbus
 
 # BlueZ D-Bus 介面定義
 BLUEZ_SERVICE = 'org.bluez'
 ADAPTER_IFACE = 'org.bluez.Adapter1'
 DEVICE_IFACE = 'org.bluez.Device1'
-AGENT_IFACE = 'org.bluez.Agent1'
 AGENT_MGR_IFACE = 'org.bluez.AgentManager1'
 PROP_IFACE = 'org.freedesktop.DBus.Properties'
+OBJECT_MGR_IFACE = 'org.freedesktop.DBus.ObjectManager'
 
 # 設定檔路徑
-WHITELIST_FILE = "whitelist.json"
+WHITELIST_FILE = "whitelist_dbus.json"
 BONDING_KEYS_DIR = Path("/var/lib/bluetooth")
 
 class BlueZBondingManager:
@@ -28,13 +27,11 @@ class BlueZBondingManager:
     def __init__(self):
         self.bus = pydbus.SystemBus()
         self.adapter = None
-        self.agent_path = None
-        self.devices = {}
+        self.devices_cache = {}
         
     def get_adapter(self):
         """取得預設藍牙適配器"""
         try:
-            # 先嘗試取得 hci0
             adapter_path = '/org/bluez/hci0'
             self.adapter = self.bus.get(BLUEZ_SERVICE, adapter_path)[ADAPTER_IFACE]
             return self.adapter
@@ -42,101 +39,92 @@ class BlueZBondingManager:
             print(f" Failed to get adapter: {e}")
             return None
     
-    def start_discovery(self, timeout=10):
-        """開始掃描 BLE 裝置"""
-        try:
-            self.adapter.StartDiscovery()
-            print(f" Discovery started for {timeout} seconds...")
-            
-            # 設定定時停止
-            GLib.timeout_add_seconds(timeout, self.stop_discovery)
-            return True
-        except Exception as e:
-            print(f" Failed to start discovery: {e}")
-            return False
-    
-    def stop_discovery(self):
-        """停止掃描"""
-        try:
-            self.adapter.StopDiscovery()
-            print(" Discovery stopped")
-            return False  # 返回 False 停止 GLib timeout
-        except Exception as e:
-            print(f" Failed to stop discovery: {e}")
-            return False
-    
     def get_managed_objects(self):
-        """取得所有 BlueZ 管理的物件（裝置與服務）"""
+        """取得所有 BlueZ 管理的物件"""
         try:
-            obj_mgr = self.bus.get(BLUEZ_SERVICE, '/')[pydbus.generic.INTERFACE_DBUS_OBJECT_MANAGER]
+            obj_mgr = self.bus.get(BLUEZ_SERVICE, '/')[OBJECT_MGR_IFACE]
             return obj_mgr.GetManagedObjects()
         except Exception as e:
             print(f" Failed to get managed objects: {e}")
             return {}
     
     def scan_devices(self, timeout=10):
-        """掃描並回傳裝置列表"""
-        print(f"\n{'='*60}")
-        print("🔍 Scanning for BLE devices...")
-        print("="*60)
+        """掃描 BLE 裝置"""
+        print(f"\n{'='*70}")
+        print(f"🔍 Starting BLE scan for {timeout} seconds...")
+        print("="*70)
         
-        # 開始掃描
-        if not self.start_discovery(timeout):
-            return []
-        
-        # 等待掃描完成
-        loop = GLib.MainLoop()
-        GLib.timeout_add_seconds(timeout, lambda: loop.quit())
-        loop.run()
-        
-        # 取得掃描結果
-        objects = self.get_managed_objects()
-        devices = []
-        
-        for path, interfaces in objects.items():
-            if DEVICE_IFACE in interfaces:
-                dev_props = interfaces[DEVICE_IFACE]
-                address = dev_props.get('Address', '')
-                name = dev_props.get('Name', 'Unknown')
-                rssi = dev_props.get('RSSI', 0)
-                paired = dev_props.get('Paired', False)
-                bonded = self.is_bonded(address)
-                
-                # 檢查是否為 LE 裝置
-                uuids = dev_props.get('UUIDs', [])
-                is_le = any('0000' in uuid for uuid in uuids)
-                
-                if is_le:  # 只顯示 BLE 裝置
-                    devices.append({
-                        'path': path,
-                        'mac': address,
-                        'name': name,
-                        'rssi': rssi,
-                        'paired': paired,
-                        'bonded': bonded,
-                        'uuids': uuids
-                    })
+        try:
+            # 開始掃描
+            self.adapter.StartDiscovery()
+            print("📡 Discovery started...")
+            
+            # 等待掃描完成
+            time.sleep(timeout)
+            
+            # 停止掃描
+            self.adapter.StopDiscovery()
+            print(" Discovery stopped")
+            
+            # 取得掃描結果
+            objects = self.get_managed_objects()
+            devices = []
+            
+            for path, interfaces in objects.items():
+                if DEVICE_IFACE in interfaces:
+                    props = interfaces[DEVICE_IFACE]
+                    address = props.get('Address', '')
+                    name = props.get('Alias', props.get('Name', 'Unknown'))
+                    rssi = props.get('RSSI', -127)
+                    paired = props.get('Paired', False)
+                    connected = props.get('Connected', False)
+                    trusted = props.get('Trusted', False)
                     
-                    bond_status = "🔒" if bonded else "🔓"
-                    print(f"{bond_status} {name:<20} ({address}) RSSI={rssi:>4} dBm "
-                          f"[Paired: {paired}] [Bonded: {bonded}]")
-        
-        return devices
+                    # 檢查是否為 LE 裝置
+                    uuids = props.get('UUIDs', [])
+                    is_le = len(uuids) > 0
+                    
+                    if is_le and rssi != -127:  # 只顯示有 RSSI 的 LE 裝置
+                        # 檢查 bonding 狀態
+                        bonded = self.is_bonded(address)
+                        
+                        devices.append({
+                            'path': path,
+                            'mac': address,
+                            'name': name,
+                            'rssi': rssi,
+                            'paired': paired,
+                            'bonded': bonded,
+                            'connected': connected,
+                            'trusted': trusted,
+                            'uuids': uuids
+                        })
+                        
+                        # 顯示裝置資訊
+                        bond_icon = "🔒" if bonded else "🔓"
+                        conn_icon = "🔗" if connected else "⛓️"
+                        print(f"{bond_icon}{conn_icon} {name:<20} ({address}) "
+                              f"RSSI={rssi:>4} dBm [Paired: {paired}] [Trusted: {trusted}]")
+            
+            print(f"\n Found {len(devices)} BLE devices")
+            return devices
+            
+        except Exception as e:
+            print(f" Scan failed: {e}")
+            return []
     
     def is_bonded(self, mac_address):
         """檢查裝置是否已 bonding"""
         try:
-            # bonding 資訊儲存在 /var/lib/bluetooth/<adapter>/<device>/info
             adapter_addr = self.adapter.Address
             device_path = BONDING_KEYS_DIR / adapter_addr.replace(':', '') / mac_address.replace(':', '')
             info_file = device_path / "info"
-            
             return info_file.exists()
         except:
             return False
     
     def get_bonding_info(self, mac_address):
-        """讀取 bonding 資訊（LTK, IRK 等）"""
+        """讀取 bonding 金鑰資訊"""
         try:
             adapter_addr = self.adapter.Address
             device_path = BONDING_KEYS_DIR / adapter_addr.replace(':', '') / mac_address.replace(':', '')
@@ -146,8 +134,9 @@ class BlueZBondingManager:
                 return None
             
             info = {}
+            current_section = None
+            
             with open(info_file, 'r') as f:
-                current_section = None
                 for line in f:
                     line = line.strip()
                     if line.startswith('[') and line.endswith(']'):
@@ -163,30 +152,32 @@ class BlueZBondingManager:
             return None
     
     def pair_device(self, device_path):
-        """配對裝置（會觸發 bonding）"""
+        """配對裝置（會建立 bonding）"""
         try:
             device = self.bus.get(BLUEZ_SERVICE, device_path)[DEVICE_IFACE]
             
-            # 檢查是否已配對
             if device.Paired:
-                print(f" Device already paired")
+                print(f" Already paired")
                 return True
             
-            print(f" Pairing with device...")
+            print(f" Starting pairing...")
             device.Pair()
             
             # 等待配對完成
             timeout = 30
             while timeout > 0 and not device.Paired:
-                asyncio.sleep(1)
+                time.sleep(1)
                 timeout -= 1
             
             if device.Paired:
                 print(f" Pairing successful")
                 
-                # Trust 裝置
+                # 設定為信任
                 device.Trusted = True
                 print(f" Device trusted")
+                
+                # 等待 bonding 資訊寫入
+                time.sleep(2)
                 
                 return True
             else:
@@ -203,19 +194,19 @@ class BlueZBondingManager:
             device = self.bus.get(BLUEZ_SERVICE, device_path)[DEVICE_IFACE]
             
             if device.Connected:
-                print(f" Device already connected")
+                print(f" Already connected")
                 return True
             
-            print(f" Connecting to device...")
+            print(f" Connecting...")
             device.Connect()
             
             timeout = 10
             while timeout > 0 and not device.Connected:
-                asyncio.sleep(1)
+                time.sleep(1)
                 timeout -= 1
             
             if device.Connected:
-                print(f" Connected successfully")
+                print(f" Connected")
                 return True
             else:
                 print(f" Connection timeout")
@@ -226,7 +217,7 @@ class BlueZBondingManager:
             return False
     
     def remove_device(self, device_path):
-        """移除裝置（會刪除 bonding 資訊）"""
+        """移除裝置（刪除 bonding）"""
         try:
             self.adapter.RemoveDevice(device_path)
             print(f" Device removed (bonding info deleted)")
@@ -242,7 +233,6 @@ class BLEProximityApp:
         self.manager = BlueZBondingManager()
         self.whitelist = self.load_whitelist()
         
-        # 確保 adapter 可用
         if not self.manager.get_adapter():
             print(" Bluetooth adapter not available")
             sys.exit(1)
@@ -268,9 +258,91 @@ class BLEProximityApp:
                     "last_updated": datetime.now().isoformat(),
                     "note": "Bonding keys stored in /var/lib/bluetooth"
                 }, f, indent=2)
-            print(f" Whitelist saved")
+            print(f" Whitelist saved to {WHITELIST_FILE}")
         except Exception as e:
             print(f" Error saving whitelist: {e}")
+    
+    def add_device_from_scan(self):
+        """從掃描添加裝置"""
+        devices = self.manager.scan_devices(timeout=10)
+        if not devices:
+            return
+        
+        print(f"\n{'='*70}")
+        print("Select device to add:")
+        print("="*70)
+        
+        for i, dev in enumerate(devices):
+            print(f"[{i:2d}] {dev['name']:<20} ({dev['mac']}) RSSI={dev['rssi']:>4} dBm "
+                  f"[Bonded: {dev['bonded']}]")
+        
+        try:
+            idx = int(input("\nSelect index (or -1 to cancel): "))
+            if idx < 0 or idx >= len(devices):
+                print(" Canceled")
+                return
+            
+            dev = devices[idx]
+            
+            # 如果未 bonding，詢問是否要配對
+            if not dev["bonded"]:
+                pair = input("Device not bonded. Pair now? [y/N]: ").lower() == 'y'
+                if pair:
+                    if not self.manager.pair_device(dev["path"]):
+                        print(" Pairing failed, device not added")
+                        return
+            
+            # 添加到白名單
+            alias = input(f"Input alias (default={dev['name']}): ").strip()
+            if not alias:
+                alias = dev["name"]
+            
+            threshold = input(f"RSSI threshold (default={NEAR_THRESHOLD}): ").strip()
+            threshold = int(threshold) if threshold else NEAR_THRESHOLD
+            
+            self.whitelist.append({
+                "name": alias,
+                "mac": dev["mac"],
+                "rssi_threshold": threshold,
+                "added_at": datetime.now().isoformat()
+            })
+            self.save_whitelist()
+            print(f" Device added to whitelist")
+            
+        except (ValueError, IndexError):
+            print(" Invalid input")
+    
+    def remove_device(self):
+        """移除裝置"""
+        if not self.whitelist:
+            print(" Whitelist is empty")
+            return
+        
+        self.display_whitelist()
+        
+        try:
+            idx = int(input("\nEnter index to remove (or -1 to cancel): "))
+            if idx < 0 or idx >= len(self.whitelist):
+                print(" Canceled")
+                return
+            
+            dev = self.whitelist[idx]
+            
+            # 從 BlueZ 移除（刪除 bonding）
+            objects = self.manager.get_managed_objects()
+            for path, interfaces in objects.items():
+                if DEVICE_IFACE in interfaces:
+                    if interfaces[DEVICE_IFACE].get('Address') == dev["mac"]:
+                        self.manager.remove_device(path)
+                        break
+            
+            # 從白名單移除
+            removed = self.whitelist.pop(idx)
+            self.save_whitelist()
+            print(f" Removed '{removed['name']}' ({removed['mac']})")
+            
+        except (ValueError, IndexError):
+            print(" Invalid input")
     
     def display_whitelist(self):
         """顯示白名單"""
@@ -287,52 +359,37 @@ class BLEProximityApp:
             threshold = dev.get("rssi_threshold", NEAR_THRESHOLD)
             print(f"[{i:3d}]  {dev['name']:<15} {dev['mac']:<18} {bonded:<8} {threshold:<10}")
     
-    def add_device_from_scan(self):
-        """從掃描結果添加裝置"""
-        devices = self.manager.scan_devices(timeout=10)
-        if not devices:
+    def show_bonding_info(self):
+        """顯示 bonding 詳細資訊"""
+        if not self.whitelist:
+            print(" Whitelist is empty")
             return
         
-        print(f"\n{'='*60}")
-        print("Select device to add:")
-        print("="*60)
-        
-        for i, dev in enumerate(devices):
-            bonded = "🔒" if dev["bonded"] else "🔓"
-            print(f"[{i:2d}] {bonded} {dev['name']:<20} ({dev['mac']}) RSSI={dev['rssi']:>4} dBm")
+        self.display_whitelist()
         
         try:
-            idx = int(input("\nSelect index (or -1 to cancel): "))
-            if idx < 0 or idx >= len(devices):
+            idx = int(input("\nEnter index to view bonding info (or -1 to cancel): "))
+            if idx < 0 or idx >= len(self.whitelist):
                 print(" Canceled")
                 return
             
-            selected = devices[idx]
+            dev = self.whitelist[idx]
+            info = self.manager.get_bonding_info(dev["mac"])
             
-            # 如果未 bonding，詢問是否要配對
-            if not selected["bonded"]:
-                pair = input("Device not bonded. Pair now? [y/N]: ").lower() == 'y'
-                if pair:
-                    if not self.manager.pair_device(selected["path"]):
-                        print(" Pairing failed, device not added")
-                        return
+            if not info:
+                print(" No bonding information found")
+                return
             
-            # 添加到白名單
-            alias = input(f"Input alias (default={selected['name']}): ").strip()
-            if not alias:
-                alias = selected["name"]
+            print(f"\n🔐 Bonding info for {dev['name']} ({dev['mac']}):")
+            print("="*70)
             
-            threshold = input(f"RSSI threshold (default={NEAR_THRESHOLD}): ").strip()
-            threshold = int(threshold) if threshold else NEAR_THRESHOLD
-            
-            self.whitelist.append({
-                "name": alias,
-                "mac": selected["mac"],
-                "rssi_threshold": threshold,
-                "added_at": datetime.now().isoformat()
-            })
-            self.save_whitelist()
-            print(f" Device added to whitelist")
+            for section, keys in info.items():
+                print(f"\n[{section}]")
+                for key, value in keys.items():
+                    # 如果是金鑰，顯示前 16 字元
+                    if 'Key' in key and len(value) > 32:
+                        value = value[:32] + "..."
+                    print(f"  {key:<25} = {value}")
             
         except (ValueError, IndexError):
             print(" Invalid input")
@@ -343,16 +400,14 @@ class BLEProximityApp:
             print(" Whitelist is empty")
             return
         
-        print("\n" + "="*60)
+        print("\n" + "="*70)
         print(" Starting proximity monitoring...")
         print("  Press Ctrl+C to stop")
-        print("="*60)
+        print("="*70)
         
         try:
-            loop = GLib.MainLoop()
-            
-            # 設定定時掃描
-            def scan_and_check():
+            while True:
+                # 掃描裝置
                 devices = self.manager.scan_devices(timeout=3)
                 rssi_map = {dev["mac"]: dev["rssi"] for dev in devices}
                 
@@ -373,94 +428,26 @@ class BLEProximityApp:
                     
                     print(f"{dev['name']:<12} ({mac}): {status:<10} RSSI={rssi or 'N/A':>4} dBm")
                 
-                return True  # 繼續定時執行
-            
-            # 每 2 秒執行一次
-            GLib.timeout_add_seconds(2, scan_and_check)
-            
-            # 開始事件迴圈
-            loop.run()
-            
+                time.sleep(2)
+                
         except KeyboardInterrupt:
             print("\n\n Monitoring stopped")
-    
-    def remove_device(self):
-        """從白名單移除裝置"""
-        self.display_whitelist()
-        
-        if not self.whitelist:
-            return
-        
-        try:
-            idx = int(input("\nEnter index to remove (or -1 to cancel): "))
-            if idx < 0 or idx >= len(self.whitelist):
-                print(" Canceled")
-                return
-            
-            dev = self.whitelist[idx]
-            
-            # 同時從 BlueZ 移除（刪除 bonding）
-            objects = self.manager.get_managed_objects()
-            for path, interfaces in objects.items():
-                if DEVICE_IFACE in interfaces:
-                    if interfaces[DEVICE_IFACE].get('Address') == dev["mac"]:
-                        self.manager.remove_device(path)
-                        break
-            
-            # 從白名單移除
-            removed = self.whitelist.pop(idx)
-            self.save_whitelist()
-            print(f" Removed '{removed['name']}' ({removed['mac']})")
-            
-        except (ValueError, IndexError):
-            print(" Invalid input")
-    
-    def show_bonding_info(self):
-        """顯示 bonding 詳細資訊"""
-        self.display_whitelist()
-        
-        if not self.whitelist:
-            return
-        
-        try:
-            idx = int(input("\nEnter index to view bonding info (or -1 to cancel): "))
-            if idx < 0 or idx >= len(self.whitelist):
-                print(" Canceled")
-                return
-            
-            dev = self.whitelist[idx]
-            info = self.manager.get_bonding_info(dev["mac"])
-            
-            if not info:
-                print(" No bonding information found")
-                return
-            
-            print(f"\n Bonding info for {dev['name']} ({dev['mac']}):")
-            print("="*60)
-            
-            for section, keys in info.items():
-                print(f"\n[{section}]")
-                for key, value in keys.items():
-                    print(f"  {key:<20} = {value}")
-            
-        except (ValueError, IndexError):
-            print("  Invalid input")
 
 def main_menu():
     """主選單"""
     app = BLEProximityApp()
     
     while True:
-        print("\n" + "="*60)
+        print("\n" + "="*70)
         print("    BlueZ D-Bus BLE Bonding Manager")
-        print("="*60)
+        print("="*70)
         print("1.  Scan & add device")
         print("2.  Show whitelist")
         print("3.  Show bonding info")
         print("4.  Remove device")
         print("5.  Start proximity monitor")
         print("0.  Exit")
-        print("="*60)
+        print("="*70)
         
         choice = input("Select: ").strip()
         
@@ -469,4 +456,24 @@ def main_menu():
         elif choice == "2":
             app.display_whitelist()
         elif choice == "3":
-            app.show_bond
+            app.show_bonding_info()
+        elif choice == "4":
+            app.remove_device()
+        elif choice == "5":
+            app.monitor_proximity()
+        elif choice == "0":
+            print(" Goodbye!")
+            break
+        else:
+            print(" Invalid choice")
+
+if __name__ == "__main__":
+    # 檢查執行環境
+    if os.geteuid() != 0:
+        print("  Warning: Running without root may have limited access to bonding keys")
+        print("   Consider running with sudo for full functionality")
+        print("="*70)
+    
+    # 檢查 BlueZ 是否運行
+    if not Path("/var/run/dbus/system_bus_socket").exists():
+        print
