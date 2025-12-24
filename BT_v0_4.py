@@ -36,7 +36,7 @@ class BlueZBondingManager:
             self.adapter = self.bus.get(BLUEZ_SERVICE, adapter_path)[ADAPTER_IFACE]
             return self.adapter
         except Exception as e:
-            print(f"❌ Failed to get adapter: {e}")
+            print(f" Failed to get adapter: {e}")
             return None
     
     def get_managed_objects(self):
@@ -45,26 +45,26 @@ class BlueZBondingManager:
             obj_mgr = self.bus.get(BLUEZ_SERVICE, '/')[OBJECT_MGR_IFACE]
             return obj_mgr.GetManagedObjects()
         except Exception as e:
-            print(f"❌ Failed to get managed objects: {e}")
+            print(f" Failed to get managed objects: {e}")
             return {}
     
     def scan_devices(self, timeout=10):
         """掃描 BLE 裝置"""
         print(f"\n{'='*70}")
-        print(f"🔍 Starting BLE scan for {timeout} seconds...")
+        print(f" Starting BLE scan for {timeout} seconds...")
         print("="*70)
         
         try:
             # 開始掃描
             self.adapter.StartDiscovery()
-            print("📡 Discovery started...")
+            print(" Discovery started...")
             
             # 等待掃描完成
             time.sleep(timeout)
             
             # 停止掃描
             self.adapter.StopDiscovery()
-            print("⏹️ Discovery stopped")
+            print(" Discovery stopped")
             
             # 取得掃描結果
             objects = self.get_managed_objects()
@@ -105,11 +105,11 @@ class BlueZBondingManager:
                         print(f"{bond_icon}{conn_icon} {name:<20} ({address}) "
                               f"RSSI={rssi:>4} dBm [Paired: {paired}] [Trusted: {trusted}]")
             
-            print(f"\n✅ Found {len(devices)} BLE devices")
+            print(f"\n Found {len(devices)} BLE devices")
             return devices
             
         except Exception as e:
-            print(f"❌ Scan failed: {e}")
+            print(f" Scan failed: {e}")
             return []
     
     def is_bonded(self, mac_address):
@@ -147,7 +147,7 @@ class BlueZBondingManager:
             
             return info
         except Exception as e:
-            print(f"❌ Failed to read bonding info: {e}")
+            print(f" Failed to read bonding info: {e}")
             return None
     
     def pair_device(self, device_path):
@@ -156,10 +156,10 @@ class BlueZBondingManager:
             device = self.bus.get(BLUEZ_SERVICE, device_path)[DEVICE_IFACE]
             
             if device.Paired:
-                print(f"✅ Already paired")
+                print(f" Already paired")
                 return True
             
-            print(f"🔐 Starting pairing...")
+            print(f" Starting pairing...")
             device.Pair()
             
             # 等待配對完成
@@ -169,22 +169,22 @@ class BlueZBondingManager:
                 timeout -= 1
             
             if device.Paired:
-                print(f"✅ Pairing successful")
+                print(f" Pairing successful")
                 
                 # 設定為信任
                 device.Trusted = True
-                print(f"✅ Device trusted")
+                print(f" Device trusted")
                 
                 # 等待 bonding 資訊寫入
                 time.sleep(2)
                 
                 return True
             else:
-                print(f"❌ Pairing timeout")
+                print(f" Pairing timeout")
                 return False
                 
         except Exception as e:
-            print(f"❌ Pairing failed: {e}")
+            print(f" Pairing failed: {e}")
             return False
     
     def connect_device(self, device_path):
@@ -193,10 +193,10 @@ class BlueZBondingManager:
             device = self.bus.get(BLUEZ_SERVICE, device_path)[DEVICE_IFACE]
             
             if device.Connected:
-                print(f"✅ Already connected")
+                print(f" Already connected")
                 return True
             
-            print(f"🔗 Connecting...")
+            print(f" Connecting...")
             device.Connect()
             
             timeout = 10
@@ -205,24 +205,24 @@ class BlueZBondingManager:
                 timeout -= 1
             
             if device.Connected:
-                print(f"✅ Connected")
+                print(f" Connected")
                 return True
             else:
-                print(f"❌ Connection timeout")
+                print(f" Connection timeout")
                 return False
                 
         except Exception as e:
-            print(f"❌ Connection failed: {e}")
+            print(f" Connection failed: {e}")
             return False
     
     def remove_device(self, device_path):
         """移除裝置（刪除 bonding）"""
         try:
             self.adapter.RemoveDevice(device_path)
-            print(f"🗑️ Device removed (bonding info deleted)")
+            print(f" Device removed (bonding info deleted)")
             return True
         except Exception as e:
-            print(f"❌ Failed to remove device: {e}")
+            print(f" Failed to remove device: {e}")
             return False
 
 class BLEProximityApp:
@@ -233,7 +233,7 @@ class BLEProximityApp:
         self.whitelist = self.load_whitelist()
         
         if not self.manager.get_adapter():
-            print("❌ Bluetooth adapter not available")
+            print(" Bluetooth adapter not available")
             sys.exit(1)
     
     def load_whitelist(self):
@@ -245,7 +245,7 @@ class BLEProximityApp:
                 data = json.load(f)
             return data.get("devices", [])
         except Exception as e:
-            print(f"❌ Error loading whitelist: {e}")
+            print(f" Error loading whitelist: {e}")
             return []
     
     def save_whitelist(self):
@@ -257,9 +257,9 @@ class BLEProximityApp:
                     "last_updated": datetime.now().isoformat(),
                     "note": "Bonding keys stored in /var/lib/bluetooth"
                 }, f, indent=2)
-            print(f"✅ Whitelist saved to {WHITELIST_FILE}")
+            print(f" Whitelist saved to {WHITELIST_FILE}")
         except Exception as e:
-            print(f"❌ Error saving whitelist: {e}")
+            print(f" Error saving whitelist: {e}")
     
     def add_device_from_scan(self):
         """從掃描添加裝置"""
@@ -278,7 +278,7 @@ class BLEProximityApp:
         try:
             idx = int(input("\nSelect index (or -1 to cancel): "))
             if idx < 0 or idx >= len(devices):
-                print("⏹️ Canceled")
+                print(" Canceled")
                 return
             
             dev = devices[idx]
@@ -288,7 +288,7 @@ class BLEProximityApp:
                 pair = input("Device not bonded. Pair now? [y/N]: ").lower() == 'y'
                 if pair:
                     if not self.manager.pair_device(dev["path"]):
-                        print("❌ Pairing failed, device not added")
+                        print(" Pairing failed, device not added")
                         return
             
             # 添加到白名單
@@ -306,15 +306,15 @@ class BLEProximityApp:
                 "added_at": datetime.now().isoformat()
             })
             self.save_whitelist()
-            print(f"✅ Device added to whitelist")
+            print(f" Device added to whitelist")
             
         except (ValueError, IndexError):
-            print("❌ Invalid input")
+            print(" Invalid input")
     
     def remove_device(self):
         """移除裝置"""
         if not self.whitelist:
-            print("📋 Whitelist is empty")
+            print(" Whitelist is empty")
             return
         
         self.display_whitelist()
@@ -322,7 +322,7 @@ class BLEProximityApp:
         try:
             idx = int(input("\nEnter index to remove (or -1 to cancel): "))
             if idx < 0 or idx >= len(self.whitelist):
-                print("⏹️ Canceled")
+                print(" Canceled")
                 return
             
             dev = self.whitelist[idx]
@@ -338,18 +338,18 @@ class BLEProximityApp:
             # 從白名單移除
             removed = self.whitelist.pop(idx)
             self.save_whitelist()
-            print(f"🗑️ Removed '{removed['name']}' ({removed['mac']})")
+            print(f" Removed '{removed['name']}' ({removed['mac']})")
             
         except (ValueError, IndexError):
-            print("❌ Invalid input")
+            print(" Invalid input")
     
     def display_whitelist(self):
         """顯示白名單"""
         if not self.whitelist:
-            print("📋 Whitelist is empty")
+            print(" Whitelist is empty")
             return
         
-        print(f"\n📋 Whitelist ({len(self.whitelist)} devices):")
+        print(f"\n Whitelist ({len(self.whitelist)} devices):")
         print(f"{'Index':<6} {'Name':<15} {'MAC':<18} {'Bonded':<8} {'RSSI Thr.':<10}")
         print("-" * 65)
         
@@ -361,7 +361,7 @@ class BLEProximityApp:
     def show_bonding_info(self):
         """顯示 bonding 詳細資訊"""
         if not self.whitelist:
-            print("📋 Whitelist is empty")
+            print(" Whitelist is empty")
             return
         
         self.display_whitelist()
@@ -369,14 +369,14 @@ class BLEProximityApp:
         try:
             idx = int(input("\nEnter index to view bonding info (or -1 to cancel): "))
             if idx < 0 or idx >= len(self.whitelist):
-                print("⏹️ Canceled")
+                print(" Canceled")
                 return
             
             dev = self.whitelist[idx]
             info = self.manager.get_bonding_info(dev["mac"])
             
             if not info:
-                print("❌ No bonding information found")
+                print(" No bonding information found")
                 return
             
             print(f"\n🔐 Bonding info for {dev['name']} ({dev['mac']}):")
@@ -391,17 +391,17 @@ class BLEProximityApp:
                     print(f"  {key:<25} = {value}")
             
         except (ValueError, IndexError):
-            print("❌ Invalid input")
+            print(" Invalid input")
     
     def monitor_proximity(self):
         """監控接近狀態"""
         if not self.whitelist:
-            print("❌ Whitelist is empty")
+            print(" Whitelist is empty")
             return
         
         print("\n" + "="*70)
-        print("🎯 Starting proximity monitoring...")
-        print("⚠️  Press Ctrl+C to stop")
+        print(" Starting proximity monitoring...")
+        print("  Press Ctrl+C to stop")
         print("="*70)
         
         try:
@@ -430,7 +430,7 @@ class BLEProximityApp:
                 time.sleep(2)
                 
         except KeyboardInterrupt:
-            print("\n\n⏹️ Monitoring stopped")
+            print("\n\n Monitoring stopped")
 
 def main_menu():
     """主選單"""
@@ -438,14 +438,14 @@ def main_menu():
     
     while True:
         print("\n" + "="*70)
-        print("   🔷 BlueZ D-Bus BLE Bonding Manager")
+        print("    BlueZ D-Bus BLE Bonding Manager")
         print("="*70)
-        print("1. 📡 Scan & add device")
-        print("2. 📋 Show whitelist")
-        print("3. 🔐 Show bonding info")
-        print("4. 🗑️ Remove device")
-        print("5. ▶️ Start proximity monitor")
-        print("0. ❌ Exit")
+        print("1.  Scan & add device")
+        print("2.  Show whitelist")
+        print("3.  Show bonding info")
+        print("4.  Remove device")
+        print("5.  Start proximity monitor")
+        print("0.  Exit")
         print("="*70)
         
         choice = input("Select: ").strip()
@@ -461,21 +461,21 @@ def main_menu():
         elif choice == "5":
             app.monitor_proximity()
         elif choice == "0":
-            print("👋 Goodbye!")
+            print(" Goodbye!")
             break
         else:
-            print("❌ Invalid choice")
+            print(" Invalid choice")
 
 if __name__ == "__main__":
     # 檢查執行環境
     if os.geteuid() != 0:
-        print("⚠️  Warning: Running without root may have limited access to bonding keys")
+        print("  Warning: Running without root may have limited access to bonding keys")
         print("   Consider running with sudo for full functionality")
         print("="*70)
     
     # 檢查 BlueZ 是否運行
     if not Path("/var/run/dbus/system_bus_socket").exists():
-        print("❌ D-Bus system socket not found. Is BlueZ running?")
+        print(" D-Bus system socket not found. Is BlueZ running?")
         sys.exit(1)
     
     # 檢查 pydbus
@@ -483,13 +483,13 @@ if __name__ == "__main__":
         import pydbus
         from gi.repository import GLib
     except ImportError as e:
-        print(f"❌ Import error: {e}")
+        print(f" Import error: {e}")
         print("Install dependencies: pip install pydbus PyGObject")
         sys.exit(1)
     
-    print("🔧 BlueZ D-Bus BLE Bonding Manager")
-    print(f"📁 Whitelist: {WHITELIST_FILE}")
-    print(f"🔑 Bonding keys: {BONDING_KEYS_DIR}")
+    print(" BlueZ D-Bus BLE Bonding Manager")
+    print(f" Whitelist: {WHITELIST_FILE}")
+    print(f" Bonding keys: {BONDING_KEYS_DIR}")
     print("="*70)
     
     # 執行主選單

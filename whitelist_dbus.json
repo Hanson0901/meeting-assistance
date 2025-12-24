@@ -1,0 +1,23 @@
+{
+  "devices": [
+    {
+      "name": "X50",
+      "mac": "C8:16:DA:A0:5C:C2",
+      "rssi_threshold": -70,
+      "added_at": "2025-12-24T12:53:42.531280"
+    },
+    {
+      "name": "iPhone",
+      "mac": "CC:3F:36:A0:69:6D",
+      "added_at": "2025-12-24T13:02:58.766392"
+    },
+    {
+      "name": "PC",
+      "mac": "50:EE:32:85:A9:37",
+      "rssi_threshold": -70,
+      "added_at": "2025-12-24T13:39:45.527183"
+    }
+  ],
+  "last_updated": "2025-12-24T13:39:45.527386",
+  "note": "Bonding keys in /var/lib/bluetooth"
+}
