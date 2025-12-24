@@ -960,7 +960,7 @@ if __name__ == "__main__":
     print(" BlueZ Bluetooth Proximity Monitor")
     print(f" Whitelist: {WHITELIST_FILE}")
     print(f" Bonding keys: {BONDING_KEYS_DIR}")
-    print("\n 💡 Strategy: l2ping for reachability → BLE for RSSI")
+    print("\n  Strategy: l2ping for reachability → BLE for RSSI")
     print(" ✨ Efficient and reliable!")
     print("="*70)
     
