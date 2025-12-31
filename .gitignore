@@ -7,7 +7,7 @@
 outputs/
 uploads/
 offload/
-
+*.gguf
 # 忽略常见缓存目录
 cache/
 .cache/

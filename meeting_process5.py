@@ -148,7 +148,7 @@ class LlamaCppQwen3Extractor:
     【Raspberry Pi 5 16GB 優化】llama.cpp GGUF Q8_0 Qwen3-4B
     【v5.5 改進】舊版本 prompt + 新統計輸出 + 類型聚合迴圈處理 + CSV 產出
     """
-    def __init__(self, model_path="../Qwen3-4B-Q8_0.gguf"):
+    def __init__(self, model_path="..w"):
         """初始化模型（Pi 5 16GB 版本 v5.5）"""
         print("="*70)
         print("🚀 Qwen3-4B-Q8_0 會議記錄整理助手 (Pi 5 16GB 優化版 v5.5)")
