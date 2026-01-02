@@ -36,14 +36,13 @@ class ModelConfig:
         },
         'actions': {
             'path': f'{BASE_MODEL_PATH}qwen3-4b-instruct-2507-q8_0.gguf',
-            'max_tokens': 300,
-            'temperature': 0.2,
-            'top_p': 0.4,
+            'max_tokens': 250,
+            'temperature': 0.25,
+            'top_p': 0.5,
             'top_k': 40,
             'repeat_penalty': 1.3,
-
-
         },
+
         'summary': {
             'path': f'{BASE_MODEL_PATH}qwen3-4b-instruct-2507-q8_0.gguf',
             'max_tokens': 1800,

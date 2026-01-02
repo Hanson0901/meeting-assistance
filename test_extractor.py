@@ -76,7 +76,7 @@ MANUAL_TEST_TEXT = """
 # =====================================================
 # 將純文字轉為 segments
 # =====================================================
-def text_to_segments(text: str, max_chars: int = 2000):
+def text_to_segments(text: str, max_chars: int = 400):
     segments = []
     buffer = ""
 
