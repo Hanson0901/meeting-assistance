@@ -1,0 +1,70 @@
+# drivers/summary_driver.py
+# -*- coding: utf-8 -*-
+
+class SummaryGeneratorDriver:
+    def __init__(self, generator, verbose=True):
+        """
+        generator: SummaryGenerator instance
+        """
+        self.generator = generator
+        self.verbose = verbose
+
+    def run(self, segments, people, keypoints, decisions, actions):
+        """
+        統一驅動 SummaryGenerator.generate()
+
+        參數：
+            segments: List[dict]，例如 [{"text": "..."}]
+            people/keypoints/decisions/actions: str
+
+        回傳：
+            {
+                "ok": bool,
+                "result": str,
+                "error": Optional[str]
+            }
+        """
+        if self.verbose:
+            print("\n===== Running SummaryGenerator =====")
+
+        try:
+            result = self.generator.generate(
+                segments=segments,
+                people=people,
+                keypoints=keypoints,
+                decisions=decisions,
+                actions=actions,
+            )
+
+            # ===== 驗證輸出 =====
+            if not isinstance(result, str):
+                return {
+                    "ok": False,
+                    "result": "",
+                    "error": f"Expected str, got {type(result)}"
+                }
+
+            if len(result.strip()) == 0:
+                return {
+                    "ok": False,
+                    "result": "",
+                    "error": "Empty result string"
+                }
+
+            if self.verbose:
+                print("----- Generated Summary -----")
+                print(result)
+                print("✓ SummaryGenerator OK")
+
+            return {
+                "ok": True,
+                "result": result,
+                "error": None
+            }
+
+        except Exception as e:
+            return {
+                "ok": False,
+                "result": "",
+                "error": str(e)
+            }

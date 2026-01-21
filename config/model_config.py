@@ -9,7 +9,7 @@ class ModelConfig:
     """模型配置管理類"""
     
     # 基礎路徑
-    BASE_MODEL_PATH = "/home/csie/"
+    BASE_MODEL_PATH = "/home/cgu-csie/"
     
     # 各功能使用的模型配置
     MODELS = {
@@ -57,7 +57,7 @@ class ModelConfig:
     LLAMA_CONFIG = {
         'n_gpu_layers': 0,
         'n_threads': 4,
-        'n_ctx': 8192,  # 16GB 版本
+        'n_ctx': 2048,  # 16GB 版本
         'verbose': False,
     }
     

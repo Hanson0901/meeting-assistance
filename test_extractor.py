@@ -97,7 +97,9 @@ def text_to_segments(text: str, max_chars: int = 400):
         segments.append({"text": buffer.strip()})
 
     return segments
-
+def normalize_actions_brackets(raw_output: str) -> str:
+    # 只做格式清理：去掉中括號
+    return raw_output.replace("[", "").replace("]", "")
 
 # =====================================================
 # 單一 extractor 測試工具（最原始版本）
@@ -121,23 +123,25 @@ def main():
 
     segments = text_to_segments(MANUAL_TEST_TEXT)
 
+
     if not segments:
         raise RuntimeError("❌ 沒有任何 segments")
 
     print(f"📦 segments 數量: {len(segments)}")
 
     # 初始化 Extractors（原本的樣子）
-    people = PeopleExtractor()
-    keypoints = KeypointsExtractor()
-    decisions = DecisionsExtractor()
+#    people = PeopleExtractor()
+#    keypoints = KeypointsExtractor()
+#    decisions = DecisionsExtractor()
     actions = ActionsExtractor()
-    summary = SummaryGenerator()
+#    summary = SummaryGenerator()
 
     # 逐一測試
 #    test_one("PeopleExtractor", lambda: people.extract(segments))
 #    test_one("KeypointsExtractor", lambda: keypoints.extract(segments))
 #    test_one("DecisionsExtractor", lambda: decisions.extract(segments))
-    test_one("ActionsExtractor", lambda: actions.extract(segments))
+    test_one("ActionsExtractor", lambda: normalize_actions_brackets(actions.extract(segments)))
+
 
     # Summary（如果你要）
 #    test_one(
