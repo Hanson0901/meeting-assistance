@@ -140,6 +140,20 @@ def auto_find_target_device(prefer_connected: bool = True, require_trusted: bool
     # 最後退一步：任一已配對裝置
     return trusted[0] if trusted else (others[0] if others else None)
 
+def push_to_mac(target_mac: str, files: List[str]) -> Tuple[str, str]:
+    """
+    指定 MAC 直接送（不猜）
+    回傳 (mac, name)
+    """
+    target_mac = target_mac.upper()
+    name = target_mac
+    for mac, n in list_paired_devices():
+        if mac.upper() == target_mac:
+            name = n
+            break
+    obex_push_files(target_mac, files)
+    return target_mac, name
+
 
 def auto_push(files: List[str], max_try: int = 5) -> Tuple[str, str]:
     """
