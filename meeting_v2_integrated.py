@@ -28,36 +28,7 @@ import dbus
 import dbus.service
 import dbus.mainloop.glib
 from gi.repository import GLib
-from bluetooth.obex_push import push_file, ObexPushError
-def _get_obex_bus():
-        """
-        自動選擇 OBEX 所在的 D-Bus：
-        - 若在 dbus-run-session 下 → 使用 SessionBus（你目前的正確情況）
-        - 否則再嘗試 SystemBus（保底）
-        """
-        errors = []
 
-        # 優先：SessionBus
-        if os.environ.get("DBUS_SESSION_BUS_ADDRESS"):
-            try:
-                bus = dbus.SessionBus()
-                bus.get_object("org.bluez.obex", "/org/bluez/obex")
-                return bus
-            except Exception as e:
-                errors.append(f"SessionBus failed: {e}")
-
-        # 次要：SystemBus
-        try:
-            bus = dbus.SystemBus()
-            bus.get_object("org.bluez.obex", "/org/bluez/obex")
-            return bus
-        except Exception as e:
-            errors.append(f"SystemBus failed: {e}")
-
-        raise RuntimeError(
-            "找不到 org.bluez.obex（OBEX 服務未啟動或不在同一個 D-Bus）\n"
-            + "\n".join(errors)
-        )
 # --------------------------------------------------
 # 將專案根目錄加入 Python 路徑
 # --------------------------------------------------
@@ -107,8 +78,7 @@ class BluetoothFileSender:
     def send_file(self, file_path: str, device_mac: str) -> bool:
         try:
             bus = _get_obex_bus()
-            import bluetooth.obex_push as obp
-            print("🔎 using obex_push at:", obp.__file__, flush=True)
+
             # OBEX client
             client = dbus.Interface(
                 bus.get_object("org.bluez.obex", "/org/bluez/obex"),
