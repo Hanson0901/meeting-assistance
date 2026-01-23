@@ -1223,11 +1223,6 @@ def main():
 
 
 if __name__ == "__main__":
-    # 檢查 root 權限 (藍牙需要)
-    if os.geteuid() != 0:
-        print("⚠️  此腳本需要 root 權限以使用藍牙功能")
-        print("   請使用: sudo python3 meeting_v1_integrated.py")
-        sys.exit(1)
     
     # 設置 D-Bus 主循環
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
