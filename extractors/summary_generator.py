@@ -1,10 +1,32 @@
 from extractors.base_extractor import BaseExtractor
 from datetime import datetime
+import re
 
 class SummaryGenerator(BaseExtractor):
     def __init__(self):
         super().__init__("summary")
 
+    @staticmethod
+    def post_process(text: str) -> str:
+        if not text:
+            return ""
+
+        # 1) 移除常見干擾字樣/分隔線/自我檢核
+        text = re.sub(r"(最終輸出|符合所有要求|最終回應|輸出完成)\s*[:：]?\s*", "", text)
+        text = text.replace("（最終輸出完成）", "")
+        text = re.sub(r"^-{3,}\s*$", "", text, flags=re.MULTILINE)
+
+        # 2) 行級去重（保留第一次出現，維持順序）
+        lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+        unique_lines = list(dict.fromkeys(lines))
+
+        # 3) 合併回段落（避免變條列）
+        clean_text = " ".join(unique_lines)
+
+        # 4) 簡單處理「A。A。」這種句子連續重複（可選）
+        clean_text = re.sub(r"(.{6,30}[。！？])\s*\1+", r"\1", clean_text)
+
+        return clean_text.strip()
     def generate(self, segments, people, keypoints, decisions, actions):
         # =====================================================
         # 第一階段：逐段摘要（loop）——已停用（不使用 segments）
@@ -62,14 +84,12 @@ class SummaryGenerator(BaseExtractor):
 
 ### 行動項目 ###
 {actions}
+### 輸出規範 ###
+- 僅限繁體中文，採用流暢的段落敘述（非條列式）。
+- 嚴禁包含任何標題、前言（如：這是一份摘要）、自我檢核文字或結束語。
+- 若資訊不足，僅回覆「無法生成摘要」。
+- 內容須整合討論重點、決策與行動項，避免資訊重複。
 
-### 任務要求 ###
-請基於以上資訊，生成一段完整、通順的會議整體摘要：
-1. 使用繁體中文
-2. 保留最重要的會議背景、討論重點、決策與後續行動
-3. 不要使用條列格式
-4. 以正式書面語撰寫
-5. 如果沒有足夠資訊，請回復「無法生成摘要」
 
 ###end###
 
@@ -81,3 +101,5 @@ class SummaryGenerator(BaseExtractor):
         )
 
         return final_summary.strip() if final_summary else "（無法生成摘要：模型未回傳內容）"
+
+        

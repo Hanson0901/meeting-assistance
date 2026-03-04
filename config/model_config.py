@@ -30,8 +30,8 @@ class ModelConfig:
         'decisions': {
             'path': f'{BASE_MODEL_PATH}qwen3-4b-instruct-2507-q8_0.gguf',
             'max_tokens': 150,
-            'temperature': 0.5,
-            'top_p': 0.5,
+            'temperature': 0.7,
+            'top_p': 0.8,
             'top_k': 20,
         },
         'actions': {
@@ -46,7 +46,7 @@ class ModelConfig:
         'summary': {
             'path': f'{BASE_MODEL_PATH}qwen3-4b-instruct-2507-q8_0.gguf',
             'max_tokens': 1800,
-            'temperature': 0.7,
+            'temperature': 0.5,
             'top_p': 0.95,
             'min_p': 0.05,
             'top_k': 20,

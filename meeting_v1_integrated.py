@@ -47,17 +47,19 @@ def _get_obex_bus():
                 errors.append(f"SessionBus failed: {e}")
 
         # 次要：SystemBus
+        """
         try:
             bus = dbus.SystemBus()
             bus.get_object("org.bluez.obex", "/org/bluez/obex")
             return bus
         except Exception as e:
             errors.append(f"SystemBus failed: {e}")
-
+        """
         raise RuntimeError(
             "找不到 org.bluez.obex（OBEX 服務未啟動或不在同一個 D-Bus）\n"
             + "\n".join(errors)
         )
+
 # --------------------------------------------------
 # 將專案根目錄加入 Python 路徑
 # --------------------------------------------------
