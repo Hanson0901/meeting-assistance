@@ -55,7 +55,7 @@ class BaseExtractor:
             verbose=llama_cfg["verbose"],
         )
 
-        print(f"✅ Loaded model [{extractor_type}]: {self.model_path}")
+        print(f"[BaseExtractor][init] Loaded model [{extractor_type}]: {self.model_path}")
 
     # ======================
     # 記憶體相關（不動）
@@ -70,10 +70,10 @@ class BaseExtractor:
 
     def print_memory_usage(self, stage=""):
         memory = self.get_memory_usage()
-        print(f"📊 記憶體狀況 {stage}:")
-        print(f"   使用率: {memory['cpu_percent']:.1f}%")
-        print(f"   已用: {memory['cpu_used']:.1f}GB")
-        print(f"   可用: {memory['cpu_available']:.1f}GB")
+        print(f"[BaseExtractor] 記憶體狀況 {stage}:")
+        print(f"[BaseExtractor] 使用率: {memory['cpu_percent']:.1f}%")
+        print(f"[BaseExtractor] 已用: {memory['cpu_used']:.1f}GB")
+        print(f"[BaseExtractor] 可用: {memory['cpu_available']:.1f}GB")
 
     def aggressive_memory_cleanup(self):
         gc.collect()
@@ -88,12 +88,12 @@ class BaseExtractor:
 
     def generate_response(self, prompt, max_tokens, retry_count=0):
         if retry_count >= self.max_retries:
-            return "記憶體不足，無法生成回應。"
+            return "[BaseExtractor]記憶體不足，無法生成回應。"
 
         try:
             if self.check_memory_pressure():
                 self.aggressive_memory_cleanup()
-                print("   ⚠️ 記憶體預先清理")
+                print("[BaseExtractor] 記憶體預先清理")
 
             response = self.model(
                 prompt,
@@ -110,7 +110,7 @@ class BaseExtractor:
 
         except RuntimeError as e:
             if "out of memory" in str(e).lower():
-                print(f"   ⚠️ 記憶體不足 (重試 {retry_count + 1}/{self.max_retries})")
+                print(f"[BaseExtractor] 記憶體不足 (重試 {retry_count + 1}/{self.max_retries})")
                 self.aggressive_memory_cleanup()
                 time.sleep(1)
                 return self.generate_response(

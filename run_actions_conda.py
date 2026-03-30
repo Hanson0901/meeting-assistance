@@ -5,6 +5,7 @@ import os
 import sys
 import json
 import argparse
+import time
 from pathlib import Path
 
 # 專案根目錄
@@ -21,6 +22,7 @@ def list_srt_files(output_dir: str, output_prefix: str):
 def srt_to_text(srt_path: str) -> str:
     lines = []
     encodings = ["utf-8", "utf-8-sig", "cp950", "gbk"]
+
     for enc in encodings:
         try:
             with open(srt_path, "r", encoding=enc) as f:
@@ -32,6 +34,7 @@ def srt_to_text(srt_path: str) -> str:
             break
         except Exception:
             continue
+
     return "\n".join(lines)
 
 
@@ -41,16 +44,27 @@ def main():
     ap.add_argument("--output-prefix", default="output")
     args = ap.parse_args()
 
+    script_start = time.time()
+
     srt_files = list_srt_files(args.output_dir, args.output_prefix)
     if not srt_files:
-        print("❌ 找不到任何 SRT")
+        print("[run_actions_conda] 找不到任何 SRT")
         sys.exit(1)
 
+    # ===== 模型載入 =====
     extractor = ActionsExtractor()
+
+    # ===== 模型載入結束 =====
+    model_loaded_time = time.time()
+
     all_actions = []
     segments = []
 
+    # ===== 生成開始 =====
+    generation_start = time.time()
+
     for srt in srt_files:
+
         text = srt_to_text(str(srt)).strip()
         if not text:
             continue
@@ -59,6 +73,7 @@ def main():
         segments.append(segment)
 
         result = extractor.extract([segment])
+
         if result and result.strip() != "本段無具體行動項目":
             for line in result.splitlines():
                 line = line.strip()
@@ -67,6 +82,9 @@ def main():
 
         if hasattr(extractor, "aggressive_memory_cleanup"):
             extractor.aggressive_memory_cleanup()
+
+    # ===== 生成結束 (寫入 cache 前) =====
+    generation_end = time.time()
 
     out_json = os.path.join(
         args.output_dir, f"{args.output_prefix}_actions_cache.json"
@@ -86,7 +104,14 @@ def main():
             indent=2,
         )
 
-    print(f"ACTIONS OK -> {out_json}")
+    script_time = time.time() - script_start
+    generation_time = generation_end - generation_start
+    model_load_time = model_loaded_time - script_start
+
+    print(f"[run_actions_conda] ACTIONS OK -> {out_json}")
+    print(f"[run_actions_conda] 模型載入時間: {model_load_time:.2f} 秒")
+    print(f"[run_actions_conda] 生成時間: {generation_time:.2f} 秒")
+    print(f"[run_actions_conda] run_actions_conda 總耗時: {script_time:.2f} 秒\n")
 
 
 if __name__ == "__main__":

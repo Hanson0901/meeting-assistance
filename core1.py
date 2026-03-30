@@ -50,7 +50,7 @@ class SRTParser:
                         continue
             return subtitles
         except Exception as e:
-            print(f"    讀取 SRT 檔案失敗: {e}")
+            print(f"[SRTParser] 讀取 SRT 檔案失敗: {e}")
             return []
 
     @staticmethod
@@ -140,8 +140,8 @@ class LlamaCppQwen3Extractor:
     """
     def __init__(self, model_path="../qwen3-4b-instruct-2507-q8_0.gguf"):
         """初始化模型（Pi 5 16GB 版本 v5.5）"""
-        print("="*70)
-        print(" Qwen3-4B-Q8_0 核心引擎載入中...")
+        print("[LlamaCppQwen3Extractor][init] ="*70)
+        print("[LlamaCppQwen3Extractor][init] Qwen3-4B-Q8_0 核心引擎載入中...")
         
         os.environ['TOKENIZERS_PARALLELISM'] = 'false'
         os.environ['OMP_NUM_THREADS'] = '4'
@@ -150,19 +150,19 @@ class LlamaCppQwen3Extractor:
         self.model_path = model_path
         
         if not os.path.exists(model_path):
-            raise FileNotFoundError(f"Model not found: {model_path}")
+            raise FileNotFoundError(f"[LlamaCppQwen3Extractor][init] Model not found: {model_path}")
         
         # 記憶體檢測與參數配置
         total_mem_gb = psutil.virtual_memory().total / 1024**3
         if total_mem_gb >= 15:
             n_ctx = 8192
-            print(f"  ✓ Pi 5 16GB 模式 (n_ctx=8192)")
+            print(f"[LlamaCppQwen3Extractor] Pi 5 16GB 模式 (n_ctx=8192)")
         elif total_mem_gb >= 7:
             n_ctx = 4096
-            print(f"  ✓ Pi 5 8GB 模式 (n_ctx=4096)")
+            print(f"[LlamaCppQwen3Extractor] Pi 5 8GB 模式 (n_ctx=4096)")
         else:
             n_ctx = 2048
-            print(f"  ⚠ 低記憶體模式 (n_ctx=2048)")
+            print(f"[LlamaCppQwen3Extractor] 低記憶體模式 (n_ctx=2048)")
         
         try:
             self.model = Llama(
@@ -172,9 +172,9 @@ class LlamaCppQwen3Extractor:
                 n_ctx=n_ctx,
                 verbose=False,
             )
-            print("  ✓ 模型載入成功")
+            print("[LlamaCppQwen3Extractor] 模型載入成功")
         except Exception as e:
-            print(f"  ❌ 模型載入失敗: {e}")
+            print(f"[LlamaCppQwen3Extractor] 模型載入失敗: {e}")
             raise
 
     def get_memory_usage(self):
@@ -211,12 +211,12 @@ class LlamaCppQwen3Extractor:
             
         except RuntimeError as e:
             if "out of memory" in str(e).lower():
-                print(f"    ⚠ OOM 偵測，正在重試 ({retry_count + 1}/{self.max_retries})...")
+                print(f"[LlamaCppQwen3Extractor] OOM 偵測，正在重試 ({retry_count + 1}/{self.max_retries})...")
                 self.aggressive_memory_cleanup()
                 time.sleep(1)
                 return self.generate_response(prompt, max(100, max_tokens - 50), retry_count + 1)
             else:
-                return f"生成錯誤: {str(e)}"
+                return f"[LlamaCppQwen3Extractor] 生成錯誤: {str(e)}"
 
     # =========================================================
     #  以下為三個核心提取迴圈 (供外部腳本呼叫)
@@ -224,10 +224,10 @@ class LlamaCppQwen3Extractor:
 
     def extract_all_people_loop(self, segments: List[Dict]) -> Dict:
         """【人物識別模式】"""
-        print(f"\n【模式】人物識別執行中 (共 {len(segments)} 段)...")
+        print(f"\n[LlamaCppQwen3Extractor] 人物識別執行中 (共 {len(segments)} 段)...")
         results = {}
         for idx, seg in enumerate(segments, 1):
-            print(f"  處理分段 {idx}/{len(segments)}...", end="\r")
+            print(f"  [LlamaCppQwen3Extractor] 處理分段 {idx}/{len(segments)}...", end="\r")
             
             prompt = f"""你是一位專業的人物識別專家，請從以下會議記錄中識別出現的人物。
 
@@ -248,15 +248,15 @@ class LlamaCppQwen3Extractor:
             
             results[idx] = self.generate_response(prompt, max_tokens=200)
             self.aggressive_memory_cleanup()
-        print("\n  ✓ 人物識別完成")
+        print("\n[LlamaCppQwen3Extractor] 人物識別完成")
         return results
 
     def extract_all_key_points_loop(self, segments: List[Dict]) -> Dict:
         """【會議重點模式】"""
-        print(f"\n【模式】核心要點提取中 (共 {len(segments)} 段)...")
+        print(f"\n[LlamaCppQwen3Extractor] 核心要點提取中 (共 {len(segments)} 段)...")
         results = {}
         for idx, seg in enumerate(segments, 1):
-            print(f"  處理分段 {idx}/{len(segments)}...", end="\r")
+            print(f"[LlamaCppQwen3Extractor] 處理分段 {idx}/{len(segments)}...", end="\r")
             
             prompt = f"""你是一位專業的內容分析專家，請從以下會議記錄中提取核心要點。
 
@@ -276,15 +276,15 @@ class LlamaCppQwen3Extractor:
             
             results[idx] = self.generate_response(prompt, max_tokens=200)
             self.aggressive_memory_cleanup()
-        print("\n  ✓ 重點提取完成")
+        print("\n[LlamaCppQwen3Extractor] 重點提取完成")
         return results
 
     def extract_all_decisions_loop(self, segments: List[Dict]) -> Dict:
         """【分段決策模式】"""
-        print(f"\n【模式】決策事項提取中 (共 {len(segments)} 段)...")
+        print(f"\n[LlamaCppQwen3Extractor] 決策事項提取中 (共 {len(segments)} 段)...")
         results = {}
         for idx, seg in enumerate(segments, 1):
-            print(f"  處理分段 {idx}/{len(segments)}...", end="\r")
+            print(f"[LlamaCppQwen3Extractor] 處理分段 {idx}/{len(segments)}...", end="\r")
             
             prompt = f"""你是一位專業的決策分析專家，請從以下會議記錄中識別決策事項。
 
@@ -304,5 +304,5 @@ class LlamaCppQwen3Extractor:
             
             results[idx] = self.generate_response(prompt, max_tokens=200)
             self.aggressive_memory_cleanup()
-        print("\n  ✓ 決策提取完成")
+        print("\n[LlamaCppQwen3Extractor] 決策提取完成")
         return results

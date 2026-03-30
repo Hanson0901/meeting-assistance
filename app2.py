@@ -66,10 +66,10 @@ def run_meeting_analysis(session_id: str, srt_path: str):
             "progress": 10
         }
 
-        # 1️⃣ 解析 SRT
+        # 1 解析 SRT
         subtitles = SRTParser.parse_srt_file(srt_path)
 
-        # 2️⃣ 分段
+        # 2 分段
         segmentizer = SRTSegmentizer(max_duration=300, max_chars=5000)
         segments = segmentizer.segment_subtitles(subtitles)
 
@@ -184,6 +184,6 @@ def get_result(session_id):
 # 啟動
 # =========================================================
 if __name__ == "__main__":
-    print("🚀 啟動 Meeting Assistant API")
+    print("[app2] 啟動 Meeting Assistant API")
     initialize_meeting_analyzer()
     app.run(host="0.0.0.0", port=5000, debug=False)

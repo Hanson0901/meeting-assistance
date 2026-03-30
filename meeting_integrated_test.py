@@ -40,7 +40,7 @@ def _ensure_obexd_running():
         time.sleep(0.5)  # 給予服務啟動時間
         return True
     except Exception as e:
-        print(f"[警告]  無法啟動 obexd: {e}")
+        print(f"⚠️  無法啟動 obexd: {e}")
         return False
 
 
@@ -58,7 +58,7 @@ def _get_obex_bus():
         bus = dbus.SessionBus()
         # 測試連接
         bus.get_object("org.bluez.obex", "/org/bluez/obex")
-        print("[OBEX] 使用 SessionBus 連接 OBEX")
+        print("✓ 使用 SessionBus 連接 OBEX")
         return bus
     except Exception as e:
         errors.append(f"SessionBus failed: {e}")
@@ -67,13 +67,13 @@ def _get_obex_bus():
     try:
         bus = dbus.SystemBus()
         bus.get_object("org.bluez.obex", "/org/bluez/obex")
-        print("[OBEX] 使用 SystemBus 連接 OBEX")
+        print("✓ 使用 SystemBus 連接 OBEX")
         return bus
     except Exception as e:
         errors.append(f"SystemBus failed: {e}")
     
     raise RuntimeError(
-        "[OBEX] 找不到 org.bluez.obex（OBEX 服務未啟動或不在同一個 D-Bus）\n"
+        "找不到 org.bluez.obex（OBEX 服務未啟動或不在同一個 D-Bus）\n"
         + "\n".join(errors)
     )
 
@@ -123,7 +123,7 @@ class BluetoothFileSender:
                         })
             return devices
         except Exception as e:
-            raise ObexPushError(f"[藍芽] 無法取得配對裝置: {e}")
+            raise ObexPushError(f"無法取得配對裝置: {e}")
     
     def send_file(self, file_path: str, device_mac: str) -> bool:
         """
@@ -138,7 +138,7 @@ class BluetoothFileSender:
         """
         try:
             if not os.path.exists(file_path):
-                raise ObexPushError(f"[send_file] 檔案不存在: {file_path}")
+                raise ObexPushError(f"檔案不存在: {file_path}")
             
             # 獲取檔案的絕對路徑和大小
             abs_path = os.path.abspath(file_path)
@@ -146,9 +146,9 @@ class BluetoothFileSender:
             file_name = os.path.basename(abs_path)
             
             # 打印傳送檔案的詳細信息
-            print(f"  [send_file] 檔案路徑: {abs_path}")
-            print(f"  [send_file] 檔案大小: {file_size} bytes ({file_size/1024:.2f} KB)")
-            print(f"  [send_file] 檔案名稱: {file_name}")
+            print(f"  📍 檔案路徑: {abs_path}")
+            print(f"  📊 檔案大小: {file_size} bytes ({file_size/1024:.2f} KB)")
+            print(f"  🔍 檔案名稱: {file_name}")
             
             # 使用 SessionBus 的 OBEX Client
             client = dbus.Interface(
@@ -161,7 +161,7 @@ class BluetoothFileSender:
                 device_mac,
                 {"Target": "OPP"}
             )
-            print(f"[send_file]  → OBEX 會話建立: {session_path}")
+            print(f"  → OBEX 會話建立: {session_path}")
             
             # 建立 ObjectPush 介面並傳送檔案
             obj_push = dbus.Interface(
@@ -170,7 +170,7 @@ class BluetoothFileSender:
             )
             
             transfer_path, properties = obj_push.SendFile(abs_path)
-            print(f"[send_file] 開始傳送: {transfer_path}")
+            print(f"  → 開始傳送: {transfer_path}")
             
             # 等待傳送完成
             props_iface = dbus.Interface(
@@ -188,32 +188,32 @@ class BluetoothFileSender:
                     
                     if total > 0 and transferred > 0:
                         percent = int((transferred / total) * 100)
-                        print(f"[send_file] 進度: {percent}% ({transferred}/{total} bytes)")
+                        print(f"    進度: {percent}% ({transferred}/{total} bytes)")
                     
                     if status == "complete":
-                        print(f"  [send_file] 傳送完成")
+                        print(f"  ✅ 傳送完成")
                         return True
                     elif status == "error":
                         raise ObexPushError("傳送失敗 - 裝置端錯誤")
                     elif status in ["active", "queued", "suspended"]:
-                        print(f"[send_file] 狀態: {status}")
+                        print(f"    狀態: {status}")
                         
                 except Exception as e:
                     retry_count += 1
                     if retry_count > 5:
-                        print(f"[send_file] 狀態查詢失敗: {e}")
+                        print(f"    ⚠️  狀態查詢失敗: {e}")
                 
                 time.sleep(0.5)
                 timeout -= 0.5
             
-            raise ObexPushError("[send_file] 傳送逾時 (超過 60 秒)")
+            raise ObexPushError("傳送逾時 (超過 60 秒)")
             
         except dbus.exceptions.DBusException as e:
-            raise ObexPushError(f"[send_file] D-Bus 錯誤: {e}")
+            raise ObexPushError(f"D-Bus 錯誤: {e}")
         except ObexPushError:
             raise
         except Exception as e:
-            raise ObexPushError(f"[send_file] 未預期的錯誤: {e}")
+            raise ObexPushError(f"未預期的錯誤: {e}")
     
     def auto_send_to_first_paired(self, files: List[str]) -> tuple:
         """
@@ -228,7 +228,7 @@ class BluetoothFileSender:
         devices = self.get_paired_devices()
         
         if not devices:
-            raise ObexPushError("[send_to_paired] 沒有已配對的藍牙裝置")
+            raise ObexPushError("❌ 沒有已配對的藍牙裝置")
         
         # 優先選擇已連線的裝置
         target = None
@@ -240,38 +240,38 @@ class BluetoothFileSender:
         if not target:
             target = devices[0]
         
-        print(f"[send_to_paired] 藍牙傳送目標: {target['name']} ({target['mac']})")
+        print(f"\n🔵 藍牙傳送目標: {target['name']} ({target['mac']})")
         
         success_count = 0
         failed_files = []
         
         for file_path in files:
             if not os.path.exists(file_path):
-                print(f"[send_to_paired] 檔案不存在: {file_path}")
+                print(f"  ⚠️  檔案不存在: {file_path}")
                 failed_files.append(os.path.basename(file_path))
                 continue
             
             file_name = os.path.basename(file_path)
-            print(f"[send_to_paired] 傳送檔案: {file_name}")
+            print(f"\n  📤 傳送檔案: {file_name}")
             
             try:
                 self.send_file(file_path, target["mac"])
                 success_count += 1
                 time.sleep(0.5)  # 檔案間隔
             except ObexPushError as e:
-                print(f"[send_to_paired] 傳送失敗: {e}")
+                print(f"  ❌ 傳送失敗: {e}")
                 failed_files.append(file_name)
         
         # 傳送摘要
         print(f"\n{'='*60}")
-        print(f"[send_to_paired] 傳送統計:")
-        print(f"[send_to_paired] 成功: {success_count}/{len(files)} 個檔案")
+        print(f"📊 傳送統計:")
+        print(f"   ✅ 成功: {success_count}/{len(files)} 個檔案")
         if failed_files:
-            print(f"[send_to_paired] 失敗: {', '.join(failed_files)}")
+            print(f"   ❌ 失敗: {', '.join(failed_files)}")
         print(f"{'='*60}\n")
         
         if success_count == 0:
-            raise ObexPushError("[send_to_paired] 所有檔案傳送失敗")
+            raise ObexPushError("所有檔案傳送失敗")
         
         return target["mac"], target["name"]
     
@@ -366,10 +366,8 @@ class MeetingWorkflow:
         model_path="/home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf",
         interval_minutes=5,
         overlap_seconds=60,
-        enable_recording=True,
         enable_bluetooth=True,
         enable_proximity_monitor=False,
-        enable_write_output=True,
     ):
         self.audio_device = audio_device
         self.output_dir = output_dir
@@ -377,7 +375,6 @@ class MeetingWorkflow:
         self.model_path = model_path
         self.interval_minutes = interval_minutes
         self.overlap_seconds = overlap_seconds
-        self.enable_recording = enable_recording
 
         self.audio_file = os.path.join(output_dir, f"{output_prefix}_audio.mkv")
         self.actions_file = os.path.join(output_dir, f"{output_prefix}_actions.txt")
@@ -387,37 +384,33 @@ class MeetingWorkflow:
         self.dump_cache_in_txt = False
         self.enable_bluetooth = enable_bluetooth
         self.enable_proximity_monitor = enable_proximity_monitor
-        self.enable_write_output = enable_write_output
 
         os.makedirs(output_dir, exist_ok=True)
         self.is_recording = False
         self.cache: Dict[str, object] = {}
         
-        # 計時功能
-        self.step_times = {}  # 儲存每個 step 的耗時
-        
         # 藍牙模組
         if self.enable_bluetooth:
             try:
                 self.bt_sender = BluetoothFileSender()
-                print("[MeetingWorkflow][init] 藍牙傳送模組已啟用")
+                print("✅ 藍牙傳送模組已啟用")
             except Exception as e:
-                print(f"  藍牙傳送模組啟動失敗: {e}")
+                print(f"⚠️  藍牙傳送模組啟動失敗: {e}")
                 self.enable_bluetooth = False
         
         if self.enable_proximity_monitor:
             try:
                 self.bt_monitor = BluetoothProximityMonitor()
-                print("[MeetingWorkflow][init] 藍牙監控模組已啟用")
+                print("✅ 藍牙監控模組已啟用")
             except Exception as e:
-                print(f"[MeetingWorkflow][init]  藍牙監控模組啟動失敗: {e}")
+                print(f"⚠️  藍牙監控模組啟動失敗: {e}")
                 self.enable_proximity_monitor = False
 
     # --------------------------------------------------
     def _print_banner(self, text: str):
         print("\n" + "=" * 60)
         print(f"  {text}")
-        print(" =" * 60 + "\n")
+        print("=" * 60 + "\n")
 
     def _list_srt_files(self) -> List[Path]:
         pattern = f"{self.output_prefix}_*.srt"
@@ -479,7 +472,7 @@ class MeetingWorkflow:
             try:
                 with open(file_path, "r", encoding=enc) as f:
                     lines = f.readlines()
-                print(f"[MeetingWorkflow][parse_srt_brute_force] 使用編碼 {enc} 讀取成功,共 {len(lines)} 行")
+                print(f"📖 使用編碼 {enc} 讀取成功,共 {len(lines)} 行")
                 break
             except:
                 continue
@@ -530,7 +523,7 @@ class MeetingWorkflow:
         start_chunk_idx = int(min_time // interval_sec)
         end_chunk_idx = int(max_time // interval_sec)
 
-        print(f"[MeetingWorkflow][split_subtitles_to_segments] 偵測 SRT 時間範圍: {int(min_time)}秒 ~ {int(max_time)}秒")
+        print(f"⏱️ 偵測 SRT 時間範圍: {int(min_time)}秒 ~ {int(max_time)}秒")
         segments = []
 
         for i in range(start_chunk_idx, end_chunk_idx + 1):
@@ -544,7 +537,7 @@ class MeetingWorkflow:
 
             if current_text_list:
                 label = f"{i*self.interval_minutes:02d}:00 - {(i+1)*self.interval_minutes:02d}:00"
-                segments.append(f"[MeetingWorkflow][split_subtitles_to_segments] 【時間段 {label}】\n" + "\n".join(current_text_list))
+                segments.append(f"【時間段 {label}】\n" + "\n".join(current_text_list))
 
         return segments
 
@@ -552,11 +545,10 @@ class MeetingWorkflow:
     # step1: 錄音
     # ------------------------
     def step1_record(self) -> bool:
-        step_start = time.time()
         self._print_banner("步驟 1/6: 開始錄音")
-        print(f"[MeetingWorkflow][step1_record] 音訊設備: {self.audio_device}")
-        print(f"[MeetingWorkflow][step1_record] 輸出檔案: {self.audio_file}")
-        print("[MeetingWorkflow][step1_record]  按 Ctrl+C 結束錄音\n")
+        print(f"🎤 音訊設備: {self.audio_device}")
+        print(f"📁 輸出檔案: {self.audio_file}")
+        print("⌨️  按 Ctrl+C 結束錄音\n")
 
         arecord_cmd = [
             "arecord",
@@ -585,7 +577,7 @@ class MeetingWorkflow:
 
         def _on_sigint(sig, frame):
             if self.is_recording:
-                print("[MeetingWorkflow][step1_record][on_sigint] 正在停止錄音...")
+                print("\n\n🛑 正在停止錄音...")
                 self.is_recording = False
 
         try:
@@ -604,7 +596,7 @@ class MeetingWorkflow:
             self.is_recording = True
             signal.signal(signal.SIGINT, _on_sigint)
 
-            print("[MeetingWorkflow][step1_record] 錄音進行中...\n")
+            print("✅ 錄音進行中...\n")
             while self.is_recording:
                 time.sleep(0.2)
 
@@ -629,33 +621,30 @@ class MeetingWorkflow:
                         pass
 
         if os.path.exists(self.audio_file):
-            print("[MeetingWorkflow][step1_record] 錄音已停止")
-            print(f"[MeetingWorkflow][step1_record] 音訊檔案已儲存: {self.audio_file}")
-            self.step_times['step1'] = time.time() - step_start
-            print(f"[MeetingWorkflow][step1_record] step1 耗時: {self.step_times['step1']:.2f} 秒\n")
+            print("✅ 錄音已停止")
+            print(f"💾 音訊檔案已儲存: {self.audio_file}\n")
             return True
 
-        print("[MeetingWorkflow][step1_record] 找不到錄音輸出檔\n")
+        print("❌ 找不到錄音輸出檔\n")
         return False
 
     # ------------------------
     # step2: ASR
     # ------------------------
     def step2_transcribe(self) -> bool:
-        step_start = time.time()
         self._print_banner("步驟 2/6: 語音轉文字 (ASR)")
-        print(f"[MeetingWorkflow][step2_transcribe] 讀取音訊: {self.audio_file}")
-        print("[MeetingWorkflow][step2_transcribe]  按 Ctrl+C 可提前結束轉錄\n")
+        print(f"📂 讀取音訊: {self.audio_file}")
+        print("⌨️  按 Ctrl+C 可提前結束轉錄\n")
 
         if not os.path.exists(self.audio_file):
-            print("[MeetingWorkflow][step2_transcribe] 音訊檔不存在\n")
+            print("❌ 音訊檔不存在\n")
             return False
 
         conda_python = "/home/cgu-csie/miniconda3/bin/python3"
         asr_script = os.path.join(project_root, "speech", "run_asr_conda.py")
 
         cmd = [
-            "sudo", "-u", "cgu-csie",         # 重要：用你的帳號跑 conda，不要用 root
+            "sudo", "-u", "cgu-csie",         # ✅ 重要：用你的帳號跑 conda，不要用 root
             conda_python,
             asr_script,
             "--audio", self.audio_file,
@@ -666,7 +655,7 @@ class MeetingWorkflow:
             "--verbose",
         ]
 
-        print("[MeetingWorkflow][step2_transcribe] 使用 conda Python 執行 ASR：")
+        print("🚀 使用 conda Python 執行 ASR：")
         print("   " + " ".join(cmd) + "\n")
 
         env = os.environ.copy()
@@ -675,11 +664,9 @@ class MeetingWorkflow:
         try:
             subprocess.run(cmd, check=True, cwd=str(project_root), env=env)
         except subprocess.CalledProcessError as e:
-            print(f"[MeetingWorkflow][step2_transcribe] ASR 失敗: {e}\n")
+            print(f"❌ ASR 失敗: {e}\n")
             return False
-        self.step_times['step2'] = time.time() - step_start
-        print("[MeetingWorkflow][step2_transcribe] ASR 轉錄完成")
-        print(f"[MeetingWorkflow][step2_transcribe] step2 耗時: {self.step_times['step2']:.2f} 秒\n")
+        print("✅ ASR 轉錄完成\n")
         return True
 
 
@@ -687,11 +674,10 @@ class MeetingWorkflow:
     # step3: People/Keypoints/Decisions
     # ------------------------
     def step3_run_pkd_reports(self) -> bool:
-        step_start = time.time()
         self._print_banner("步驟 3/6: 生成 People/Keypoints/Decisions 報告 (conda worker)")
 
         if not os.path.exists(self.model_path):
-            print(f"[MeetingWorkflow][step3_run_pkd_reports] 找不到模型: {self.model_path}\n")
+            print(f"❌ 找不到模型: {self.model_path}\n")
             return False
 
         conda_python = "/home/cgu-csie/miniconda3/bin/python3"
@@ -708,7 +694,7 @@ class MeetingWorkflow:
             "--overlap-seconds", str(self.overlap_seconds),
         ]
 
-        print("[MeetingWorkflow][step3_run_pkd_reports] 使用 conda Python 執行 PKD：")
+        print("🚀 使用 conda Python 執行 PKD：")
         print("   " + " ".join(cmd) + "\n")
 
         env = os.environ.copy()
@@ -717,13 +703,13 @@ class MeetingWorkflow:
         try:
             subprocess.run(cmd, check=True, cwd=str(project_root), env=env)
         except subprocess.CalledProcessError as e:
-            print(f"[MeetingWorkflow][step3_run_pkd_reports] PKD 失敗: {e}\n")
+            print(f"❌ PKD 失敗: {e}\n")
             return False
     # 讀回結果
         try:
             import json
             if not os.path.exists(out_json):
-                print(f"[MeetingWorkflow][step3_run_pkd_reports] 找不到 PKD 輸出: {out_json}\n")
+                print(f"❌ 找不到 PKD 輸出: {out_json}\n")
                 return False
             with open(out_json, "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -731,33 +717,18 @@ class MeetingWorkflow:
             self.cache["keypoints"] = data.get("keypoints", "").strip() or "(無)"
             self.cache["decisions"] = data.get("decisions", "").strip() or "(無)"
         except Exception as e:
-            print(f"[MeetingWorkflow][step3_run_pkd_reports] 讀取 PKD 結果失敗: {e}\n")
+            print(f"❌ 讀取 PKD 結果失敗: {e}\n")
             return False
-    
-    # ✅ 新增：寫入 cache JSON 供 step5 使用
-        cache_json = os.path.join(self.output_dir, f"{self.output_prefix}_cache.json")
-        try:
-            cache_data = {
-                "people": self.cache["people"],
-                "keypoints": self.cache["keypoints"],
-                "decisions": self.cache["decisions"],
-            }
-            with open(cache_json, "w", encoding="utf-8") as f:
-                json.dump(cache_data, f, ensure_ascii=False, indent=2)
-            print(f"[MeetingWorkflow][step3_run_pkd_reports] cache 已寫入: {cache_json}\n")
-        except Exception as e:
-            print(f"[MeetingWorkflow][step3_run_pkd_reports] 寫入 cache 失敗: {e}\n")
+
+        print("✅ step3 完成：P/K/D 已寫入 cache\n")
         
-        self.step_times['step3'] = time.time() - step_start
-        print(f"[MeetingWorkflow][step3_run_pkd_reports] step3 完成：P/K/D 已寫入 cache")
-        print(f"[MeetingWorkflow][step3_run_pkd_reports] step3 耗時: {self.step_times['step3']:.2f} 秒\n")
         return True
+
 
     # ------------------------
     # step4: Actions
     # ------------------------
     def step4_extract_actions(self) -> bool:
-        step_start = time.time()
         self._print_banner("步驟 4/6: 提取行動項目 (conda worker)")
 
         conda_python = "/home/cgu-csie/miniconda3/bin/python3"
@@ -770,20 +741,20 @@ class MeetingWorkflow:
             "--output-prefix", self.output_prefix,
         ]
 
-        print("[MeetingWorkflow][step4_extract_actions] 使用 conda Python 執行 Actions：")
-        print("[MeetingWorkflow][step4_extract_actions]   " + " ".join(cmd) + "\n")
+        print("🚀 使用 conda Python 執行 Actions：")
+        print("   " + " ".join(cmd) + "\n")
 
         try:
             subprocess.run(cmd, check=True, cwd=str(project_root))
         except subprocess.CalledProcessError as e:
-            print(f"[MeetingWorkflow][step4_extract_actions] Actions 失敗: {e}\n")
+            print(f"❌ Actions 失敗: {e}\n")
             return False
 
         # 讀回結果
         try:
             import json
             if not os.path.exists(out_json):
-                print(f"[MeetingWorkflow][step4_extract_actions] 找不到 Actions 輸出: {out_json}\n")
+                print(f"❌ 找不到 Actions 輸出: {out_json}\n")
                 return False
             with open(out_json, "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -801,40 +772,17 @@ class MeetingWorkflow:
                 else:
                     f.write("本次會議無具體行動項目\n")
         except Exception as e:
-            print(f"[MeetingWorkflow][step4_extract_actions] 讀取 Actions 結果失敗: {e}\n")
+            print(f"❌ 讀取 Actions 結果失敗: {e}\n")
             return False
-        # 新增：更新 cache JSON，加入 actions_text
-        cache_json = os.path.join(self.output_dir, f"{self.output_prefix}_cache.json")
-        try:
-            import json
-            # 讀取既有的 cache（包含 P/K/D）
-            if os.path.exists(cache_json):
-                with open(cache_json, "r", encoding="utf-8") as f:
-                    cache_data = json.load(f)
-            else:
-                cache_data = {}
-        
-            # 加入 actions_text
-            cache_data["actions_text"] = self.cache["actions_text"]
-        
-            with open(cache_json, "w", encoding="utf-8") as f:
-                json.dump(cache_data, f, ensure_ascii=False, indent=2)
-            print(f"[MeetingWorkflow][step4_extract_actions] cache 已更新: {cache_json}\n")
-        except Exception as e:
-            print(f"[MeetingWorkflow][step4_extract_actions] 更新 cache 失敗: {e}\n")
 
-        self.step_times['step4'] = time.time() - step_start
-        print(f"[MeetingWorkflow][step4_extract_actions] 行動項目已輸出: {self.actions_file}")
-        print(f"[MeetingWorkflow][step4_extract_actions] step4 耗時: {self.step_times['step4']:.2f} 秒\n")
+        print(f"💾 行動項目已輸出: {self.actions_file}\n")
         return True
-       
 
 
     # ------------------------
     # step5: Summary
     # ------------------------
     def step5_generate_summary(self) -> bool:
-        step_start = time.time()
         self._print_banner("步驟 5/6: 生成會議摘要 (conda worker)")
 
         conda_python = "/home/cgu-csie/miniconda3/bin/python3"
@@ -849,18 +797,18 @@ class MeetingWorkflow:
             "--output-dir", self.output_dir,
             "--output-prefix", self.output_prefix,
         ]
-        print("[MeetingWorkflow][step5_generate_summary] 使用 conda Python 執行 Summary：")
-        print("[MeetingWorkflow][step5_generate_summary]   " + " ".join(cmd) + "\n")
+        print("🚀 使用 conda Python 執行 Summary：")
+        print("   " + " ".join(cmd) + "\n")
 
         try:
             subprocess.run(cmd, check=True, cwd=str(project_root))
         except subprocess.CalledProcessError as e:
-            print(f"[MeetingWorkflow][step5_generate_summary] Summary 失敗: {e}\n")
+            print(f"❌ Summary 失敗: {e}\n")
             return False
         try:
             import json
             if not os.path.exists(out_json):
-                print(f"[MeetingWorkflow][step5_generate_summary] 找不到 Summary 輸出: {out_json}\n")
+                print(f"❌ 找不到 Summary 輸出: {out_json}\n")
                 return False
 
             with open(out_json, "r", encoding="utf-8") as f:
@@ -868,18 +816,6 @@ class MeetingWorkflow:
 
             # 若 summary 為 null, 或是空字串，或包含『無法生成摘要』字樣，視為沒有摘要
             raw_summary = data.get("summary", None)
-            raw_title = data.get("title", None)
-            
-            # 處理 title
-            if raw_title is None:
-                self.cache["title"] = ""
-            else:
-                t = str(raw_title).strip()
-                if not t or "無法生成標題" in t:
-                    self.cache["title"] = ""
-                else:
-                    self.cache["title"] = t
-                    
             if raw_summary is None:
                 self.cache["summary"] = ""
             else:
@@ -893,39 +829,25 @@ class MeetingWorkflow:
             summary_txt = os.path.join(
                 self.output_dir, f"{self.output_prefix}_summary.txt"
             )
-            if self.cache["summary"] or self.cache["title"]:
+            if self.cache["summary"]:
                 with open(summary_txt, "w", encoding="utf-8") as f:
-                    if self.cache["title"]:
-                        f.write(self.cache["title"] + "\n")
-                        f.write("=" * 60 + "\n\n")
-                    else:
-                        f.write("會議摘要\n")
-                        f.write("=" * 60 + "\n\n")
-                        
+                    f.write("會議摘要\n" + "=" * 60 + "\n\n")
                     f.write(self.cache["summary"] + "\n")
 
-                print(f"[MeetingWorkflow][step5_generate_summary] 摘要已輸出: {summary_txt}\n")
+                print(f"💾 摘要已輸出: {summary_txt}\n")
             else:
-                print(f"[MeetingWorkflow][step5_generate_summary] Summary 為空或 null，跳過輸出 summary.txt\n")
+                print("⚠️ Summary 為空或 null，跳過輸出 summary.txt\n")
 
         except Exception as e:
-            print(f"[MeetingWorkflow][step5_generate_summary] 讀取 Summary 結果失敗: {e}\n")
+            print(f"❌ 讀取 Summary 結果失敗: {e}\n")
             return False
 
-        self.step_times['step5'] = time.time() - step_start
-        print(f"[MeetingWorkflow][step5_generate_summary] step5 耗時: {self.step_times['step5']:.2f} 秒\n")
         return True
     # ------------------------
     # step6: Export TXT + Bluetooth
     # ------------------------
     def step6_export_txt(self) -> bool:
-        step_start = time.time()
         self._print_banner("步驟 6/6: 匯出 TXT + 藍牙傳送")
-        
-        # 檢查是否啟用寫檔功能
-        if not self.enable_write_output:
-            print(f"[MeetingWorkflow][step6_export_txt]  寫檔功能已禁用，跳過 step6\n")
-            return True
 
         def _write_section(f, title: str, content: str):
             content = (content or "").strip()
@@ -947,8 +869,7 @@ class MeetingWorkflow:
             with open(self.txt_file, "w", encoding="utf-8") as f:
                 f.write("會議摘要報告(TXT)\n" + "="*60 + "\n")
                 f.write(f"產生時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                
-                _write_section(f, "會議主題(Title)", self.cache.get("title", ""))
+
                 _write_section(f, "整體摘要(Summary)", self.cache.get("summary", ""))
                 _write_section(f, "與會人員(People)", self.cache.get("people", ""))
                 _write_section(f, "會議重點(Keypoints)", self.cache.get("keypoints", ""))
@@ -956,10 +877,10 @@ class MeetingWorkflow:
                 _write_list(f, "行動項目(Actions)", self.cache.get("actions_lines", []))
 
         except Exception as e:
-            print(f" TXT 產生失敗: {e}")
+            print(f"❌ TXT 產生失敗: {e}")
             return False
 
-        print(f" TXT 已輸出: {self.txt_file}\n")
+        print(f"📄 TXT 已輸出: {self.txt_file}\n")
 
         # =========================
         # ★ 藍牙傳送結果檔案（基於 BT_trans_v0_4 方式）
@@ -973,29 +894,26 @@ class MeetingWorkflow:
                 ]
 
                 mac, name = self.bt_sender.auto_send_to_first_paired(files_to_send)
-                print(f"[MeetingWorkflow][step6_export_txt] 藍牙傳送完成: {name} ({mac})\n")
+                print(f"✅ 藍牙傳送完成: {name} ({mac})\n")
 
             except ObexPushError as e:
-                print(f"[MeetingWorkflow][step6_export_txt] 藍牙傳送失敗: {e}")
-                print("[MeetingWorkflow][step6_export_txt]    檢查項目:")
-                print("[MeetingWorkflow][step6_export_txt]      確保格藍牙裝置已配對且在範圍內")
-                print("[MeetingWorkflow][step6_export_txt]      執行: systemctl --user status obex")
-                print("[MeetingWorkflow][step6_export_txt]      執行: systemctl --user restart obex\n")
+                print(f"❌ 藍牙傳送失敗: {e}")
+                print("   💡 檢查項目:")
+                print("      • 確保格藍牙裝置已配對且在範圍內")
+                print("      • 執行: systemctl --user status obex")
+                print("      • 執行: systemctl --user restart obex\n")
             except Exception as e:
-                print(f"[MeetingWorkflow][step6_export_txt] 藍牙未預期錯誤: {e}\n")
+                print(f"❌ 藍牙未預期錯誤: {e}\n")
         else:
-            print("[MeetingWorkflow][step6_export_txt]  藍牙傳送已禁用\n")
+            print("⏭️  藍牙傳送已禁用\n")
 
-        self.step_times['step6'] = time.time() - step_start
-        print(f"[MeetingWorkflow][step6_export_txt] step6 耗時: {self.step_times['step6']:.2f} 秒\n")
         return True
 
     # ------------------------
     # 主流程
     # ------------------------
     def run(self) -> bool:
-        workflow_start = time.time()
-        self._print_banner(" 會議工作流程控制器 (整合藍牙版)")
+        self._print_banner("🎯 會議工作流程控制器 (整合藍牙版)")
 
         # 啟動藍牙監控 (選用)
         if self.enable_proximity_monitor:
@@ -1003,21 +921,18 @@ class MeetingWorkflow:
                 devices = self.bt_sender.get_paired_devices()
                 if devices:
                     def on_device_change(mac, name, is_nearby):
-                        status = " 進入範圍" if is_nearby else " 離開範圍"
-                        print(f"\n[MeetingWorkflow][run] {name}: {status}")
+                        status = "🟢 進入範圍" if is_nearby else "🔴 離開範圍"
+                        print(f"\n[藍牙監控] {name}: {status}")
                     
                     monitor_devices = [{"mac": d["mac"], "name": d["name"]} for d in devices[:3]]
                     self.bt_monitor.start_monitoring(monitor_devices, callback=on_device_change)
-                    print(f"[MeetingWorkflow][run] {len(monitor_devices)} 個裝置\n")
+                    print(f"📡 已啟動藍牙監控: {len(monitor_devices)} 個裝置\n")
             except Exception as e:
-                print(f"[MeetingWorkflow][run]  藍牙監控啟動失敗: {e}\n")
+                print(f"⚠️  藍牙監控啟動失敗: {e}\n")
 
         # 執行主要流程
-        if self.enable_recording:
-            if not self.step1_record():
-                return False
-        else:
-            print("[MeetingWorkflow][run]  錄音步驟已停用，直接使用既有音訊檔\n")
+        if not self.step1_record():
+            return False
         if not self.step2_transcribe():
             return False
         if not self.step3_run_pkd_reports():
@@ -1033,23 +948,12 @@ class MeetingWorkflow:
         if self.enable_proximity_monitor:
             try:
                 self.bt_monitor.stop_monitoring()
-                print("[MeetingWorkflow][run] 藍牙監控已停止\n")
+                print("📡 藍牙監控已停止\n")
             except Exception as e:
-                print(f"[MeetingWorkflow][run]  停止監控失敗: {e}\n")
+                print(f"⚠️  停止監控失敗: {e}\n")
 
-        self._print_banner(" 工作流程完成")
-        
-        # 計時統計
-        total_time = time.time() - workflow_start
-        print("[MeetingWorkflow][run]  計時統計:")
-        print("[MeetingWorkflow][run] ="*60)
-        for i in range(1, 7):
-            step_key = f'step{i}'
-            if step_key in self.step_times:
-                print(f"[MeetingWorkflow][run]  step{i}: {self.step_times[step_key]:.2f} 秒")
-        print(f"[MeetingWorkflow][run]  總耗時: {total_time:.2f} 秒")
-        print("[MeetingWorkflow][run] ="*60 + "\n")
-        print("[MeetingWorkflow][run] 全流程結束\n")
+        self._print_banner("✅ 工作流程完成")
+        print("🎉 全流程結束\n")
         return True
 
 
@@ -1124,7 +1028,7 @@ def generate_final_people_summary(extractor, raw_list: List[str]) -> str:
         )
         return MeetingWorkflow._clean_thought_tags(out["choices"][0]["text"])
     except Exception:
-        return "[generate_people_summary] 總結生成失敗"
+        return "總結生成失敗"
 
 
 def extract_raw_keypoints(extractor, text: str) -> str:
@@ -1193,7 +1097,7 @@ def generate_final_keypoints_summary(extractor, raw_list: List[str]) -> str:
         )
         return MeetingWorkflow._clean_thought_tags(out["choices"][0]["text"].strip())
     except Exception:
-        return "[generate_keypoints_summary] 總結生成失敗"
+        return "總結生成失敗"
 
 
 def extract_raw_decisions(extractor, text: str) -> str:
@@ -1280,31 +1184,26 @@ def run_step3_with_extracts(workflow: MeetingWorkflow) -> bool:
 
     srt_files = workflow._list_srt_files()
     if not srt_files:
-        print("[run_step3_with_extracts] 找不到任何 SRT(請先完成 ASR)\n")
+        print("❌ 找不到任何 SRT(請先完成 ASR)\n")
         return False
 
     if not os.path.exists(workflow.model_path):
-        print(f"[run_step3_with_extracts] 找不到模型: {workflow.model_path}\n")
+        print(f"❌ 找不到模型: {workflow.model_path}\n")
         return False
 
     from core1 import LlamaCppQwen3Extractor
 
     try:
-        model_load_start = time.time()
-        print("[run_step3_with_extracts] 正在導入模型...")
         extractor = LlamaCppQwen3Extractor(model_path=workflow.model_path)
-        model_load_time = time.time() - model_load_start
-        print(f"[run_step3_with_extracts] 模型導入完成")
-        print(f"[run_step3_with_extracts]  模型導入耗時: {model_load_time:.2f} 秒\n")
     except Exception as e:
-        print(f"[run_step3_with_extracts] 引擎啟動失敗: {e}\n")
+        print(f"❌ 引擎啟動失敗: {e}\n")
         return False
 
     people_reports = []
     keypoints_reports = []
     decisions_reports = []
 
-    print(f"[run_step3_with_extracts] 找到 {len(srt_files)} 個字幕檔案,開始產生 P/K/D 報告...\n")
+    print(f"📄 找到 {len(srt_files)} 個字幕檔案,開始產生 P/K/D 報告...\n")
 
     for idx, srt in enumerate(srt_files, 1):
         srt_path = str(srt)
@@ -1313,16 +1212,16 @@ def run_step3_with_extracts(workflow: MeetingWorkflow) -> bool:
         out_k = os.path.join(workflow.output_dir, f"finalk_{stem}.md")
         out_d = os.path.join(workflow.output_dir, f"finald_{stem}.md")
 
-        print(f"[run_step3_with_extracts] --- ({idx}/{len(srt_files)}) {srt.name} ---")
+        print(f"--- ({idx}/{len(srt_files)}) {srt.name} ---")
 
         subtitles = workflow._parse_srt_brute_force(srt_path)
         if not subtitles:
-            print(f"[run_step3_with_extracts] 字幕讀取失敗,略過\n")
+            print("⚠️  字幕讀取失敗,略過\n")
             continue
 
         segments = workflow._split_subtitles_to_segments(subtitles)
         if not segments:
-            print(f"[run_step3_with_extracts] 切割後沒有片段,略過\n")
+            print("⚠️  切割後沒有片段,略過\n")
             continue
 
         # ---- People ----
@@ -1389,9 +1288,9 @@ def run_step3_with_extracts(workflow: MeetingWorkflow) -> bool:
             f.write("\n\n---\n## 原始提取紀錄 (備份)\n\n")
             f.write("\n\n".join(raw_ds))
 
-        print(f" People  輸出: {out_p}")
-        print(f" Keypts  輸出: {out_k}")
-        print(f" Decisn  輸出: {out_d}\n")
+        print(f"✅ People  輸出: {out_p}")
+        print(f"✅ Keypts  輸出: {out_k}")
+        print(f"✅ Decisn  輸出: {out_d}\n")
 
         people_reports.append(people_final.strip())
         keypoints_reports.append(k_final.strip())
@@ -1401,7 +1300,7 @@ def run_step3_with_extracts(workflow: MeetingWorkflow) -> bool:
     workflow.cache["keypoints"] = "\n\n".join(keypoints_reports).strip() or "(無)"
     workflow.cache["decisions"] = "\n\n".join(decisions_reports).strip() or "(無)"
 
-    print("[run_step3_with_extracts] step3 完成:P/K/D 已寫入 cache\n")
+    print("✅ step3 完成:P/K/D 已寫入 cache\n")
     return True
 
 
@@ -1423,7 +1322,6 @@ def main():
         overlap_seconds=60,
         enable_bluetooth=True,           # 啟用藍牙傳送
         enable_proximity_monitor=False,  # 選用:藍牙監控
-        enable_recording=False,            # 測試階段先關閉錄音，直接用既有音訊檔
     )
     
     success = workflow.run()

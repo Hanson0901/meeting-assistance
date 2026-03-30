@@ -151,6 +151,8 @@ class RealtimeASR:
     
     def _load_models(self):
         """載入 ASR 和 Speaker 模型"""
+        import time
+        start_load = time.time() 
         if self.model is not None and self.spk_model is not None:
             return  # 已載入
         
@@ -215,6 +217,8 @@ class RealtimeASR:
                 )
             
             self._log("模型載入完成\n" + "=" * 60)
+            end_load = time.time()
+            self._log(f"模型載入耗時: {end_load - start_load:.2f} 秒")
         
         finally:
             sys.stderr.close()

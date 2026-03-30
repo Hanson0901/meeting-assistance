@@ -1,15 +1,15 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import os
 import sys
+import time   # ✅ 加這行
 from pathlib import Path
 
-# 把專案根目錄加進 Python path，讓 `import speech...` 一定成功
-project_root = Path(__file__).resolve().parents[1]   # .../meeting-assistence
+# 把專案根目錄加進 Python path
+project_root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(project_root))
 
 import argparse
 from speech.pipeline_mkv_read import RealtimeASR
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -29,7 +29,25 @@ def main():
         buffer_overlap=args.overlap,
         verbose=args.verbose,
     )
-    asr.start()
+
+    print("🚀 開始 ASR 轉錄...\n")
+
+    # ✅ 開始計時
+    start_time = time.time()
+
+    try:
+        asr.start()
+
+    except KeyboardInterrupt:
+        print("\n⚠️ 使用者中斷")
+
+    # ✅ 結束計時
+    end_time = time.time()
+    elapsed = end_time - start_time
+
+    print("\n✅ ASR 結束")
+    print(f"⏱️ ASR 總耗時: {elapsed:.2f} 秒 ")
+
 
 if __name__ == "__main__":
     main()

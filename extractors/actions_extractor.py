@@ -16,7 +16,7 @@ class ActionsExtractor(BaseExtractor):
     def __init__(self):
         super().__init__("actions")
 
-        # ❗ 行動抽取黑名單（語氣 / 背景 / 建議）
+        # 行動抽取黑名單（語氣 / 背景 / 建議）
         self.BLACKLIST = [
             "建議", "可以", "是否", "該於", "考慮", "希望", "詢問",
             "分享", "經驗", "他國", "例如", "說明", "背景",
@@ -85,7 +85,7 @@ class ActionsExtractor(BaseExtractor):
                 if not item:
                     continue
 
-                # ❌ 黑名單語氣直接丟棄
+                # 黑名單語氣直接丟棄
                 if any(word in item for word in self.BLACKLIST):
                     continue
 

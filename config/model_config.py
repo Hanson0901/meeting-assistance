@@ -45,8 +45,8 @@ class ModelConfig:
 
         'summary': {
             'path': f'{BASE_MODEL_PATH}qwen3-4b-instruct-2507-q8_0.gguf',
-            'max_tokens': 1800,
-            'temperature': 0.5,
+            'max_tokens': 2000,
+            'temperature': 0.7,
             'top_p': 0.95,
             'min_p': 0.05,
             'top_k': 20,

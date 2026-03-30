@@ -3,6 +3,7 @@
 
 import os
 import re
+import time
 import datetime
 from pathlib import Path
 from typing import List, Dict, Optional
@@ -309,6 +310,8 @@ def list_srt_files(output_dir: str, output_prefix: str) -> List[Path]:
 
 
 def run_pkd(output_dir: str, output_prefix: str, model_path: str, interval_minutes: int, overlap_seconds: int) -> Dict[str, str]:
+    total_start = time.time()
+    
     srt_files = list_srt_files(output_dir, output_prefix)
     if not srt_files:
         raise RuntimeError("找不到任何 SRT")
@@ -316,9 +319,18 @@ def run_pkd(output_dir: str, output_prefix: str, model_path: str, interval_minut
     if not os.path.exists(model_path):
         raise RuntimeError(f"找不到模型: {model_path}")
 
+    print("🚀 正在導入模型...")
+    model_load_start = time.time()
     from core1 import LlamaCppQwen3Extractor
     extractor = LlamaCppQwen3Extractor(model_path=model_path)
+    model_load_time = time.time() - model_load_start
+    print(f"✅ 模型導入完成 (耗時: {model_load_time:.2f} 秒)\n")
 
+    # 初始化統計變數
+    people_time = 0.0
+    keypoints_time = 0.0
+    decisions_time = 0.0
+    
     people_reports = []
     keypoints_reports = []
     decisions_reports = []
@@ -326,67 +338,78 @@ def run_pkd(output_dir: str, output_prefix: str, model_path: str, interval_minut
     for srt in srt_files:
         srt_path = str(srt)
         stem = srt.stem
-        out_p = os.path.join(output_dir, f"finalp_{stem}.md")
-        out_k = os.path.join(output_dir, f"finalk_{stem}.md")
-        out_d = os.path.join(output_dir, f"finald_{stem}.md")
-
+        
         subtitles = parse_srt_brute_force(srt_path)
-        if not subtitles:
-            continue
-
+        if not subtitles: continue
         segments = split_subtitles_to_segments(subtitles, interval_minutes, overlap_seconds)
-        if not segments:
-            continue
+        if not segments: continue
 
+        # --- PEOPLE 任務 ---
+        t_start = time.time()
         raw_people = []
         for seg in segments:
             r = extract_raw_people(extractor, seg)
-            if r and len(r) > 3 and "無" not in r and "<think>" not in r:
+            if r and len(r) > 3 and "無" not in r:
                 raw_people.append(r)
-            if hasattr(extractor, "aggressive_memory_cleanup"):
-                extractor.aggressive_memory_cleanup()
+        
+        people_final = generate_final_people_summary(extractor, raw_people) if raw_people else "## 尚無特定人物"
+        people_time += (time.time() - t_start)
+        
+        # 寫入檔案 (略過寫入代碼以保持簡潔，邏輯同原版)
+        with open(os.path.join(output_dir, f"finalp_{stem}.md"), "w", encoding="utf-8") as f:
+            f.write(f"# 會議參與人員名單\n{people_final}")
 
-        people_final = generate_final_people_summary(extractor, raw_people) if raw_people else "## 尚無特定人物\n未能識別出具體人員。"
-        with open(out_p, "w", encoding="utf-8") as f:
-            f.write("# 會議參與人員名單\n")
-            f.write(f"時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
-            f.write(people_final.strip() + "\n")
-
+        # --- KEYPOINTS 任務 ---
+        t_start = time.time()
         raw_kps = []
         for seg in segments:
             label = seg.split("\n")[0].strip()
             r = extract_raw_keypoints(extractor, seg)
             if r and len(r) > 5 and "無" not in r:
                 raw_kps.append(f"{label}\n{r}")
-            if hasattr(extractor, "aggressive_memory_cleanup"):
-                extractor.aggressive_memory_cleanup()
+        
+        k_final = generate_final_keypoints_summary(extractor, raw_kps) if raw_kps else "## 尚無明確重點"
+        keypoints_time += (time.time() - t_start)
+        
+        with open(os.path.join(output_dir, f"finalk_{stem}.md"), "w", encoding="utf-8") as f:
+            f.write(f"# 會議核心重點總結\n{k_final}")
 
-        k_final = generate_final_keypoints_summary(extractor, raw_kps) if raw_kps else "## 尚無明確重點\n未發現具體重點。"
-        with open(out_k, "w", encoding="utf-8") as f:
-            f.write("# 會議核心重點總結\n")
-            f.write(f"分析時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
-            f.write(k_final.strip() + "\n")
-
+        # --- DECISIONS 任務 ---
+        t_start = time.time()
         raw_ds = []
         for seg in segments:
             r = extract_raw_decisions(extractor, seg)
             if r and "無" not in r and len(r) > 5:
                 raw_ds.append(r)
-            if hasattr(extractor, "aggressive_memory_cleanup"):
-                extractor.aggressive_memory_cleanup()
+        
+        d_final = generate_final_decision_report(extractor, raw_ds) if raw_ds else "## 尚無明確決策"
+        decisions_time += (time.time() - t_start)
+        
+        with open(os.path.join(output_dir, f"finald_{stem}.md"), "w", encoding="utf-8") as f:
+            f.write(f"# 會議決策重點報告\n{d_final}")
 
-        d_final = generate_final_decision_report(extractor, raw_ds) if raw_ds else "## 尚無明確決策\n未發現明確決策。"
-        with open(out_d, "w", encoding="utf-8") as f:
-            f.write("# 會議決策重點報告\n")
-            f.write(f"時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
-            f.write(d_final.strip() + "\n")
+        # 每處理完一個檔案清理一次記憶體，兼顧效能與穩定
+        if hasattr(extractor, "aggressive_memory_cleanup"):
+            extractor.aggressive_memory_cleanup()
 
         people_reports.append(people_final.strip())
         keypoints_reports.append(k_final.strip())
         decisions_reports.append(d_final.strip())
 
+    total_time = time.time() - total_start
+
+    print("\n⏱️  PKD 任務詳細統計")
+    print("=" * 60)
+    print(f" 1. 模型導入時間 : {model_load_time:>8.2f} 秒")
+    print(f" 2. People 任務  : {people_time:>8.2f} 秒")
+    print(f" 3. Keypoints 任務: {keypoints_time:>8.2f} 秒")
+    print(f" 4. Decisions 任務: {decisions_time:>8.2f} 秒")
+    print("-" * 60)
+    print(f" 總執行耗時      : {total_time:>8.2f} 秒")
+    print("=" * 60 + "\n")
+
     return {
-        "people": "\n\n".join(people_reports).strip() or "(無)",
-        "keypoints": "\n\n".join(keypoints_reports).strip() or "(無)",
-        "decisions": "\n\n".join(decisions_reports).strip() or "(無)",
+        "people": "\n\n".join(people_reports),
+        "keypoints": "\n\n".join(keypoints_reports),
+        "decisions": "\n\n".join(decisions_reports),
     }

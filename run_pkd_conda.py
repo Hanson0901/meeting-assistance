@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os, sys, argparse, json
+import os, sys, argparse, json, time
 from pathlib import Path
 
 project_root = Path(__file__).resolve().parent
@@ -18,6 +18,8 @@ def main():
     ap.add_argument("--overlap-seconds", type=int, default=60)
     args = ap.parse_args()
 
+    script_start = time.time()
+    
     data = run_pkd(
         output_dir=args.output_dir,
         output_prefix=args.output_prefix,
@@ -30,7 +32,9 @@ def main():
     with open(out_json, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-    print(f"PKD OK -> {out_json}")
+    script_time = time.time() - script_start
+    print(f"[run_pkd_conda] PKD OK -> {out_json}")
+    print(f"[run_pkd_conda] 總耗時: {script_time:.2f} 秒\n")
 
 if __name__ == "__main__":
     main()
