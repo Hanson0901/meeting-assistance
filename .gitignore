@@ -10,4 +10,14 @@ offload/
 *.gguf
 # 忽略常见缓存目录
 cache/
+
+# Runtime/generated artifacts (avoid huge binary and noisy outputs)
+output_audio.mkv
+output_*.srt
+output_*cache.json
+output_meeting_summary.txt
+output_actions.txt
+finald_output_*.md
+finalk_output_*.md
+finalp_output_*.md
 .cache/
