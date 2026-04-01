@@ -13,11 +13,21 @@ cache/
 
 # Runtime/generated artifacts (avoid huge binary and noisy outputs)
 output_audio.mkv
-output_*.srt
+*_audio.mkv
+**/*_audio.mkv
+output*.srt
+**/output*.srt
 output_*cache.json
 output_meeting_summary.txt
 output_actions.txt
-finald_output_*.md
-finalk_output_*.md
-finalp_output_*.md
+finald_output*.md
+finalk_output*.md
+finalp_output*.md
+**/finald_output*.md
+**/finalk_output*.md
+**/finalp_output*.md
+
+# Ignore txt outputs/logs
+*.txt
+**/*.txt
 .cache/

@@ -45,14 +45,14 @@ class RealtimeASR:
         output_prefix="output",
         
         # ========== 常用參數 ==========
-        max_srt_duration=300,
+        max_srt_duration=600,
         speaker_sim_threshold=0.70,
         segment_duration=30.0,
         buffer_overlap=0.0,  # 新增：buffer 重疊時間（秒）
         
         # ========== 進階參數 ==========
         sample_rate=16000,
-        chunk_duration=1.0,
+        chunk_duration=5.0,
         prototype_alpha=0.2,
         max_speakers=50,
         max_empty_segments_before_eof=5,

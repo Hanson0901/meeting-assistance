@@ -140,7 +140,7 @@ class LlamaCppQwen3Extractor:
     """
     def __init__(self, model_path="../qwen3-4b-instruct-2507-q8_0.gguf"):
         """初始化模型（Pi 5 16GB 版本 v5.5）"""
-        print("[LlamaCppQwen3Extractor][init] ="*70)
+        #print("[LlamaCppQwen3Extractor][init] ="*70)
         print("[LlamaCppQwen3Extractor][init] Qwen3-4B-Q8_0 核心引擎載入中...")
         
         os.environ['TOKENIZERS_PARALLELISM'] = 'false'
