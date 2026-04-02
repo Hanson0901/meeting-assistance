@@ -30,4 +30,8 @@ finalp_output*.md
 # Ignore txt outputs/logs
 *.txt
 **/*.txt
+
+# Temporary wav segments
+tmp_seg_*.wav
+tmp_spk_*.wav
 .cache/

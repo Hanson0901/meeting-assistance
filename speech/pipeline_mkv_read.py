@@ -43,6 +43,7 @@ class RealtimeASR:
         audio_file,
         output_dir=".",
         output_prefix="output",
+        recording_flag_file=None,
         
         # ========== 常用參數 ==========
         max_srt_duration=600,
@@ -94,6 +95,7 @@ class RealtimeASR:
         self.audio_file = audio_file
         self.output_dir = output_dir
         self.output_prefix = output_prefix
+        self.recording_flag_file = recording_flag_file
         
         # 常用參數
         self.max_srt_duration = max_srt_duration
@@ -366,6 +368,12 @@ class RealtimeASR:
                     os.remove(temp_file)
             except Exception:
                 pass
+
+    def _is_writer_active(self):
+        """檢查錄音端是否仍在寫入（以旗標檔判斷）。"""
+        if not self.recording_flag_file:
+            return False
+        return os.path.exists(self.recording_flag_file)
     
     def start(self):
         """開始處理音訊"""
@@ -403,8 +411,12 @@ class RealtimeASR:
                         consecutive_read_failures += 1
                         
                         if consecutive_read_failures >= self.max_read_failures:
-                            self._log(f"[檔案結束] 連續{self.max_read_failures}次讀取失敗，音訊檔案可能已結束")
-                            break
+                            if self._is_writer_active():
+                                self._log(f"[等待中] 連續{self.max_read_failures}次讀取失敗，但錄音仍在進行")
+                                consecutive_read_failures = 0
+                            else:
+                                self._log(f"[檔案結束] 連續{self.max_read_failures}次讀取失敗，且錄音已結束")
+                                break
                         
                         time.sleep(0.2)
                         continue

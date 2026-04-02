@@ -370,6 +370,8 @@ class MeetingWorkflow:
         enable_bluetooth=True,
         enable_proximity_monitor=False,
         enable_write_output=True,
+        include_actions_and_summary_files=True,
+        include_decisions_in_final_txt=True,
     ):
         self.audio_device = audio_device
         self.output_dir = output_dir
@@ -380,6 +382,7 @@ class MeetingWorkflow:
         self.enable_recording = enable_recording
 
         self.audio_file = os.path.join(output_dir, f"{output_prefix}_audio.mkv")
+        self.recording_flag_file = os.path.join(output_dir, f"{output_prefix}.recording")
         self.actions_file = os.path.join(output_dir, f"{output_prefix}_actions.txt")
         self.summary_file = os.path.join(output_dir, f"{output_prefix}_summary.txt")
         self.txt_file = os.path.join(output_dir, f"{output_prefix}_meeting_summary.txt")
@@ -388,6 +391,8 @@ class MeetingWorkflow:
         self.enable_bluetooth = enable_bluetooth
         self.enable_proximity_monitor = enable_proximity_monitor
         self.enable_write_output = enable_write_output
+        self.include_actions_and_summary_files = include_actions_and_summary_files
+        self.include_decisions_in_final_txt = include_decisions_in_final_txt
 
         os.makedirs(output_dir, exist_ok=True)
         self.is_recording = False
@@ -589,6 +594,9 @@ class MeetingWorkflow:
                 self.is_recording = False
 
         try:
+            with open(self.recording_flag_file, "w", encoding="utf-8") as flag_f:
+                flag_f.write(str(os.getpid()))
+
             arecord_proc = subprocess.Popen(
                 arecord_cmd,
                 stdout=subprocess.PIPE,
@@ -628,6 +636,12 @@ class MeetingWorkflow:
                     except:
                         pass
 
+            try:
+                if os.path.exists(self.recording_flag_file):
+                    os.remove(self.recording_flag_file)
+            except Exception as e:
+                print(f"[MeetingWorkflow][step1_record] 清除錄音旗標失敗: {e}")
+
         if os.path.exists(self.audio_file):
             print("[MeetingWorkflow][step1_record] 錄音已停止")
             print(f"[MeetingWorkflow][step1_record] 音訊檔案已儲存: {self.audio_file}")
@@ -665,6 +679,9 @@ class MeetingWorkflow:
             "--overlap", "5.0",
             "--verbose",
         ]
+
+        if self.enable_recording:
+            cmd.extend(["--recording-flag", self.recording_flag_file])
 
         print("[MeetingWorkflow][step2_transcribe] 使用 conda Python 執行 ASR：")
         print("   " + " ".join(cmd) + "\n")
@@ -952,7 +969,8 @@ class MeetingWorkflow:
                 _write_section(f, "整體摘要(Summary)", self.cache.get("summary", ""))
                 _write_section(f, "與會人員(People)", self.cache.get("people", ""))
                 _write_section(f, "會議重點(Keypoints)", self.cache.get("keypoints", ""))
-                _write_section(f, "決策事項(Decisions)", self.cache.get("decisions", ""))
+                if self.include_decisions_in_final_txt:
+                    _write_section(f, "決策事項(Decisions)", self.cache.get("decisions", ""))
                 _write_list(f, "行動項目(Actions)", self.cache.get("actions_lines", []))
 
         except Exception as e:
@@ -966,11 +984,14 @@ class MeetingWorkflow:
         # =========================
         if self.enable_bluetooth:
             try:
-                files_to_send = [
-                    self.txt_file,
-                    self.actions_file,
-                    self.summary_file,
-                ]
+                if self.include_actions_and_summary_files:
+                    files_to_send = [
+                        self.txt_file,
+                        self.actions_file,
+                        self.summary_file,
+                    ]
+                else:
+                    files_to_send = [self.txt_file]
 
                 mac, name = self.bt_sender.auto_send_to_first_paired(files_to_send)
                 print(f"[MeetingWorkflow][step6_export_txt] 藍牙傳送完成: {name} ({mac})\n")
@@ -1424,6 +1445,8 @@ def main():
         enable_bluetooth=True,           # 啟用藍牙傳送
         enable_proximity_monitor=False,  # 選用:藍牙監控
         enable_recording=False,            # 測試階段先關閉錄音，直接用既有音訊檔
+        include_actions_and_summary_files=False,  # False: 不包含 actions/summary，僅傳送最終總報告 TXT
+        include_decisions_in_final_txt=False,  # False: 最終總報告不包含 Decisions
     )
     
     success = workflow.run()
