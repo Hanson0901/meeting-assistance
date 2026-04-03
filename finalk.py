@@ -47,7 +47,7 @@ def parse_srt_brute_force(file_path):
         try:
             with open(file_path, 'r', encoding=enc) as f:
                 lines = f.readlines()
-            print(f"🔍 使用編碼 {enc} 讀取成功，共 {len(lines)} 行")
+            print(f"[finalk][parse_srt] 使用編碼 {enc} 讀取成功，共 {len(lines)} 行")
             break
         except UnicodeDecodeError:
             continue
@@ -100,8 +100,8 @@ def split_subtitles_to_segments(subtitles, interval_min, overlap_sec):
     
     segments = []
 
-    print(f"⏱️ 偵測 SRT 時間範圍: {int(min_time)}秒 ~ {int(max_time)}秒")
-    print(f"   將從 {start_chunk_idx * interval_min} 分鐘開始切分，至 {(end_chunk_idx + 1) * interval_min} 分鐘結束")
+    print(f"[finalk][split_subtitles_to_segments] 偵測 SRT 時間範圍: {int(min_time)}秒 ~ {int(max_time)}秒")
+    print(f"[finalk][split_subtitles_to_segments]   將從 {start_chunk_idx * interval_min} 分鐘開始切分，至 {(end_chunk_idx + 1) * interval_min} 分鐘結束")
 
     for i in range(start_chunk_idx, end_chunk_idx + 1):
         chunk_start = i * interval_sec
@@ -195,22 +195,22 @@ def generate_final_keypoints_summary(extractor, raw_list):
 
 def main():
     print("="*60)
-    print("🚀 啟動任務：提取會議重點")
+    print("[finalk] 啟動任務：提取會議重點")
     print("="*60)
     
     if not os.path.exists(MODEL_PATH):
-        print(f"❌ 找不到模型: {MODEL_PATH}")
+        print(f"[finalk] 找不到模型: {MODEL_PATH}")
         return
 
     try:
         extractor = LlamaCppQwen3Extractor(model_path=MODEL_PATH)
     except Exception as e:
-        print(f"引擎啟動失敗: {e}")
+        print(f"[finalk] 引擎啟動失敗: {e}")
         return
 
     subtitles = parse_srt_brute_force(SRT_FILE)
     if not subtitles:
-        print("❌ 字幕讀取失敗")
+        print(f"[finalk] 字幕讀取失敗: {SRT_FILE}")
         return
 
     segments = split_subtitles_to_segments(subtitles, INTERVAL_MINUTES, OVERLAP_SECONDS)
@@ -219,7 +219,7 @@ def main():
     print("\n--- 階段一：逐時段掃描重點 ---")
     for i, seg in enumerate(segments, 1):
         label = seg.split('\n')[0]
-        print(f"[{i}/{len(segments)}] 分析 {label}...", end="\r")
+        print(f"[finalk][{i}/{len(segments)}] 分析 {label}...", end="\r")
         
         result = extract_raw_keypoints(extractor, seg)
         if result and len(result) > 5 and "無" not in result:
@@ -228,7 +228,7 @@ def main():
         if hasattr(extractor, 'aggressive_memory_cleanup'):
             extractor.aggressive_memory_cleanup()
 
-    print(f"\n✅ 掃描完成，收集到 {len(raw_keypoints)} 個有效片段。\n")
+    print(f"\n[finalk] 掃描完成，收集到 {len(raw_keypoints)} 個有效片段。\n")
 
     if raw_keypoints:
         print("--- 階段二：AI 總整理 ---")
@@ -240,15 +240,15 @@ def main():
             f.write(final_report)
             f.write("\n\n---\n## 原始提取紀錄\n\n")
             f.write("\n\n".join(raw_keypoints))
-        print(f"✅ 完成！請查看 {OUTPUT_FILE}")
+        print(f"[finalk] 完成！請查看 {OUTPUT_FILE}")
     else:
-        print("⚠️ 未發現任何重點。")
+        print(f"[finalk] 未發現任何重點。")
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
             f.write("# 會議核心重點總結\n")
             f.write(f"分析時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
             f.write("## 尚無明確重點\n")
             f.write("系統分析本段會議記錄後，未發現具體的討論重點或結論。")
-        print(f"✅ 已生成狀態檔案 {OUTPUT_FILE}")
-    
+        print(f"[finalk] 已生成狀態檔案 {OUTPUT_FILE}")
+
 if __name__ == "__main__":
     main()

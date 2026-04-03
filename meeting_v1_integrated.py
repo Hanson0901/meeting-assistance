@@ -557,7 +557,7 @@ class MeetingWorkflow:
     # step1: 錄音
     # ------------------------
     def step1_record(self) -> bool:
-        step_start = time.time()
+        step_start = time.perf_counter()
         self._print_banner("步驟 1/6: 開始錄音")
         print(f"[MeetingWorkflow][step1_record] 音訊設備: {self.audio_device}")
         print(f"[MeetingWorkflow][step1_record] 輸出檔案: {self.audio_file}")
@@ -642,11 +642,12 @@ class MeetingWorkflow:
             except Exception as e:
                 print(f"[MeetingWorkflow][step1_record] 清除錄音旗標失敗: {e}")
 
+            self.step_times['step1'] = time.perf_counter() - step_start
+            print(f"[MeetingWorkflow][step1_record] step1 耗時: {self.step_times['step1']:.2f} 秒\n")
+
         if os.path.exists(self.audio_file):
             print("[MeetingWorkflow][step1_record] 錄音已停止")
             print(f"[MeetingWorkflow][step1_record] 音訊檔案已儲存: {self.audio_file}")
-            self.step_times['step1'] = time.time() - step_start
-            print(f"[MeetingWorkflow][step1_record] step1 耗時: {self.step_times['step1']:.2f} 秒\n")
             return True
 
         print("[MeetingWorkflow][step1_record] 找不到錄音輸出檔\n")
@@ -656,88 +657,92 @@ class MeetingWorkflow:
     # step2: ASR
     # ------------------------
     def step2_transcribe(self) -> bool:
-        step_start = time.time()
+        step_start = time.perf_counter()
         self._print_banner("步驟 2/6: 語音轉文字 (ASR)")
         print(f"[MeetingWorkflow][step2_transcribe] 讀取音訊: {self.audio_file}")
         print("[MeetingWorkflow][step2_transcribe]  按 Ctrl+C 可提前結束轉錄\n")
 
-        if not os.path.exists(self.audio_file):
-            print("[MeetingWorkflow][step2_transcribe] 音訊檔不存在\n")
-            return False
-
-        conda_python = "/home/cgu-csie/miniconda3/bin/python3"
-        asr_script = os.path.join(project_root, "speech", "run_asr_conda.py")
-
-        cmd = [
-            "sudo", "-u", "cgu-csie",         # 重要：用你的帳號跑 conda，不要用 root
-            conda_python,
-            asr_script,
-            "--audio", self.audio_file,
-            "--outdir", self.output_dir,
-            "--prefix", self.output_prefix,
-            "--alpha", "0.0",
-            "--overlap", "5.0",
-            "--verbose",
-        ]
-
-        if self.enable_recording:
-            cmd.extend(["--recording-flag", self.recording_flag_file])
-
-        print("[MeetingWorkflow][step2_transcribe] 使用 conda Python 執行 ASR：")
-        print("   " + " ".join(cmd) + "\n")
-
-        env = os.environ.copy()
-        env["PYTHONPATH"] = str(project_root) + (":" + env["PYTHONPATH"] if "PYTHONPATH" in env else "")
-
         try:
-            subprocess.run(cmd, check=True, cwd=str(project_root), env=env)
-        except subprocess.CalledProcessError as e:
-            print(f"[MeetingWorkflow][step2_transcribe] ASR 失敗: {e}\n")
-            return False
-        self.step_times['step2'] = time.time() - step_start
-        print("[MeetingWorkflow][step2_transcribe] ASR 轉錄完成")
-        print(f"[MeetingWorkflow][step2_transcribe] step2 耗時: {self.step_times['step2']:.2f} 秒\n")
-        return True
+            if not os.path.exists(self.audio_file):
+                print("[MeetingWorkflow][step2_transcribe] 音訊檔不存在\n")
+                return False
+
+            conda_python = "/home/cgu-csie/miniconda3/bin/python3"
+            asr_script = os.path.join(project_root, "speech", "run_asr_conda.py")
+
+            cmd = [
+                "sudo", "-u", "cgu-csie",         # 重要：用你的帳號跑 conda，不要用 root
+                conda_python,
+                asr_script,
+                "--audio", self.audio_file,
+                "--outdir", self.output_dir,
+                "--prefix", self.output_prefix,
+                "--alpha", "0.0",
+                "--overlap", "5.0",
+                "--verbose",
+            ]
+
+            if self.enable_recording:
+                cmd.extend(["--recording-flag", self.recording_flag_file])
+
+            print("[MeetingWorkflow][step2_transcribe] 使用 conda Python 執行 ASR：")
+            print("   " + " ".join(cmd) + "\n")
+
+            env = os.environ.copy()
+            env["PYTHONPATH"] = str(project_root) + (":" + env["PYTHONPATH"] if "PYTHONPATH" in env else "")
+
+            try:
+                subprocess.run(cmd, check=True, cwd=str(project_root), env=env)
+            except subprocess.CalledProcessError as e:
+                print(f"[MeetingWorkflow][step2_transcribe] ASR 失敗: {e}\n")
+                return False
+
+            print("[MeetingWorkflow][step2_transcribe] ASR 轉錄完成")
+            return True
+        finally:
+            self.step_times['step2'] = time.perf_counter() - step_start
+            print(f"[MeetingWorkflow][step2_transcribe] step2 耗時: {self.step_times['step2']:.2f} 秒\n")
 
 
     # ------------------------
     # step3: People/Keypoints/Decisions
     # ------------------------
     def step3_run_pkd_reports(self) -> bool:
-        step_start = time.time()
+        step_start = time.perf_counter()
         self._print_banner("步驟 3/6: 生成 People/Keypoints/Decisions 報告 (conda worker)")
 
-        if not os.path.exists(self.model_path):
-            print(f"[MeetingWorkflow][step3_run_pkd_reports] 找不到模型: {self.model_path}\n")
-            return False
-
-        conda_python = "/home/cgu-csie/miniconda3/bin/python3"
-        worker = os.path.join(project_root, "run_pkd_conda.py")
-        out_json = os.path.join(self.output_dir, f"{self.output_prefix}_pkd_cache.json")
-
-        cmd = [
-            "sudo", "-u", "cgu-csie",
-            conda_python, worker,
-            "--output-dir", self.output_dir,
-            "--output-prefix", self.output_prefix,
-            "--model-path", self.model_path,
-            "--interval-minutes", str(self.interval_minutes),
-            "--overlap-seconds", str(self.overlap_seconds),
-        ]
-
-        print("[MeetingWorkflow][step3_run_pkd_reports] 使用 conda Python 執行 PKD：")
-        print("   " + " ".join(cmd) + "\n")
-
-        env = os.environ.copy()
-        env["PYTHONPATH"] = str(project_root) + (":" + env["PYTHONPATH"] if "PYTHONPATH" in env else "")
-
         try:
-            subprocess.run(cmd, check=True, cwd=str(project_root), env=env)
-        except subprocess.CalledProcessError as e:
-            print(f"[MeetingWorkflow][step3_run_pkd_reports] PKD 失敗: {e}\n")
-            return False
-    # 讀回結果
-        try:
+            if not os.path.exists(self.model_path):
+                print(f"[MeetingWorkflow][step3_run_pkd_reports] 找不到模型: {self.model_path}\n")
+                return False
+
+            conda_python = "/home/cgu-csie/miniconda3/bin/python3"
+            worker = os.path.join(project_root, "run_pkd_conda.py")
+            out_json = os.path.join(self.output_dir, f"{self.output_prefix}_pkd_cache.json")
+
+            cmd = [
+                "sudo", "-u", "cgu-csie",
+                conda_python, worker,
+                "--output-dir", self.output_dir,
+                "--output-prefix", self.output_prefix,
+                "--model-path", self.model_path,
+                "--interval-minutes", str(self.interval_minutes),
+                "--overlap-seconds", str(self.overlap_seconds),
+            ]
+
+            print("[MeetingWorkflow][step3_run_pkd_reports] 使用 conda Python 執行 PKD：")
+            print("   " + " ".join(cmd) + "\n")
+
+            env = os.environ.copy()
+            env["PYTHONPATH"] = str(project_root) + (":" + env["PYTHONPATH"] if "PYTHONPATH" in env else "")
+
+            try:
+                subprocess.run(cmd, check=True, cwd=str(project_root), env=env)
+            except subprocess.CalledProcessError as e:
+                print(f"[MeetingWorkflow][step3_run_pkd_reports] PKD 失敗: {e}\n")
+                return False
+
+            # 讀回結果
             import json
             if not os.path.exists(out_json):
                 print(f"[MeetingWorkflow][step3_run_pkd_reports] 找不到 PKD 輸出: {out_json}\n")
@@ -747,13 +752,9 @@ class MeetingWorkflow:
             self.cache["people"] = data.get("people", "").strip() or "(無)"
             self.cache["keypoints"] = data.get("keypoints", "").strip() or "(無)"
             self.cache["decisions"] = data.get("decisions", "").strip() or "(無)"
-        except Exception as e:
-            print(f"[MeetingWorkflow][step3_run_pkd_reports] 讀取 PKD 結果失敗: {e}\n")
-            return False
-    
-    # ✅ 新增：寫入 cache JSON 供 step5 使用
-        cache_json = os.path.join(self.output_dir, f"{self.output_prefix}_cache.json")
-        try:
+
+            # ✅ 新增：寫入 cache JSON 供 step5 使用
+            cache_json = os.path.join(self.output_dir, f"{self.output_prefix}_cache.json")
             cache_data = {
                 "people": self.cache["people"],
                 "keypoints": self.cache["keypoints"],
@@ -762,42 +763,43 @@ class MeetingWorkflow:
             with open(cache_json, "w", encoding="utf-8") as f:
                 json.dump(cache_data, f, ensure_ascii=False, indent=2)
             print(f"[MeetingWorkflow][step3_run_pkd_reports] cache 已寫入: {cache_json}\n")
+            print(f"[MeetingWorkflow][step3_run_pkd_reports] step3 完成：P/K/D 已寫入 cache")
+            return True
         except Exception as e:
-            print(f"[MeetingWorkflow][step3_run_pkd_reports] 寫入 cache 失敗: {e}\n")
-        
-        self.step_times['step3'] = time.time() - step_start
-        print(f"[MeetingWorkflow][step3_run_pkd_reports] step3 完成：P/K/D 已寫入 cache")
-        print(f"[MeetingWorkflow][step3_run_pkd_reports] step3 耗時: {self.step_times['step3']:.2f} 秒\n")
-        return True
+            print(f"[MeetingWorkflow][step3_run_pkd_reports] 讀取 PKD 結果失敗: {e}\n")
+            return False
+        finally:
+            self.step_times['step3'] = time.perf_counter() - step_start
+            print(f"[MeetingWorkflow][step3_run_pkd_reports] step3 耗時: {self.step_times['step3']:.2f} 秒\n")
 
     # ------------------------
     # step4: Actions
     # ------------------------
     def step4_extract_actions(self) -> bool:
-        step_start = time.time()
+        step_start = time.perf_counter()
         self._print_banner("步驟 4/6: 提取行動項目 (conda worker)")
 
-        conda_python = "/home/cgu-csie/miniconda3/bin/python3"
-        worker = os.path.join(project_root, "run_actions_conda.py")
-        out_json = os.path.join(self.output_dir, f"{self.output_prefix}_actions_cache.json")
-        cmd = [
-            "sudo", "-u", "cgu-csie",
-            conda_python, worker,
-            "--output-dir", self.output_dir,
-            "--output-prefix", self.output_prefix,
-        ]
-
-        print("[MeetingWorkflow][step4_extract_actions] 使用 conda Python 執行 Actions：")
-        print("[MeetingWorkflow][step4_extract_actions]   " + " ".join(cmd) + "\n")
-
         try:
-            subprocess.run(cmd, check=True, cwd=str(project_root))
-        except subprocess.CalledProcessError as e:
-            print(f"[MeetingWorkflow][step4_extract_actions] Actions 失敗: {e}\n")
-            return False
+            conda_python = "/home/cgu-csie/miniconda3/bin/python3"
+            worker = os.path.join(project_root, "run_actions_conda.py")
+            out_json = os.path.join(self.output_dir, f"{self.output_prefix}_actions_cache.json")
+            cmd = [
+                "sudo", "-u", "cgu-csie",
+                conda_python, worker,
+                "--output-dir", self.output_dir,
+                "--output-prefix", self.output_prefix,
+            ]
 
-        # 讀回結果
-        try:
+            print("[MeetingWorkflow][step4_extract_actions] 使用 conda Python 執行 Actions：")
+            print("[MeetingWorkflow][step4_extract_actions]   " + " ".join(cmd) + "\n")
+
+            try:
+                subprocess.run(cmd, check=True, cwd=str(project_root))
+            except subprocess.CalledProcessError as e:
+                print(f"[MeetingWorkflow][step4_extract_actions] Actions 失敗: {e}\n")
+                return False
+
+            # 讀回結果
             import json
             if not os.path.exists(out_json):
                 print(f"[MeetingWorkflow][step4_extract_actions] 找不到 Actions 輸出: {out_json}\n")
@@ -817,12 +819,9 @@ class MeetingWorkflow:
                         f.write(f"{i}. {line}\n")
                 else:
                     f.write("本次會議無具體行動項目\n")
-        except Exception as e:
-            print(f"[MeetingWorkflow][step4_extract_actions] 讀取 Actions 結果失敗: {e}\n")
-            return False
-        # 新增：更新 cache JSON，加入 actions_text
-        cache_json = os.path.join(self.output_dir, f"{self.output_prefix}_cache.json")
-        try:
+
+            # 新增：更新 cache JSON，加入 actions_text
+            cache_json = os.path.join(self.output_dir, f"{self.output_prefix}_cache.json")
             import json
             # 讀取既有的 cache（包含 P/K/D）
             if os.path.exists(cache_json):
@@ -837,13 +836,14 @@ class MeetingWorkflow:
             with open(cache_json, "w", encoding="utf-8") as f:
                 json.dump(cache_data, f, ensure_ascii=False, indent=2)
             print(f"[MeetingWorkflow][step4_extract_actions] cache 已更新: {cache_json}\n")
+            print(f"[MeetingWorkflow][step4_extract_actions] 行動項目已輸出: {self.actions_file}")
+            return True
         except Exception as e:
-            print(f"[MeetingWorkflow][step4_extract_actions] 更新 cache 失敗: {e}\n")
-
-        self.step_times['step4'] = time.time() - step_start
-        print(f"[MeetingWorkflow][step4_extract_actions] 行動項目已輸出: {self.actions_file}")
-        print(f"[MeetingWorkflow][step4_extract_actions] step4 耗時: {self.step_times['step4']:.2f} 秒\n")
-        return True
+            print(f"[MeetingWorkflow][step4_extract_actions] 讀取 Actions 結果失敗: {e}\n")
+            return False
+        finally:
+            self.step_times['step4'] = time.perf_counter() - step_start
+            print(f"[MeetingWorkflow][step4_extract_actions] step4 耗時: {self.step_times['step4']:.2f} 秒\n")
        
 
 
@@ -851,30 +851,31 @@ class MeetingWorkflow:
     # step5: Summary
     # ------------------------
     def step5_generate_summary(self) -> bool:
-        step_start = time.time()
+        step_start = time.perf_counter()
         self._print_banner("步驟 5/6: 生成會議摘要 (conda worker)")
 
-        conda_python = "/home/cgu-csie/miniconda3/bin/python3"
-        worker = os.path.join(project_root, "run_summary_conda.py")
-        out_json = os.path.join(
-            self.output_dir, f"{self.output_prefix}_summary_cache.json"
-        )
-
-        cmd = [
-            "sudo", "-u", "cgu-csie",
-            conda_python, worker,
-            "--output-dir", self.output_dir,
-            "--output-prefix", self.output_prefix,
-        ]
-        print("[MeetingWorkflow][step5_generate_summary] 使用 conda Python 執行 Summary：")
-        print("[MeetingWorkflow][step5_generate_summary]   " + " ".join(cmd) + "\n")
-
         try:
-            subprocess.run(cmd, check=True, cwd=str(project_root))
-        except subprocess.CalledProcessError as e:
-            print(f"[MeetingWorkflow][step5_generate_summary] Summary 失敗: {e}\n")
-            return False
-        try:
+            conda_python = "/home/cgu-csie/miniconda3/bin/python3"
+            worker = os.path.join(project_root, "run_summary_conda.py")
+            out_json = os.path.join(
+                self.output_dir, f"{self.output_prefix}_summary_cache.json"
+            )
+
+            cmd = [
+                "sudo", "-u", "cgu-csie",
+                conda_python, worker,
+                "--output-dir", self.output_dir,
+                "--output-prefix", self.output_prefix,
+            ]
+            print("[MeetingWorkflow][step5_generate_summary] 使用 conda Python 執行 Summary：")
+            print("[MeetingWorkflow][step5_generate_summary]   " + " ".join(cmd) + "\n")
+
+            try:
+                subprocess.run(cmd, check=True, cwd=str(project_root))
+            except subprocess.CalledProcessError as e:
+                print(f"[MeetingWorkflow][step5_generate_summary] Summary 失敗: {e}\n")
+                return False
+
             import json
             if not os.path.exists(out_json):
                 print(f"[MeetingWorkflow][step5_generate_summary] 找不到 Summary 輸出: {out_json}\n")
@@ -928,94 +929,96 @@ class MeetingWorkflow:
         except Exception as e:
             print(f"[MeetingWorkflow][step5_generate_summary] 讀取 Summary 結果失敗: {e}\n")
             return False
+        finally:
+            self.step_times['step5'] = time.perf_counter() - step_start
+            print(f"[MeetingWorkflow][step5_generate_summary] step5 耗時: {self.step_times['step5']:.2f} 秒\n")
 
-        self.step_times['step5'] = time.time() - step_start
-        print(f"[MeetingWorkflow][step5_generate_summary] step5 耗時: {self.step_times['step5']:.2f} 秒\n")
         return True
     # ------------------------
     # step6: Export TXT + Bluetooth
     # ------------------------
     def step6_export_txt(self) -> bool:
-        step_start = time.time()
+        step_start = time.perf_counter()
         self._print_banner("步驟 6/6: 匯出 TXT + 藍牙傳送")
-        
-        # 檢查是否啟用寫檔功能
-        if not self.enable_write_output:
-            print(f"[MeetingWorkflow][step6_export_txt]  寫檔功能已禁用，跳過 step6\n")
-            return True
-
-        def _write_section(f, title: str, content: str):
-            content = (content or "").strip()
-            if not content:
-                return
-            f.write(f"\n{title}\n" + "="*60 + "\n")
-            f.write(content)
-            f.write("\n")
-
-        def _write_list(f, title: str, items):
-            f.write(f"\n{title}\n" + "="*60 + "\n")
-            if not items:
-                f.write("(空)\n")
-                return
-            for i, it in enumerate(items, 1):
-                f.write(f"{i}. {it}\n")
-
         try:
-            with open(self.txt_file, "w", encoding="utf-8") as f:
-                f.write("會議摘要報告(TXT)\n" + "="*60 + "\n")
-                f.write(f"產生時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                
-                _write_section(f, "會議主題(Title)", self.cache.get("title", ""))
-                _write_section(f, "整體摘要(Summary)", self.cache.get("summary", ""))
-                _write_section(f, "與會人員(People)", self.cache.get("people", ""))
-                _write_section(f, "會議重點(Keypoints)", self.cache.get("keypoints", ""))
-                if self.include_decisions_in_final_txt:
-                    _write_section(f, "決策事項(Decisions)", self.cache.get("decisions", ""))
-                _write_list(f, "行動項目(Actions)", self.cache.get("actions_lines", []))
+            # 檢查是否啟用寫檔功能
+            if not self.enable_write_output:
+                print(f"[MeetingWorkflow][step6_export_txt]  寫檔功能已禁用，跳過 step6\n")
+                return True
 
-        except Exception as e:
-            print(f" TXT 產生失敗: {e}")
-            return False
+            def _write_section(f, title: str, content: str):
+                content = (content or "").strip()
+                if not content:
+                    return
+                f.write(f"\n{title}\n" + "="*60 + "\n")
+                f.write(content)
+                f.write("\n")
 
-        print(f" TXT 已輸出: {self.txt_file}\n")
+            def _write_list(f, title: str, items):
+                f.write(f"\n{title}\n" + "="*60 + "\n")
+                if not items:
+                    f.write("(空)\n")
+                    return
+                for i, it in enumerate(items, 1):
+                    f.write(f"{i}. {it}\n")
 
-        # =========================
-        # ★ 藍牙傳送結果檔案（基於 BT_trans_v0_4 方式）
-        # =========================
-        if self.enable_bluetooth:
             try:
-                if self.include_actions_and_summary_files:
-                    files_to_send = [
-                        self.txt_file,
-                        self.actions_file,
-                        self.summary_file,
-                    ]
-                else:
-                    files_to_send = [self.txt_file]
+                with open(self.txt_file, "w", encoding="utf-8") as f:
+                    f.write("會議摘要報告(TXT)\n" + "="*60 + "\n")
+                    f.write(f"產生時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+                    
+                    _write_section(f, "會議主題(Title)", self.cache.get("title", ""))
+                    _write_section(f, "整體摘要(Summary)", self.cache.get("summary", ""))
+                    _write_section(f, "與會人員(People)", self.cache.get("people", ""))
+                    _write_section(f, "會議重點(Keypoints)", self.cache.get("keypoints", ""))
+                    if self.include_decisions_in_final_txt:
+                        _write_section(f, "決策事項(Decisions)", self.cache.get("decisions", ""))
+                    _write_list(f, "行動項目(Actions)", self.cache.get("actions_lines", []))
 
-                mac, name = self.bt_sender.auto_send_to_first_paired(files_to_send)
-                print(f"[MeetingWorkflow][step6_export_txt] 藍牙傳送完成: {name} ({mac})\n")
-
-            except ObexPushError as e:
-                print(f"[MeetingWorkflow][step6_export_txt] 藍牙傳送失敗: {e}")
-                print("[MeetingWorkflow][step6_export_txt]    檢查項目:")
-                print("[MeetingWorkflow][step6_export_txt]      確保格藍牙裝置已配對且在範圍內")
-                print("[MeetingWorkflow][step6_export_txt]      執行: systemctl --user status obex")
-                print("[MeetingWorkflow][step6_export_txt]      執行: systemctl --user restart obex\n")
             except Exception as e:
-                print(f"[MeetingWorkflow][step6_export_txt] 藍牙未預期錯誤: {e}\n")
-        else:
-            print("[MeetingWorkflow][step6_export_txt]  藍牙傳送已禁用\n")
+                print(f" TXT 產生失敗: {e}")
+                return False
 
-        self.step_times['step6'] = time.time() - step_start
-        print(f"[MeetingWorkflow][step6_export_txt] step6 耗時: {self.step_times['step6']:.2f} 秒\n")
-        return True
+            print(f" TXT 已輸出: {self.txt_file}\n")
+
+            # =========================
+            # ★ 藍牙傳送結果檔案（基於 BT_trans_v0_4 方式）
+            # =========================
+            if self.enable_bluetooth:
+                try:
+                    if self.include_actions_and_summary_files:
+                        files_to_send = [
+                            self.txt_file,
+                            self.actions_file,
+                            self.summary_file,
+                        ]
+                    else:
+                        files_to_send = [self.txt_file]
+
+                    mac, name = self.bt_sender.auto_send_to_first_paired(files_to_send)
+                    print(f"[MeetingWorkflow][step6_export_txt] 藍牙傳送完成: {name} ({mac})\n")
+
+                except ObexPushError as e:
+                    print(f"[MeetingWorkflow][step6_export_txt] 藍牙傳送失敗: {e}")
+                    print("[MeetingWorkflow][step6_export_txt]    檢查項目:")
+                    print("[MeetingWorkflow][step6_export_txt]      確保格藍牙裝置已配對且在範圍內")
+                    print("[MeetingWorkflow][step6_export_txt]      執行: systemctl --user status obex")
+                    print("[MeetingWorkflow][step6_export_txt]      執行: systemctl --user restart obex\n")
+                except Exception as e:
+                    print(f"[MeetingWorkflow][step6_export_txt] 藍牙未預期錯誤: {e}\n")
+            else:
+                print("[MeetingWorkflow][step6_export_txt]  藍牙傳送已禁用\n")
+
+            return True
+        finally:
+            self.step_times['step6'] = time.perf_counter() - step_start
+            print(f"[MeetingWorkflow][step6_export_txt] step6 耗時: {self.step_times['step6']:.2f} 秒\n")
 
     # ------------------------
     # 主流程
     # ------------------------
     def run(self) -> bool:
-        workflow_start = time.time()
+        workflow_start = time.perf_counter()
         self._print_banner(" 會議工作流程控制器 (整合藍牙版)")
 
         # 啟動藍牙監控 (選用)
@@ -1061,7 +1064,7 @@ class MeetingWorkflow:
         self._print_banner(" 工作流程完成")
         
         # 計時統計
-        total_time = time.time() - workflow_start
+        total_time = time.perf_counter() - workflow_start
         print("[MeetingWorkflow][run]  計時統計:")
         for i in range(1, 7):
             step_key = f'step{i}'
@@ -1309,10 +1312,10 @@ def run_step3_with_extracts(workflow: MeetingWorkflow) -> bool:
     from core1 import LlamaCppQwen3Extractor
 
     try:
-        model_load_start = time.time()
+        model_load_start = time.perf_counter()
         print("[run_step3_with_extracts] 正在導入模型...")
         extractor = LlamaCppQwen3Extractor(model_path=workflow.model_path)
-        model_load_time = time.time() - model_load_start
+        model_load_time = time.perf_counter() - model_load_start
         print(f"[run_step3_with_extracts] 模型導入完成")
         print(f"[run_step3_with_extracts]  模型導入耗時: {model_load_time:.2f} 秒\n")
     except Exception as e:

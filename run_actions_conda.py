@@ -44,7 +44,7 @@ def main():
     ap.add_argument("--output-prefix", default="output")
     args = ap.parse_args()
 
-    script_start = time.time()
+    script_start = time.perf_counter()
 
     srt_files = list_srt_files(args.output_dir, args.output_prefix)
     if not srt_files:
@@ -55,13 +55,13 @@ def main():
     extractor = ActionsExtractor()
 
     # ===== 模型載入結束 =====
-    model_loaded_time = time.time()
+    model_loaded_time = time.perf_counter()
 
     all_actions = []
     segments = []
 
     # ===== 生成開始 =====
-    generation_start = time.time()
+    generation_start = time.perf_counter()
 
     for srt in srt_files:
 
@@ -84,7 +84,7 @@ def main():
             extractor.aggressive_memory_cleanup()
 
     # ===== 生成結束 (寫入 cache 前) =====
-    generation_end = time.time()
+    generation_end = time.perf_counter()
 
     out_json = os.path.join(
         args.output_dir, f"{args.output_prefix}_actions_cache.json"
@@ -104,7 +104,7 @@ def main():
             indent=2,
         )
 
-    script_time = time.time() - script_start
+    script_time = time.perf_counter() - script_start
     generation_time = generation_end - generation_start
     model_load_time = model_loaded_time - script_start
 

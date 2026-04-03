@@ -26,7 +26,7 @@ def parse_srt_brute_force(file_path):
         try:
             with open(file_path, 'r', encoding=enc) as f:
                 lines = f.readlines()
-            print(f"🔍 使用編碼 {enc} 讀取成功，共 {len(lines)} 行")
+            print(f"[finalld parse_srt]使用編碼 {enc} 讀取成功，共 {len(lines)} 行")
             break
         except: continue
             
@@ -78,8 +78,8 @@ def split_subtitles_to_segments(subtitles, interval_min, overlap_sec):
     
     segments = []
 
-    print(f"⏱️ 偵測 SRT 時間範圍: {int(min_time)}秒 ~ {int(max_time)}秒")
-    print(f"   將從 {start_chunk_idx * interval_min} 分鐘開始切分，至 {(end_chunk_idx + 1) * interval_min} 分鐘結束")
+    print(f"[finald split_subtitles_to_segments] 偵測 SRT 時間範圍: {int(min_time)}秒 ~ {int(max_time)}秒")
+    print(f"[finald split_subtitles_to_segments]   將從 {start_chunk_idx * interval_min} 分鐘開始切分，至 {(end_chunk_idx + 1) * interval_min} 分鐘結束")
 
     for i in range(start_chunk_idx, end_chunk_idx + 1):
         chunk_start = i * interval_sec
@@ -166,37 +166,37 @@ def generate_final_decision_report(extractor, raw_list):
 
 def main():
     print("="*60)
-    print("🚀 啟動任務：提取決策")
+    print("[finald] 啟動任務：提取決策")
     print("="*60)
     
     if not os.path.exists(MODEL_PATH):
-        print(f"❌ 找不到模型: {MODEL_PATH}")
+        print(f"[finald] 找不到模型: {MODEL_PATH}")
         return
 
     try:
         extractor = LlamaCppQwen3Extractor(model_path=MODEL_PATH)
     except Exception as e:
-        print(f"引擎啟動失敗: {e}")
+        print(f"[finald] 引擎啟動失敗: {e}")
         return
 
-    print("1️⃣  解析 SRT...")
+    print("[finald] 1️⃣  解析 SRT...")
     subtitles = parse_srt_brute_force(SRT_FILE)
     segments = split_subtitles_to_segments(subtitles, INTERVAL_MINUTES, OVERLAP_SECONDS)
     
     raw_decisions = []
-    print("\n2️⃣  逐段掃描決策點...")
+    print("\n[finald] 2️⃣  逐段掃描決策點...")
     for i, seg in enumerate(segments):
         label = seg.split('\n')[0]
-        print(f"   - 分析片段 {i+1}/{len(segments)}...", end="\r")
+        print(f"[finald]   - 分析片段 {i+1}/{len(segments)}...", end="\r")
         
         res = extract_raw_decisions(extractor, seg)
         if res and "無" not in res and len(res) > 5:
             raw_decisions.append(res)
             
-    print(f"\n   ✅ 掃描完成，發現 {len(raw_decisions)} 個決策片段")
+    print(f"\n[finald] 掃描完成，發現 {len(raw_decisions)} 個決策片段")
 
     if raw_decisions:
-        print("\n3️⃣  生成最終決策報告...")
+        print("\n[finald] 3️⃣  生成最終決策報告...")
         final_report = generate_final_decision_report(extractor, raw_decisions)
         
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
@@ -206,15 +206,15 @@ def main():
             f.write("\n\n---\n## 原始提取紀錄 (備份)\n\n")
             f.write("\n".join(raw_decisions))
             
-        print(f"✅ 完成！請查看 {OUTPUT_FILE}")
+        print(f"[finald] 完成！請查看 {OUTPUT_FILE}")
     else:
-        print("⚠️ 未發現任何明確決策。")
+        print(f"[finald] 未發現任何明確決策。")
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
             f.write("# 會議決策重點報告\n")
             f.write(f"時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
             f.write("## 尚無明確決策\n")
             f.write("系統分析本段會議記錄後，未發現明確的承諾、決議或共識。")
-        print(f"✅ 已生成檔案 {OUTPUT_FILE}")
+        print(f"[finald] 已生成檔案 {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     main()

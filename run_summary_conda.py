@@ -38,14 +38,14 @@ def main():
     ap.add_argument("--output-prefix", default="output")
     args = ap.parse_args()
 
-    script_start = time.time()
+    script_start = time.perf_counter()
 
     # ===== 載入模型 =====
     print("[run_summary_conda] 正在初始化 SummaryGenerator（載入模型）...")
     generator = SummaryGenerator()
 
     # ===== 模型載入結束 =====
-    model_loaded_time = time.time()
+    model_loaded_time = time.perf_counter()
     model_load_time = model_loaded_time - script_start
 
     # ===== 讀取 cache =====
@@ -77,7 +77,7 @@ def main():
     print(f"[run_summary_conda] 生成 {len(segments)} 個資訊區塊進行濃縮摘要\n")
 
     # ===== 生成開始 =====
-    generation_start = time.time()
+    generation_start = time.perf_counter()
 
     result = generator.generate(
         segments=segments,
@@ -88,7 +88,7 @@ def main():
     )
 
     # ===== 生成結束 =====
-    generation_end = time.time()
+    generation_end = time.perf_counter()
     generation_time = generation_end - generation_start
 
     # ===== 輸出 JSON =====
@@ -126,15 +126,14 @@ def main():
             indent=2,
         )
 
-    script_time = time.time() - script_start
+    script_time = time.perf_counter() - script_start
 
     print(f"[run_summary_conda] SUMMARY OK -> {out_json}")
-    print("\n[run_summary_conda] 計時統計:")
-    print("[run_summary_conda]=" * 60)
+    print("[run_summary_conda] 計時統計:")
     print(f"[run_summary_conda]  模型載入時間: {model_load_time:.2f} 秒")
     print(f"[run_summary_conda]  推導時間: {generation_time:.2f} 秒")
     print(f"[run_summary_conda]  總耗時: {script_time:.2f} 秒")
-    print("[run_summary_conda]=" * 60 + "\n")
+    print("")
 
 
 if __name__ == "__main__":

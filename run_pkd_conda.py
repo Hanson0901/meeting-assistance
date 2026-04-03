@@ -18,7 +18,7 @@ def main():
     ap.add_argument("--overlap-seconds", type=int, default=60)
     args = ap.parse_args()
 
-    script_start = time.time()
+    script_start = time.perf_counter()
     
     data = run_pkd(
         output_dir=args.output_dir,
@@ -32,7 +32,7 @@ def main():
     with open(out_json, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
-    script_time = time.time() - script_start
+    script_time = time.perf_counter() - script_start
     print(f"[run_pkd_conda] PKD OK -> {out_json}")
     print(f"[run_pkd_conda] 總耗時: {script_time:.2f} 秒\n")
 
