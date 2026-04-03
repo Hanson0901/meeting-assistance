@@ -56,7 +56,7 @@ def parse_srt_brute_force(file_path):
         try:
             with open(file_path, 'r', encoding=enc) as f:
                 lines = f.readlines()
-            print(f"🔍 使用編碼 {enc} 讀取成功，共 {len(lines)} 行")
+            print(f"[finalp][parse_srt] 使用編碼 {enc} 讀取成功，共 {len(lines)} 行")
             break
         except UnicodeDecodeError:
             continue
@@ -105,8 +105,8 @@ def split_subtitles_to_segments(subtitles, interval_min, overlap_sec):
     
     segments = []
 
-    print(f"⏱️ 偵測 SRT 時間範圍: {int(min_time)}秒 ~ {int(max_time)}秒")
-    
+    print(f"[finalp][split_subtitles_to_segments] 偵測 SRT 時間範圍: {int(min_time)}秒 ~ {int(max_time)}秒")
+
     for i in range(start_chunk_idx, end_chunk_idx + 1):
         chunk_start = i * interval_sec
         chunk_end = (i + 1) * interval_sec + overlap_sec 
@@ -187,35 +187,35 @@ def generate_final_people_summary(extractor, raw_list):
 
 def main():
     print("="*60)
-    print(f"🚀 啟動任務：人物識別")
+    print(f"[finalp] 啟動任務：人物識別")
     print("="*60)
     
     if not os.path.exists(MODEL_PATH):
-        print(f"❌ 找不到模型: {MODEL_PATH}")
+        print(f"[finalp] 找不到模型: {MODEL_PATH}")
         return
 
     try:
         extractor = LlamaCppQwen3Extractor(model_path=MODEL_PATH)
     except Exception as e:
-        print(f"引擎啟動失敗: {e}")
+        print(f"[finalp] 引擎啟動失敗: {e}")
         return
 
     subtitles = parse_srt_brute_force(SRT_FILE)
     if not subtitles:
-        print("❌ 字幕讀取失敗")
+        print(f"[finalp] 字幕讀取失敗: {SRT_FILE}")
         return
 
     segments = split_subtitles_to_segments(subtitles, INTERVAL_MINUTES, OVERLAP_SECONDS)
     
     if not segments:
-        print("❌ 切割後沒有產生任何片段")
+        print(f"[finalp] 切割後沒有產生任何片段")
         return
 
     raw_people = []
     print("\n--- 階段一：逐時段掃描人物 ---")
     for i, seg in enumerate(segments, 1):
         label = seg.split('\n')[0]
-        print(f"[{i}/{len(segments)}] 分析 {label}...", end="\r")
+        print(f"[finalp][{i}/{len(segments)}] 分析 {label}...", end="\r")
         
         result = extract_raw_people(extractor, seg)
         
@@ -225,7 +225,7 @@ def main():
         if hasattr(extractor, 'aggressive_memory_cleanup'):
             extractor.aggressive_memory_cleanup()
 
-    print(f"\n✅ 掃描完成，收集到 {len(raw_people)} 個有效片段。\n")
+    print(f"\n[finalp] 掃描完成，收集到 {len(raw_people)} 個有效片段。\n")
 
     if raw_people:
         print("--- 階段二：名單整併 ---")
@@ -237,15 +237,15 @@ def main():
             f.write(final_report)
             f.write("\n\n---\n## 原始提取紀錄 (備份)\n\n")
             f.write("\n\n".join(raw_people))
-        print(f"✅ 完成！請查看 {OUTPUT_FILE}")
+        print(f"[finalp] 完成！請查看 {OUTPUT_FILE}")
     else:
-        print("⚠️ 未發現任何人物資料。")
+        print(f"[finalp] 未發現任何人物資料。")
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
             f.write("# 會議參與人員名單\n")
             f.write(f"時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
             f.write("## 尚無特定人物\n")
             f.write("系統分析本段會議記錄後，未能識別出具體的人員姓名或職稱。")
-        print(f"✅ 已生成狀態檔案 {OUTPUT_FILE}")
+        print(f"[finalp] 已生成狀態檔案 {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     main()

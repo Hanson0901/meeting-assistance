@@ -33,8 +33,14 @@ class BaseExtractor:
         llama_cfg = ModelConfig.LLAMA_CONFIG
         mem_cfg = ModelConfig.MEMORY_CONFIG
 
+        self.extractor_type = extractor_type
         self.model_path = model_path or model_cfg["path"]
-        self.n_ctx = n_ctx or llama_cfg["n_ctx"]
+        if n_ctx is not None:
+            self.n_ctx = n_ctx
+        elif extractor_type == "summary":
+            self.n_ctx = self._resolve_dynamic_n_ctx()
+        else:
+            self.n_ctx = llama_cfg["n_ctx"]
         self.max_retries = mem_cfg["max_retries"]
 
         self.temperature = model_cfg["temperature"]
@@ -56,6 +62,20 @@ class BaseExtractor:
         )
 
         print(f"[BaseExtractor][init] Loaded model [{extractor_type}]: {self.model_path}")
+
+    def _resolve_dynamic_n_ctx(self):
+        """Summary 使用與 step3 相同的動態 n_ctx 規則。"""
+        total_mem_gb = psutil.virtual_memory().total / 1024**3
+        if total_mem_gb >= 15:
+            n_ctx = 8192
+        elif total_mem_gb >= 7:
+            n_ctx = 4096
+        else:
+            n_ctx = 2048
+        # 安全上限：避免設定超過專案預期的 context window
+        n_ctx = min(n_ctx, 8192)
+        print(f"[BaseExtractor][init] Dynamic n_ctx for summary: {n_ctx}")
+        return n_ctx
 
     # ======================
     # 記憶體相關（不動）
@@ -95,6 +115,25 @@ class BaseExtractor:
                 self.aggressive_memory_cleanup()
                 print("[BaseExtractor] 記憶體預先清理")
 
+            prompt_len = None
+            try:
+                prompt_tokens = self.model.tokenize(prompt.encode("utf-8"), add_bos=True, special=True)
+                prompt_len = len(prompt_tokens)
+            except Exception:
+                prompt_len = None
+
+            hard_limit = 8192
+            if prompt_len is not None:
+                if prompt_len > hard_limit:
+                    msg = f"[BaseExtractor]輸入過長：{prompt_len} tokens，超過安全上限 {hard_limit}。"
+                    print(msg)
+                    return msg
+                if prompt_len >= self.n_ctx:
+                    msg = f"[BaseExtractor]輸入過長：{prompt_len} tokens，超過目前 context window {self.n_ctx}。"
+                    print(msg)
+                    return msg
+                max_tokens = max(32, min(max_tokens, self.n_ctx - prompt_len - 8))
+
             response = self.model(
                 prompt,
                 max_tokens=max_tokens,
@@ -107,6 +146,13 @@ class BaseExtractor:
             
 
             return response['choices'][0]['text'].strip()
+
+        except ValueError as e:
+            if "exceed context window" in str(e).lower():
+                msg = f"[BaseExtractor]輸入過長，超過 context window（n_ctx={self.n_ctx}，安全上限=8192）。"
+                print(msg)
+                return msg
+            raise e
 
         except RuntimeError as e:
             if "out of memory" in str(e).lower():

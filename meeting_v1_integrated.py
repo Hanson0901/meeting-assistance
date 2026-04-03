@@ -1063,13 +1063,11 @@ class MeetingWorkflow:
         # 計時統計
         total_time = time.time() - workflow_start
         print("[MeetingWorkflow][run]  計時統計:")
-        print("[MeetingWorkflow][run] ="*60)
         for i in range(1, 7):
             step_key = f'step{i}'
             if step_key in self.step_times:
                 print(f"[MeetingWorkflow][run]  step{i}: {self.step_times[step_key]:.2f} 秒")
         print(f"[MeetingWorkflow][run]  總耗時: {total_time:.2f} 秒")
-        print("[MeetingWorkflow][run] ="*60 + "\n")
         print("[MeetingWorkflow][run] 全流程結束\n")
         return True
 
