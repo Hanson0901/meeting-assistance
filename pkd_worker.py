@@ -319,12 +319,12 @@ def run_pkd(output_dir: str, output_prefix: str, model_path: str, interval_minut
     if not os.path.exists(model_path):
         raise RuntimeError(f"找不到模型: {model_path}")
 
-    print("🚀 正在導入模型...")
+    print("[PKD] 正在導入模型...")
     model_load_start = time.time()
     from core1 import LlamaCppQwen3Extractor
     extractor = LlamaCppQwen3Extractor(model_path=model_path)
     model_load_time = time.time() - model_load_start
-    print(f"✅ 模型導入完成 (耗時: {model_load_time:.2f} 秒)\n")
+    print(f"[PKD] 模型導入完成 (耗時: {model_load_time:.2f} 秒)\n")
 
     # 初始化統計變數
     people_time = 0.0

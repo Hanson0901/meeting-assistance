@@ -84,6 +84,8 @@ project_root = Path(__file__).parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
+from print_log_utils import setup_print_logging
+
 
 # ==========================================
 # 藍牙 OBEX 檔案傳送模組
@@ -395,6 +397,14 @@ class MeetingWorkflow:
         self.include_decisions_in_final_txt = include_decisions_in_final_txt
 
         os.makedirs(output_dir, exist_ok=True)
+        default_log_file = os.path.join(
+            output_dir,
+            f"{output_prefix}_run_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.log",
+        )
+        self.log_file = setup_print_logging(
+            default_log_path=default_log_file,
+            process_name="meeting_v1_integrated",
+        )
         self.is_recording = False
         self.cache: Dict[str, object] = {}
         
@@ -422,7 +432,7 @@ class MeetingWorkflow:
     def _print_banner(self, text: str):
         print("\n" + "=" * 60)
         print(f"  {text}")
-        print(" =" * 60 + "\n")
+        print("=" * 60 + "\n")
 
     def _list_srt_files(self) -> List[Path]:
         pattern = f"{self.output_prefix}_*.srt"
@@ -690,6 +700,8 @@ class MeetingWorkflow:
 
             env = os.environ.copy()
             env["PYTHONPATH"] = str(project_root) + (":" + env["PYTHONPATH"] if "PYTHONPATH" in env else "")
+            if self.log_file:
+                env["MEETING_LOG_FILE"] = self.log_file
 
             try:
                 subprocess.run(cmd, check=True, cwd=str(project_root), env=env)
@@ -735,6 +747,8 @@ class MeetingWorkflow:
 
             env = os.environ.copy()
             env["PYTHONPATH"] = str(project_root) + (":" + env["PYTHONPATH"] if "PYTHONPATH" in env else "")
+            if self.log_file:
+                env["MEETING_LOG_FILE"] = self.log_file
 
             try:
                 subprocess.run(cmd, check=True, cwd=str(project_root), env=env)
@@ -793,8 +807,13 @@ class MeetingWorkflow:
             print("[MeetingWorkflow][step4_extract_actions] 使用 conda Python 執行 Actions：")
             print("[MeetingWorkflow][step4_extract_actions]   " + " ".join(cmd) + "\n")
 
+            env = os.environ.copy()
+            env["PYTHONPATH"] = str(project_root) + (":" + env["PYTHONPATH"] if "PYTHONPATH" in env else "")
+            if self.log_file:
+                env["MEETING_LOG_FILE"] = self.log_file
+
             try:
-                subprocess.run(cmd, check=True, cwd=str(project_root))
+                subprocess.run(cmd, check=True, cwd=str(project_root), env=env)
             except subprocess.CalledProcessError as e:
                 print(f"[MeetingWorkflow][step4_extract_actions] Actions 失敗: {e}\n")
                 return False
@@ -870,8 +889,13 @@ class MeetingWorkflow:
             print("[MeetingWorkflow][step5_generate_summary] 使用 conda Python 執行 Summary：")
             print("[MeetingWorkflow][step5_generate_summary]   " + " ".join(cmd) + "\n")
 
+            env = os.environ.copy()
+            env["PYTHONPATH"] = str(project_root) + (":" + env["PYTHONPATH"] if "PYTHONPATH" in env else "")
+            if self.log_file:
+                env["MEETING_LOG_FILE"] = self.log_file
+
             try:
-                subprocess.run(cmd, check=True, cwd=str(project_root))
+                subprocess.run(cmd, check=True, cwd=str(project_root), env=env)
             except subprocess.CalledProcessError as e:
                 print(f"[MeetingWorkflow][step5_generate_summary] Summary 失敗: {e}\n")
                 return False
@@ -976,10 +1000,10 @@ class MeetingWorkflow:
                     _write_list(f, "行動項目(Actions)", self.cache.get("actions_lines", []))
 
             except Exception as e:
-                print(f" TXT 產生失敗: {e}")
+                print(f"[MeetingWorkflow][step6_export_txt] TXT 產生失敗: {e}")
                 return False
 
-            print(f" TXT 已輸出: {self.txt_file}\n")
+            print(f"[MeetingWorkflow][step6_export_txt] TXT 已輸出: {self.txt_file}\n")
 
             # =========================
             # ★ 藍牙傳送結果檔案（基於 BT_trans_v0_4 方式）
@@ -1001,7 +1025,7 @@ class MeetingWorkflow:
                 except ObexPushError as e:
                     print(f"[MeetingWorkflow][step6_export_txt] 藍牙傳送失敗: {e}")
                     print("[MeetingWorkflow][step6_export_txt]    檢查項目:")
-                    print("[MeetingWorkflow][step6_export_txt]      確保格藍牙裝置已配對且在範圍內")
+                    print("[MeetingWorkflow][step6_export_txt]      確保藍牙裝置已配對且在範圍內")
                     print("[MeetingWorkflow][step6_export_txt]      執行: systemctl --user status obex")
                     print("[MeetingWorkflow][step6_export_txt]      執行: systemctl --user restart obex\n")
                 except Exception as e:

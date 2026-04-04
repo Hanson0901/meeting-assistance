@@ -12,6 +12,7 @@ from pathlib import Path
 project_root = Path(__file__).resolve().parent
 sys.path.insert(0, str(project_root))
 
+from print_log_utils import setup_print_logging
 from extractors.actions_extractor import ActionsExtractor
 
 
@@ -43,6 +44,11 @@ def main():
     ap.add_argument("--output-dir", default=".")
     ap.add_argument("--output-prefix", default="output")
     args = ap.parse_args()
+
+    setup_print_logging(
+        default_log_path=os.path.join(args.output_dir, f"{args.output_prefix}_run.log"),
+        process_name="run_actions_conda",
+    )
 
     script_start = time.perf_counter()
 

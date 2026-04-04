@@ -11,6 +11,7 @@ from pathlib import Path
 project_root = Path(__file__).resolve().parent
 sys.path.insert(0, str(project_root))
 
+from print_log_utils import setup_print_logging
 from extractors.summary_generator import SummaryGenerator
 
 
@@ -38,6 +39,11 @@ def main():
     ap.add_argument("--output-prefix", default="output")
     args = ap.parse_args()
 
+    setup_print_logging(
+        default_log_path=os.path.join(args.output_dir, f"{args.output_prefix}_run.log"),
+        process_name="run_summary_conda",
+    )
+
     script_start = time.perf_counter()
 
     # ===== 載入模型 =====
@@ -57,7 +63,7 @@ def main():
     print(f"[run_summary_conda] 讀取 cache: {cache_json}\n")
 
     if not os.path.exists(cache_json):
-        print(f"[run_summary_conda]找不到 cache 檔案: {cache_json}")
+        print(f"[run_summary_conda] 找不到 cache 檔案: {cache_json}")
         sys.exit(1)
 
     with open(cache_json, "r", encoding="utf-8") as f:

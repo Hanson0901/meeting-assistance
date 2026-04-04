@@ -7,6 +7,7 @@ from pathlib import Path
 project_root = Path(__file__).resolve().parent
 sys.path.insert(0, str(project_root))
 
+from print_log_utils import setup_print_logging
 from pkd_worker import run_pkd
 
 def main():
@@ -17,6 +18,11 @@ def main():
     ap.add_argument("--interval-minutes", type=int, default=5)
     ap.add_argument("--overlap-seconds", type=int, default=60)
     args = ap.parse_args()
+
+    setup_print_logging(
+        default_log_path=os.path.join(args.output_dir, f"{args.output_prefix}_run.log"),
+        process_name="run_pkd_conda",
+    )
 
     script_start = time.perf_counter()
     

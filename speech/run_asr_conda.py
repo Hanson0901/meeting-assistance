@@ -8,6 +8,7 @@ project_root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(project_root))
 
 import argparse
+from print_log_utils import setup_print_logging
 from speech.pipeline_mkv_read import RealtimeASR
 
 
@@ -21,6 +22,11 @@ def main():
     ap.add_argument("--overlap", type=float, default=5.0)
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
+
+    setup_print_logging(
+        default_log_path=os.path.join(args.outdir, f"{args.prefix}_run.log"),
+        process_name="run_asr_conda",
+    )
 
     asr = RealtimeASR(
         audio_file=args.audio,
