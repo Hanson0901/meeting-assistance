@@ -35,3 +35,4 @@ finalp_output*.md
 tmp_seg_*.wav
 tmp_spk_*.wav
 .cache/
+.vscode/
