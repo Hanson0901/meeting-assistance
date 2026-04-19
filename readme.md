@@ -7,6 +7,7 @@
 ## 快速跳轉
 
 - [專案流程](#專案流程)
+- [專案目錄導覽](#專案目錄導覽)
 - [主要檔案](#主要檔案)
 - [執行環境](#執行環境)
 - [環境配置](#環境配置)
@@ -28,6 +29,97 @@
 - 藍牙 OBEX 自動傳送結果檔（可關閉）
 
 目前主要入口是 `meeting_v1_integrated.py`，其參數在程式內 `main()` 先行固定。
+
+## 專案目錄導覽
+
+### 目錄圖
+
+```mermaid
+flowchart TB
+	R[meeting-assistence / 專案根目錄]
+	R --> A[config / 模型與參數設定]
+	R --> B[extractors / 各類提取器與摘要器]
+	R --> C[speech / ASR 與音訊處理流程]
+	R --> D[trash / 舊版或測試腳本]
+	R --> E[根目錄腳本 / 主流程與 worker]
+	E --> E1[meeting_v1_integrated.py]
+	E --> E2[run_pkd_conda.py]
+	E --> E3[run_actions_conda.py]
+	E --> E4[run_summary_conda.py]
+	E --> E5[pkd_worker.py]
+	E --> E6[core1.py]
+	E --> E7[print_log_utils.py]
+```
+
+### 目錄索引
+
+- [根目錄腳本](#根目錄腳本)
+- [config](#config)
+- [extractors](#extractors)
+- [speech](#speech)
+- [trash](#trash)
+
+### 根目錄腳本
+
+這一層放的是主要執行入口與共用核心模組，負責把錄音、轉錄、提取、摘要和輸出串起來。
+
+- `meeting_v1_integrated.py`: 整合主流程控制器，依序執行錄音、ASR、PKD、Actions、Summary、TXT 輸出與藍牙傳送
+- `pkd_worker.py`: 負責把 SRT 轉成 People、Keypoints、Decisions 的核心工作
+- `run_pkd_conda.py`: PKD worker 啟動腳本，輸出 `*_pkd_cache.json`
+- `run_actions_conda.py`: 行動項目提取腳本，輸出 `*_actions_cache.json`
+- `run_summary_conda.py`: 摘要生成腳本，輸出 `*_summary_cache.json`
+- `core1.py`: SRT 解析、字幕分段與 llama.cpp 推論核心
+- `print_log_utils.py`: 將 `print` 同步寫入 log 檔
+
+### config
+
+- [回到目錄索引](#目錄索引)
+
+此資料夾集中管理模型與推論設定，避免各腳本分散寫死參數。
+
+- `model_config.py`: 定義 People、Keypoints、Decisions、Actions、Summary 的模型路徑與推論參數
+- `__init__.py`: Python 套件初始化檔
+
+### extractors
+
+- [回到目錄索引](#目錄索引)
+
+這一層是各類語意提取器的實作區，負責把字幕內容轉成結構化文字。
+
+- `base_extractor.py`: 共用提取器基底類別，封裝 llama.cpp 載入與記憶體管理
+- `people_extractor.py`: 人物辨識與人物摘要
+- `keypoints_extractor.py`: 會議重點提取與整理
+- `decisions_extractor.py`: 決策、承諾、共識提取
+- `actions_extractor.py`: 行動項目提取
+- `summary_generator.py`: 根據 PKD 與行動項目生成最終摘要
+- `__init__.py`: 匯出提取器模組
+
+### speech
+
+- [回到目錄索引](#目錄索引)
+
+這一層處理音訊、ASR、字幕切分與轉錄流程，是從影音檔進入文字分析的入口。
+
+- `pipeline_mkv_read.py`: 即時 ASR 與說話者識別核心，負責讀取音訊、切片與產出 SRT
+- `pipeline_mkv_write.py`: 音訊寫入/錄音相關流程
+- `run_asr_conda.py`: ASR worker 啟動腳本，從音訊檔產出字幕檔
+
+### trash
+
+- [回到目錄索引](#目錄索引)
+
+這裡放的是舊版、測試版或暫時保留的腳本，不建議作為正式入口。
+
+- `app.py`: 舊版應用程式入口
+- `run_pipeline.py`: 舊版整合流程測試腳本
+- `test_summary_prompt.py`: 摘要提示詞測試
+- `cleanup_20260404_084031/`: 清理或暫存資料夾
+
+### 根目錄其他輸出與資料夾
+
+- `output_*.json`、`output_*.txt`、`output_*.srt`: 範例輸出與 cache
+- `tmp_seg_*.wav`、`tmp_spk_*.wav`: ASR 過程中建立的暫存音訊
+- 各個會議名稱資料夾: 每次執行後的案例輸出目錄，裡面通常包含 SRT、Markdown、TXT 與摘要結果
 
 ## 專案流程
 
