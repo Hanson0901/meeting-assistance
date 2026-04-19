@@ -10,6 +10,7 @@
 - [專案目錄導覽](#專案目錄導覽)
 - [主要檔案](#主要檔案)
 - [執行環境](#執行環境)
+- [樹莓派測試環境](#樹莓派測試環境)
 - [環境配置](#環境配置)
 - [模型與路徑設定](#模型與路徑設定)
 - [快速開始](#快速開始)
@@ -197,6 +198,50 @@ Python 套件（依現有程式）：
 - opencc（或對應 Python 套件）
 - dbus-python
 - PyGObject
+
+## 樹莓派測試環境
+
+目前專案的程式註解與參數設定，是以 Raspberry Pi 5 16GB 為主要測試基準，並以 CPU 推論為主，不依賴 GPU。
+
+### 硬體基準
+
+- Raspberry Pi 5
+- 記憶體：16GB
+- 架構：ARM64 / aarch64
+- CPU：4 核心
+- 儲存：建議使用 SSD 或高品質 microSD，避免長時間 ASR 與模型載入時 I/O 過慢
+- 音訊：USB 麥克風或 ALSA 可見的錄音裝置
+- 藍牙：若要啟用結果傳送，需有可用的藍牙堆疊與 OBEX 服務
+
+### 系統版本基準
+
+- Linux 64-bit
+- 建議使用 Raspberry Pi OS 64-bit 或相容的 Debian 系統
+- 專案目前程式碼是以 user-space conda 路徑與 systemd user service 的操作方式撰寫
+- 若是 Raspberry Pi OS，建議使用較新的 Bookworm 系列環境
+
+### Conda 基準
+
+- Conda Python：`/home/cgu-csie/miniconda3/bin/python3`
+- Python 版本：3.10
+- 啟動方式：`conda activate meeting-assistence`
+- 若你要重現目前專案的測試方式，請保持 `llama-cpp-python`、`funasr`、`opencc-python-reimplemented`、`dbus-python`、`PyGObject` 可用
+- conda環境的重現可以參考`environment.yml`
+
+### 專案中的 Raspberry Pi 參數
+
+- `core1.py` 會依記憶體自動調整 `n_ctx`
+- 16GB 機器會使用 `n_ctx=8192`
+- 8GB 機器會使用 `n_ctx=4096`
+- 低於 8GB 時會降到 `n_ctx=2048`
+- `llama.cpp` 推論執行緒數目前固定為 4
+
+### 測試時的實際建議
+
+- 先確認 `ffmpeg`、`arecord`、`obex`、`dbus` 都可用
+- 先用既有音檔跑 ASR，不要先開錄音流程
+- 先關閉藍牙傳送，確認 `run_asr_conda.py`、`run_pkd_conda.py`、`run_actions_conda.py`、`run_summary_conda.py` 可正常產生檔案，再打開整合流程
+- 若模型載入太慢，優先檢查模型是否在 SSD 或高速度儲存裝置上
 
 ## 環境配置
 
