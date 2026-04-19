@@ -1,281 +1,262 @@
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
-<a id="readme-top"></a>
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
--->
-
-
-
-<!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![Unlicense License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
+# meeting-assistence
+
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![Platform](https://img.shields.io/badge/Platform-Linux-green)
+![License](https://img.shields.io/badge/License-LICENSE.txt-lightgrey)
+
+## 快速跳轉
+
+- [專案流程](#專案流程)
+- [主要檔案](#主要檔案)
+- [執行環境](#執行環境)
+- [環境配置](#環境配置)
+- [模型與路徑設定](#模型與路徑設定)
+- [快速開始](#快速開始)
+- [輸出檔案說明](#輸出檔案說明)
+- [藍牙傳送](#藍牙傳送)
+- [除錯與記錄](#除錯與記錄)
+- [授權](#授權)
+
+會議語音到摘要的離線處理專案，包含：
+
+- 音訊錄製（mkv）
+- ASR 轉錄（切分多個 SRT）
+- People / Keypoints / Decisions 三類報告（PKD）
+- 行動項目提取（Actions）
+- 會議摘要生成（Summary）
+- 匯出整合 TXT
+- 藍牙 OBEX 自動傳送結果檔（可關閉）
 
+目前主要入口是 `meeting_v1_integrated.py`，其參數在程式內 `main()` 先行固定。
 
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
+## 專案流程
 
-  <h3 align="center">Best-README-Template</h3>
+### 視覺化流程圖
 
-  <p align="center">
-    An awesome README template to jumpstart your projects!
-    <br />
-    <a href="https://github.com/othneildrew/Best-README-Template"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a>
-    &middot;
-    <a href="https://github.com/othneildrew/Best-README-Template/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
-    &middot;
-    <a href="https://github.com/othneildrew/Best-README-Template/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
-  </p>
-</div>
-
-
-
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
-  </ol>
-</details>
+```mermaid
+flowchart LR
+	A[錄音或既有音檔] --> B[ASR 轉錄
+speech/run_asr_conda.py]
+	B --> C[PKD 分析
+run_pkd_conda.py]
+	C --> D[Actions 提取
+run_actions_conda.py]
+	D --> E[Summary 生成
+run_summary_conda.py]
+	E --> F[整合輸出 TXT]
+	F --> G[藍牙 OBEX 傳送 可選]
+```
 
+### 文字流程
 
+整體流程由 `MeetingWorkflow.run()` 依序執行：
 
-<!-- ABOUT THE PROJECT -->
-## About The Project
+1. step1 錄音（可停用，改用既有音檔）
+2. step2 ASR（`speech/run_asr_conda.py`）
+3. step3 PKD（`run_pkd_conda.py`）
+4. step4 Actions（`run_actions_conda.py`）
+5. step5 Summary（`run_summary_conda.py`）
+6. step6 匯出 TXT + 藍牙傳送
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+另外也可分步執行各 worker 腳本。
 
-There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
+## 主要檔案
 
-Here's why:
-* Your time should be focused on creating something amazing. A project that solves a problem and helps others
-* You shouldn't be doing the same tasks over and over like creating a README from scratch
-* You should implement DRY principles to the rest of your life :smile:
+- `meeting_v1_integrated.py`: 主流程控制器，含藍牙傳送整合
+- `speech/pipeline_mkv_read.py`: ASR 與說話者分段核心
+- `speech/run_asr_conda.py`: ASR worker 入口
+- `pkd_worker.py`: PKD 核心（People / Keypoints / Decisions）
+- `run_pkd_conda.py`: PKD worker 入口
+- `run_actions_conda.py`: Actions worker 入口
+- `run_summary_conda.py`: Summary worker 入口
+- `core1.py`: SRT 解析、分段與 llama.cpp 推論核心
+- `extractors/`: 各類提取器與摘要器
+- `config/model_config.py`: 提取器模型參數設定
+- `print_log_utils.py`: 將 print 同步寫入 log
 
-Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have contributed to expanding this template!
+### 常用腳本快速連結
 
-Use the `BLANK_README.md` to get started.
+- [主流程控制器](meeting_v1_integrated.py)
+- [ASR worker](speech/run_asr_conda.py)
+- [PKD worker](run_pkd_conda.py)
+- [Actions worker](run_actions_conda.py)
+- [Summary worker](run_summary_conda.py)
+- [PKD 核心](pkd_worker.py)
+- [ASR 核心](speech/pipeline_mkv_read.py)
+- [模型設定](config/model_config.py)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## 執行環境
 
+建議環境：Linux（目前程式寫法依賴 Linux 工具與藍牙堆疊）。
 
+必要系統工具：
 
-### Built With
+- ffmpeg
+- arecord（ALSA）
+- 藍牙工具（bluez / obex；若有啟用藍牙傳送）
 
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
+Python 套件（依現有程式）：
 
-* [![Next][Next.js]][Next-url]
-* [![React][React.js]][React-url]
-* [![Vue][Vue.js]][Vue-url]
-* [![Angular][Angular.io]][Angular-url]
-* [![Svelte][Svelte.dev]][Svelte-url]
-* [![Laravel][Laravel.com]][Laravel-url]
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![JQuery][JQuery.com]][JQuery-url]
+- llama-cpp-python
+- psutil
+- numpy
+- soundfile
+- funasr
+- opencc（或對應 Python 套件）
+- dbus-python
+- PyGObject
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+## 環境配置
 
+本專案建議優先使用 Conda。若你使用 pip 也可執行，但 dbus 與 GI 相關套件建議由系統套件管理器安裝。
 
+### 1) 安裝系統套件（Ubuntu / Debian）
 
-<!-- GETTING STARTED -->
-## Getting Started
+先安裝音訊、藍牙、GLib 與基本編譯依賴：
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+sudo apt update
+sudo apt install -y ffmpeg alsa-utils bluez bluez-obexd libsndfile1 libdbus-1-dev libglib2.0-dev libgirepository1.0-dev python3-gi python3-dev build-essential
 
-### Prerequisites
+若要使用藍牙 OBEX 傳檔，確認服務可用：
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+systemctl --user enable obex
+systemctl --user start obex
+systemctl --user status obex
 
-### Installation
+### 2) 使用 Conda 建環境（推薦）
 
-_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
+專案已提供 [environment.yml](environment.yml)：
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/github_username/repo_name.git
-   ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
-5. Change git remote url to avoid accidental pushes to base project
-   ```sh
-   git remote set-url origin github_username/repo_name
-   git remote -v # confirm the changes
-   ```
+conda env create -f environment.yml
+conda activate meeting-assistence
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+### 3) 使用 Pip 建環境（替代）
 
+專案已提供 [requirements.txt](requirements.txt)：
 
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 
-<!-- USAGE EXAMPLES -->
-## Usage
+### 4) 驗證環境
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+python -c "import numpy, soundfile, psutil; print('core ok')"
+python -c "import llama_cpp; print('llama ok')"
+python -c "import opencc; print('opencc ok')"
+python -c "import dbus; import gi; print('dbus gi ok')"
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+### 5) 離線模型路徑
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+ASR 預設模型快取目錄為：
 
+- /home/cgu-csie/.cache/modelscope
 
+若你放在其他位置，可在執行前先設定：
 
-<!-- ROADMAP -->
-## Roadmap
+export MODELSCOPE_CACHE=/your/modelscope/cache
 
-- [x] Add Changelog
-- [x] Add back to top links
-- [ ] Add Additional Templates w/ Examples
-- [ ] Add "components" document to easily copy & paste sections of the readme
-- [ ] Multi-language Support
-    - [ ] Chinese
-    - [ ] Spanish
+LLM GGUF 預設路徑為：
 
-See the [open issues](https://github.com/othneildrew/Best-README-Template/issues) for a full list of proposed features (and known issues).
+- /home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+若路徑不同，請同步調整：
 
+- meeting_v1_integrated.py 中 MeetingWorkflow 的 model_path
+- 或使用 run_pkd_conda.py 的 --model-path 參數
 
+## 模型與路徑設定
 
-<!-- CONTRIBUTING -->
-## Contributing
+### 1) PKD / Actions / Summary 使用的 LLM
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+預設模型路徑在多處使用：
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
+- `/home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf`
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+可調整位置：
 
-### Top contributors:
+- `meeting_v1_integrated.py` 的 `MeetingWorkflow(... model_path=...)`
+- `run_pkd_conda.py` 以 `--model-path` 指定
+- `config/model_config.py` 中各 extractor 設定
 
-<a href="https://github.com/othneildrew/Best-README-Template/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=othneildrew/Best-README-Template" alt="contrib.rocks image" />
-</a>
+### 2) ASR 模型快取
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+`speech/pipeline_mkv_read.py` 預設使用：
 
+- `/home/cgu-csie/.cache/modelscope`
 
+程式已設為離線模式環境變數（HF / datasets / modelscope）。
 
-<!-- LICENSE -->
-## License
+## 快速開始
 
-Distributed under the Unlicense License. See `LICENSE.txt` for more information.
+以下命令假設你在專案根目錄執行。
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+### A. 一次跑完整流程
 
+直接執行：
 
+`python3 meeting_v1_integrated.py`
 
-<!-- CONTACT -->
-## Contact
+注意：
 
-Your Name - [@your_twitter](https://twitter.com/your_username) - email@example.com
+- 目前 `main()` 內部是固定參數，不是 CLI 參數模式。
+- 預設 `enable_recording=False`，會直接使用既有音檔：`output_audio.mkv`。
+- 若要開啟錄音或調整輸出、藍牙等行為，請修改 `meeting_v1_integrated.py` 內 `MeetingWorkflow(...)` 的初始化參數。
 
-Project Link: [https://github.com/your_username/repo_name](https://github.com/your_username/repo_name)
+### B. 分步執行（建議除錯時使用）
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+1) ASR
 
+`python3 speech/run_asr_conda.py --audio ./output_audio.mkv --outdir . --prefix output --alpha 0.0 --overlap 5.0 --verbose`
 
+2) PKD
 
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
+`python3 run_pkd_conda.py --output-dir . --output-prefix output --model-path /home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf --interval-minutes 5 --overlap-seconds 60`
 
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
+3) Actions
 
-* [Choose an Open Source License](https://choosealicense.com)
-* [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-* [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-* [Malven's Grid Cheatsheet](https://grid.malven.co/)
-* [Img Shields](https://shields.io)
-* [GitHub Pages](https://pages.github.com)
-* [Font Awesome](https://fontawesome.com)
-* [React Icons](https://react-icons.github.io/react-icons/search)
+`python3 run_actions_conda.py --output-dir . --output-prefix output`
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+4) Summary
 
+`python3 run_summary_conda.py --output-dir . --output-prefix output`
 
+## 輸出檔案說明
 
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[forks-url]: https://github.com/othneildrew/Best-README-Template/network/members
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[issues-shield]: https://img.shields.io/github/issues/othneildrew/Best-README-Template.svg?style=for-the-badge
-[issues-url]: https://github.com/othneildrew/Best-README-Template/issues
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
-[license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/othneildrew
-[product-screenshot]: images/screenshot.png
-[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
-[Next-url]: https://nextjs.org/
-[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
-[React-url]: https://reactjs.org/
-[Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
-[Vue-url]: https://vuejs.org/
-[Angular.io]: https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white
-[Angular-url]: https://angular.io/
-[Svelte.dev]: https://img.shields.io/badge/Svelte-4A4A55?style=for-the-badge&logo=svelte&logoColor=FF3E00
-[Svelte-url]: https://svelte.dev/
-[Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
-[Laravel-url]: https://laravel.com
-[Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
-[Bootstrap-url]: https://getbootstrap.com
-[JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
-[JQuery-url]: https://jquery.com 
+以 `output_prefix=output` 為例：
+
+- `output_audio.mkv`: 錄音檔
+- `output_1.srt`, `output_2.srt`, ...: ASR 字幕分段輸出
+- `finalp_output_1.md`, ...: People 報告
+- `finalk_output_1.md`, ...: Keypoints 報告
+- `finald_output_1.md`, ...: Decisions 報告
+- `output_pkd_cache.json`: PKD 聚合結果
+- `output_actions_cache.json`: Actions 結果
+- `output_summary_cache.json`: Summary 結果
+- `output_cache.json`: step3 + step4 共享 cache
+- `output_actions.txt`: 行動項目文字檔
+- `output_summary.txt`: 摘要文字檔
+- `output_meeting_summary.txt`: 最終整合輸出（step6）
+- `output_run.log` 或 `output_run_YYYYmmdd_HHMMSS.log`: 執行 log
+
+## 藍牙傳送
+
+`meeting_v1_integrated.py` 內建 OBEX 傳送，會優先送到已配對且已連線裝置，否則選第一個配對裝置。
+
+常見檢查：
+
+- `systemctl --user status obex`
+- `systemctl --user restart obex`
+
+可用 `enable_bluetooth=False` 關閉。
+
+## 除錯與記錄
+
+專案多數流程以 print 為主，並透過 `print_log_utils.setup_print_logging()` 同步寫 log。若要追流程，優先看：
+
+- 終端 print 訊息
+- `*_run.log` 檔案
+
+## 授權
+
+請參考 `LICENSE.txt`。

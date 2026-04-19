@@ -1,0 +1,17 @@
+name: meeting-assistence
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - psutil
+  - soundfile
+  - ffmpeg
+  - dbus-python
+  - pygobject
+  - pip:
+      - llama-cpp-python
+      - funasr
+      - opencc-python-reimplemented
