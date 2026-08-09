@@ -47,6 +47,35 @@ app.config['MAX_CONTENT_LENGTH'] = 2000 * 1024 * 1024  # 2GB 上傳限制
 # 會話管理
 workflows: Dict[str, MeetingWorkflow] = {}
 workflow_states: Dict[str, Dict[str, Any]] = {}
+session_logs: Dict[str, list] = {}  # 存儲每個會話的日誌
+
+# 日誌工具類
+class LogCapture:
+    """捕捉日誌並存儲到內存"""
+    def __init__(self, session_id=None):
+        self.session_id = session_id
+        self.logs = []
+    
+    def add_log(self, message):
+        """添加日誌"""
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        log_entry = f"[{timestamp}] {message}"
+        self.logs.append(log_entry)
+        if self.session_id and self.session_id in session_logs:
+            session_logs[self.session_id].append(log_entry)
+    
+    def get_logs(self):
+        """獲取日誌"""
+        return self.logs
+
+
+def log_message(session_id, message):
+    """同時記錄日誌到標準輸出和內存"""
+    print(message)
+    if session_id and session_id in session_logs:
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        log_entry = f"[{timestamp}] {message}"
+        session_logs[session_id].append(log_entry)
 
 # ==========================================
 # API 端點
@@ -100,7 +129,11 @@ def create_session():
             'files': {}
         }
         
+        # 初始化會話日誌
+        session_logs[session_id] = []
+        
         print(f"[WEB] 建立會話: {session_id}")
+        session_logs[session_id].append(f"[{datetime.now().strftime('%H:%M:%S')}] 會話已建立")
         
         return jsonify({
             'success': True,
@@ -135,7 +168,8 @@ def upload_audio(session_id):
         workflows[session_id].audio_file = filepath
         workflow_states[session_id]['audio_file'] = filepath
         
-        print(f"[WEB][{session_id}] 上傳音頻: {filepath}")
+        log_message(session_id, f"[WEB][{session_id}] 上傳音頻: {filepath}")
+        log_message(session_id, f"[WEB][{session_id}] 檔案大小: {os.path.getsize(filepath) / 1024 / 1024:.2f} MB")
         
         return jsonify({
             'success': True,
@@ -157,25 +191,35 @@ def run_asr(session_id):
         workflow = workflows[session_id]
         state = workflow_states[session_id]
         
+        # 驗證音頻檔案是否存在
+        if not workflow.audio_file or not os.path.exists(workflow.audio_file):
+            error_msg = '❌ 未找到音頻檔案。請先上傳音頻檔案後再執行 ASR'
+            state['errors'].append(error_msg)
+            log_message(session_id, f"[WEB][{session_id}] ASR 前置檢查失敗: 音頻檔案不存在")
+            return jsonify({
+                'success': False,
+                'error': error_msg
+            }), 400
+        
         state['current_step'] = 'asr'
         
         def asr_task():
             try:
-                print(f"[WEB][{session_id}] 開始 ASR...")
+                log_message(session_id, f"[STEP] 開始執行 ASR 語音轉文字...")
                 result = workflow.step2_transcribe()
                 
                 if result:
                     state['steps_completed'].append('asr')
                     state['messages'].append('✓ ASR 轉錄完成')
-                    print(f"[WEB][{session_id}] ASR 完成")
+                    log_message(session_id, f"[SUCCESS] ASR 轉錄完成")
                 else:
-                    state['errors'].append('ASR 轉錄失敗')
-                    print(f"[WEB][{session_id}] ASR 失敗")
+                    state['errors'].append('❌ ASR 轉錄失敗 - 請檢查音頻檔案格式')
+                    log_message(session_id, f"[ERROR] ASR 轉錄失敗 - 請檢查音頻檔案格式")
                 
                 state['current_step'] = None
             except Exception as e:
-                state['errors'].append(f'ASR 錯誤: {str(e)}')
-                print(f"[WEB][{session_id}] ASR 異常: {e}")
+                state['errors'].append(f'❌ ASR 錯誤: {str(e)}')
+                log_message(session_id, f"[ERROR] ASR 異常: {e}")
                 state['current_step'] = None
         
         thread = threading.Thread(target=asr_task, daemon=True)
@@ -205,21 +249,21 @@ def run_pkd(session_id):
         
         def pkd_task():
             try:
-                print(f"[WEB][{session_id}] 開始 PKD...")
-                result = workflow.step3_run_pkd_reports()
+                log_message(session_id, f"[STEP] 開始執行 PKD 報告提取...")
+                result = workflow.step3_extract_pkd()
                 
                 if result:
                     state['steps_completed'].append('pkd')
-                    state['messages'].append('✓ People/Keypoints/Decisions 已生成')
-                    print(f"[WEB][{session_id}] PKD 完成")
+                    state['messages'].append('✓ PKD 報告完成')
+                    log_message(session_id, f"[SUCCESS] PKD 報告生成完成")
                 else:
-                    state['errors'].append('PKD 報告生成失敗')
-                    print(f"[WEB][{session_id}] PKD 失敗")
+                    state['errors'].append('❌ PKD 報告生成失敗')
+                    log_message(session_id, f"[ERROR] PKD 報告生成失敗")
                 
                 state['current_step'] = None
             except Exception as e:
-                state['errors'].append(f'PKD 錯誤: {str(e)}')
-                print(f"[WEB][{session_id}] PKD 異常: {e}")
+                state['errors'].append(f'❌ PKD 錯誤: {str(e)}')
+                log_message(session_id, f"[ERROR] PKD 異常: {e}")
                 state['current_step'] = None
         
         thread = threading.Thread(target=pkd_task, daemon=True)
@@ -249,21 +293,21 @@ def run_actions(session_id):
         
         def actions_task():
             try:
-                print(f"[WEB][{session_id}] 開始提取行動項目...")
+                log_message(session_id, f"[STEP] 開始提取行動項目...")
                 result = workflow.step4_extract_actions()
                 
                 if result:
                     state['steps_completed'].append('actions')
-                    state['messages'].append('✓ 行動項目已提取')
-                    print(f"[WEB][{session_id}] Actions 完成")
+                    state['messages'].append('✓ 行動項目提取完成')
+                    log_message(session_id, f"[SUCCESS] 行動項目提取完成")
                 else:
-                    state['errors'].append('行動項目提取失敗')
-                    print(f"[WEB][{session_id}] Actions 失敗")
+                    state['errors'].append('❌ 行動項目提取失敗')
+                    log_message(session_id, f"[ERROR] 行動項目提取失敗")
                 
                 state['current_step'] = None
             except Exception as e:
-                state['errors'].append(f'Actions 錯誤: {str(e)}')
-                print(f"[WEB][{session_id}] Actions 異常: {e}")
+                state['errors'].append(f'❌ Actions 錯誤: {str(e)}')
+                log_message(session_id, f"[ERROR] Actions 異常: {e}")
                 state['current_step'] = None
         
         thread = threading.Thread(target=actions_task, daemon=True)
@@ -293,21 +337,21 @@ def run_summary(session_id):
         
         def summary_task():
             try:
-                print(f"[WEB][{session_id}] 開始生成摘要...")
+                log_message(session_id, f"[STEP] 開始生成會議摘要...")
                 result = workflow.step5_generate_summary()
                 
                 if result:
                     state['steps_completed'].append('summary')
                     state['messages'].append('✓ 會議摘要已生成')
-                    print(f"[WEB][{session_id}] Summary 完成")
+                    log_message(session_id, f"[SUCCESS] 會議摘要生成完成")
                 else:
-                    state['errors'].append('會議摘要生成失敗')
-                    print(f"[WEB][{session_id}] Summary 失敗")
+                    state['errors'].append('❌ 會議摘要生成失敗')
+                    log_message(session_id, f"[ERROR] 會議摘要生成失敗")
                 
                 state['current_step'] = None
             except Exception as e:
-                state['errors'].append(f'Summary 錯誤: {str(e)}')
-                print(f"[WEB][{session_id}] Summary 異常: {e}")
+                state['errors'].append(f'❌ Summary 錯誤: {str(e)}')
+                log_message(session_id, f"[ERROR] Summary 異常: {e}")
                 state['current_step'] = None
         
         thread = threading.Thread(target=summary_task, daemon=True)
@@ -337,7 +381,7 @@ def run_export(session_id):
         
         def export_task():
             try:
-                print(f"[WEB][{session_id}] 開始匯出...")
+                log_message(session_id, f"[STEP] 開始將結果匯出為 TXT 檔案...")
                 result = workflow.step6_export_txt()
                 
                 if result:
@@ -359,15 +403,15 @@ def run_export(session_id):
                         files['summary'] = summary_file
                     
                     state['files'] = files
-                    print(f"[WEB][{session_id}] Export 完成")
+                    log_message(session_id, f"[SUCCESS] TXT 匯出完成，共 {len(files)} 個檔案")
                 else:
-                    state['errors'].append('TXT 匯出失敗')
-                    print(f"[WEB][{session_id}] Export 失敗")
+                    state['errors'].append('❌ TXT 匯出失敗')
+                    log_message(session_id, f"[ERROR] TXT 匯出失敗")
                 
                 state['current_step'] = None
             except Exception as e:
-                state['errors'].append(f'Export 錯誤: {str(e)}')
-                print(f"[WEB][{session_id}] Export 異常: {e}")
+                state['errors'].append(f'❌ Export 錯誤: {str(e)}')
+                log_message(session_id, f"[ERROR] Export 異常: {e}")
                 state['current_step'] = None
         
         thread = threading.Thread(target=export_task, daemon=True)
@@ -397,10 +441,11 @@ def run_bluetooth(session_id):
         
         def bluetooth_task():
             try:
-                print(f"[WEB][{session_id}] 開始藍牙傳送...")
+                log_message(session_id, f"[STEP] 開始進行藍牙檔案傳送...")
                 
                 if not workflow.enable_bluetooth:
                     state['messages'].append('⚠ 藍牙功能未啟用')
+                    log_message(session_id, f"[WARN] 藍牙功能未啟用")
                     state['current_step'] = None
                     return
                 
@@ -411,24 +456,26 @@ def run_bluetooth(session_id):
                         files_to_send.append(filepath)
                 
                 if not files_to_send:
-                    state['errors'].append('沒有檔案可傳送')
+                    state['errors'].append('❌ 沒有檔案可傳送')
+                    log_message(session_id, f"[ERROR] 沒有檔案可傳送")
                     state['current_step'] = None
                     return
                 
                 # 執行藍牙傳送
                 try:
+                    log_message(session_id, f"[STEP] 正在搜尋已配對的藍牙設備...")
                     mac, name = workflow.bt_sender.auto_send_to_first_paired(files_to_send)
                     state['steps_completed'].append('bluetooth')
                     state['messages'].append(f'✓ 已傳送至 {name} ({mac})')
-                    print(f"[WEB][{session_id}] Bluetooth 完成")
+                    log_message(session_id, f"[SUCCESS] 藍牙傳送完成，目標設備: {name} ({mac})")
                 except Exception as e:
-                    state['errors'].append(f'藍牙傳送失敗: {str(e)}')
-                    print(f"[WEB][{session_id}] Bluetooth 失敗: {e}")
+                    state['errors'].append(f'❌ 藍牙傳送失敗: {str(e)}')
+                    log_message(session_id, f"[ERROR] 藍牙傳送失敗: {e}")
                 
                 state['current_step'] = None
             except Exception as e:
-                state['errors'].append(f'Bluetooth 錯誤: {str(e)}')
-                print(f"[WEB][{session_id}] Bluetooth 異常: {e}")
+                state['errors'].append(f'❌ Bluetooth 錯誤: {str(e)}')
+                log_message(session_id, f"[ERROR] Bluetooth 異常: {e}")
                 state['current_step'] = None
         
         thread = threading.Thread(target=bluetooth_task, daemon=True)
@@ -441,6 +488,27 @@ def run_bluetooth(session_id):
         }), 200
     except Exception as e:
         print(f"[WEB][run_bluetooth] 錯誤: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/session/<session_id>/logs', methods=['GET'])
+def get_logs(session_id):
+    """獲取會話日誌"""
+    if session_id not in session_logs:
+        return jsonify({'success': False, 'error': '會話不存在'}), 404
+    
+    try:
+        logs = session_logs[session_id]
+        # 只返回最後 100 條日誌以節省頻寬
+        recent_logs = logs[-100:] if len(logs) > 100 else logs
+        
+        return jsonify({
+            'success': True,
+            'logs': recent_logs,
+            'total': len(logs)
+        }), 200
+    except Exception as e:
+        print(f"[WEB][get_logs] 錯誤: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 

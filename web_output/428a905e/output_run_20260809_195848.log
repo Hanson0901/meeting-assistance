@@ -1,0 +1,29 @@
+[2026-08-09 19:58:49][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-09 19:58:49][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-09 19:58:49][meeting_v1_integrated] [WEB] 建立會話: 428a905e
+[2026-08-09 19:58:56][meeting_v1_integrated] [WEB][428a905e] 上傳音頻: /home/cgu-csie/meeting-assistence/web_output/428a905e/output_audio.mkv
+[2026-08-09 19:59:24][meeting_v1_integrated] [WEB][428a905e] 開始 ASR...
+[2026-08-09 19:59:24][meeting_v1_integrated] 
+============================================================
+[2026-08-09 19:59:24][meeting_v1_integrated]   步驟 2/6: 語音轉文字 (ASR)
+[2026-08-09 19:59:24][meeting_v1_integrated] ============================================================
+
+[2026-08-09 19:59:24][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] 讀取音訊: /home/cgu-csie/meeting-assistence/web_output/428a905e/output_audio.mkv
+[2026-08-09 19:59:24][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe]  按 Ctrl+C 可提前結束轉錄
+
+[2026-08-09 19:59:24][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] 使用 conda Python 執行 ASR：
+[2026-08-09 19:59:24][meeting_v1_integrated]    sudo -u cgu-csie /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/speech/run_asr_conda.py --audio /home/cgu-csie/meeting-assistence/web_output/428a905e/output_audio.mkv --outdir /home/cgu-csie/meeting-assistence/web_output/428a905e --prefix output --alpha 0.0 --overlap 5.0 --verbose
+
+[2026-08-09 20:06:38][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] ASR 轉錄完成
+[2026-08-09 20:06:38][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] step2 耗時: 433.06 秒
+
+[2026-08-09 20:06:38][meeting_v1_integrated] [WEB][428a905e] ASR 完成
+[2026-08-09 20:08:01][meeting_v1_integrated] [WEB][428a905e] 開始 PKD...
+[2026-08-09 20:08:01][meeting_v1_integrated] 
+============================================================
+[2026-08-09 20:08:01][meeting_v1_integrated]   步驟 3/6: 生成 People/Keypoints/Decisions 報告 (conda worker)
+[2026-08-09 20:08:01][meeting_v1_integrated] ============================================================
+
+[2026-08-09 20:08:01][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] 使用 conda Python 執行 PKD：
+[2026-08-09 20:08:01][meeting_v1_integrated]    sudo -u cgu-csie /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/run_pkd_conda.py --output-dir /home/cgu-csie/meeting-assistence/web_output/428a905e --output-prefix output --model-path /home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf --interval-minutes 5 --overlap-seconds 60
+

@@ -121,7 +121,27 @@
                 <section class="panel messages-panel">
                     <h3>📢 訊息日誌</h3>
                     <div class="messages-log" id="messagesLog">
-                        <p class="info-text">會話已建立，請上傳音頻檔案開始</p>
+                        <div class="message-item info">
+                            <div class="message-item-header">
+                                <span class="message-item-icon">ℹ️</span>
+                                <span class="message-item-text">等待操作...</span>
+                                <span class="message-item-expand">▶</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 系統日誌 -->
+                <section class="panel logs-panel">
+                    <div class="logs-header">
+                        <h3>🔍 系統日誌</h3>
+                        <button class="btn btn-small btn-primary" onclick="clearSystemLogs()">清空</button>
+                        <label class="auto-refresh-label">
+                            <input type="checkbox" id="autoRefreshLogs" checked> 自動更新
+                        </label>
+                    </div>
+                    <div class="logs-container" id="systemLogs">
+                        <div class="log-line info">等待日誌信息...</div>
                     </div>
                 </section>
 
