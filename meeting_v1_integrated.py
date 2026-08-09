@@ -368,7 +368,7 @@ class MeetingWorkflow:
         model_path="/home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf",
         interval_minutes=5,
         overlap_seconds=60,
-        enable_recording=True,
+        enable_recording=False,
         enable_bluetooth=True,
         enable_proximity_monitor=False,
         enable_write_output=True,
