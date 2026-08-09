@@ -1,0 +1,332 @@
+[2026-07-17 19:36:13][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-07-17 19:36:13][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-07-17 19:36:13][meeting_v1_integrated] 
+============================================================
+[2026-07-17 19:36:13][meeting_v1_integrated]    會議工作流程控制器 (整合藍牙版)
+[2026-07-17 19:36:13][meeting_v1_integrated] ============================================================
+
+[2026-07-17 19:36:13][meeting_v1_integrated] [MeetingWorkflow][run]  錄音步驟已停用，直接使用既有音訊檔
+
+[2026-07-17 19:36:13][meeting_v1_integrated] 
+============================================================
+[2026-07-17 19:36:13][meeting_v1_integrated]   步驟 2/6: 語音轉文字 (ASR)
+[2026-07-17 19:36:13][meeting_v1_integrated] ============================================================
+
+[2026-07-17 19:36:13][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] 讀取音訊: ./output_audio.mkv
+[2026-07-17 19:36:13][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe]  按 Ctrl+C 可提前結束轉錄
+
+[2026-07-17 19:36:13][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] 使用 conda Python 執行 ASR：
+[2026-07-17 19:36:13][meeting_v1_integrated]    sudo -u cgu-csie /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/speech/run_asr_conda.py --audio ./output_audio.mkv --outdir . --prefix output --alpha 0.0 --overlap 5.0 --verbose
+
+[2026-07-17 19:41:41][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] ASR 轉錄完成
+[2026-07-17 19:41:41][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] step2 耗時: 328.51 秒
+
+[2026-07-17 19:41:41][meeting_v1_integrated] 
+============================================================
+[2026-07-17 19:41:41][meeting_v1_integrated]   步驟 3/6: 生成 People/Keypoints/Decisions 報告 (conda worker)
+[2026-07-17 19:41:41][meeting_v1_integrated] ============================================================
+
+[2026-07-17 19:41:41][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] 使用 conda Python 執行 PKD：
+[2026-07-17 19:41:41][meeting_v1_integrated]    sudo -u cgu-csie /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/run_pkd_conda.py --output-dir . --output-prefix output --model-path /home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf --interval-minutes 5 --overlap-seconds 60
+
+[2026-07-17 20:16:21][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] cache 已寫入: ./output_cache.json
+
+[2026-07-17 20:16:21][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] step3 完成：P/K/D 已寫入 cache
+[2026-07-17 20:16:21][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] step3 耗時: 2079.24 秒
+
+[2026-07-17 20:16:21][meeting_v1_integrated] 
+============================================================
+[2026-07-17 20:16:21][meeting_v1_integrated]   步驟 4/6: 提取行動項目 (conda worker)
+[2026-07-17 20:16:21][meeting_v1_integrated] ============================================================
+
+[2026-07-17 20:16:21][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions] 使用 conda Python 執行 Actions：
+[2026-07-17 20:16:21][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions]   sudo -u cgu-csie /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/run_actions_conda.py --output-dir . --output-prefix output
+
+[2026-07-17 20:18:16][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions] cache 已更新: ./output_cache.json
+
+[2026-07-17 20:18:16][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions] 行動項目已輸出: ./output_actions.txt
+[2026-07-17 20:18:16][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions] step4 耗時: 115.14 秒
+
+[2026-07-17 20:18:16][meeting_v1_integrated] 
+============================================================
+[2026-07-17 20:18:16][meeting_v1_integrated]   步驟 5/6: 生成會議摘要 (conda worker)
+[2026-07-17 20:18:16][meeting_v1_integrated] ============================================================
+
+[2026-07-17 20:18:16][meeting_v1_integrated] [MeetingWorkflow][step5_generate_summary] 使用 conda Python 執行 Summary：
+[2026-07-17 20:18:16][meeting_v1_integrated] [MeetingWorkflow][step5_generate_summary]   sudo -u cgu-csie /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/run_summary_conda.py --output-dir . --output-prefix output
+
+[2026-07-17 20:30:07][meeting_v1_integrated] [MeetingWorkflow][step5_generate_summary] Summary 為空或 null，跳過輸出 summary.txt
+
+[2026-07-17 20:30:07][meeting_v1_integrated] [MeetingWorkflow][step5_generate_summary] step5 耗時: 711.22 秒
+
+[2026-07-17 20:30:07][meeting_v1_integrated] 
+============================================================
+[2026-07-17 20:30:07][meeting_v1_integrated]   步驟 6/6: 匯出 TXT + 藍牙傳送
+[2026-07-17 20:30:07][meeting_v1_integrated] ============================================================
+
+[2026-07-17 20:30:07][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt] TXT 已輸出: ./output_meeting_summary.txt
+
+[2026-07-17 20:30:07][meeting_v1_integrated] [send_to_paired] 藍牙傳送目標: realme X50 5G (C8:16:DA:A0:5C:C2)
+[2026-07-17 20:30:07][meeting_v1_integrated] [send_to_paired] 傳送檔案: output_meeting_summary.txt
+[2026-07-17 20:30:07][meeting_v1_integrated]   [send_file] 檔案路徑: /home/cgu-csie/meeting-assistence/output_meeting_summary.txt
+[2026-07-17 20:30:07][meeting_v1_integrated]   [send_file] 檔案大小: 4265 bytes (4.17 KB)
+[2026-07-17 20:30:07][meeting_v1_integrated]   [send_file] 檔案名稱: output_meeting_summary.txt
+[2026-07-17 20:30:08][meeting_v1_integrated] [send_file]  → OBEX 會話建立: /org/bluez/obex/client/session1
+[2026-07-17 20:30:08][meeting_v1_integrated] [send_file] 開始傳送: /org/bluez/obex/client/session1/transfer1
+[2026-07-17 20:30:08][meeting_v1_integrated] [send_file] 狀態: queued
+[2026-07-17 20:30:08][meeting_v1_integrated] [send_file] 狀態: queued
+[2026-07-17 20:30:09][meeting_v1_integrated] [send_file] 狀態: queued
+[2026-07-17 20:30:09][meeting_v1_integrated] [send_file] 進度: 100% (4265/4265 bytes)
+[2026-07-17 20:30:09][meeting_v1_integrated] [send_file] 狀態: queued
+[2026-07-17 20:30:10][meeting_v1_integrated] [send_file] 進度: 100% (4265/4265 bytes)
+[2026-07-17 20:30:10][meeting_v1_integrated] [send_file] 狀態: queued
+[2026-07-17 20:30:10][meeting_v1_integrated] [send_file] 進度: 100% (4265/4265 bytes)
+[2026-07-17 20:30:10][meeting_v1_integrated] [send_file] 狀態: queued
+[2026-07-17 20:30:11][meeting_v1_integrated] [send_file] 進度: 100% (4265/4265 bytes)
+[2026-07-17 20:30:11][meeting_v1_integrated] [send_file] 狀態: queued
+[2026-07-17 20:30:11][meeting_v1_integrated] [send_file] 進度: 100% (4265/4265 bytes)
+[2026-07-17 20:30:11][meeting_v1_integrated] [send_file] 狀態: queued
+[2026-07-17 20:30:12][meeting_v1_integrated] [send_file] 進度: 100% (4265/4265 bytes)
+[2026-07-17 20:30:12][meeting_v1_integrated] [send_file] 狀態: queued
+[2026-07-17 20:30:12][meeting_v1_integrated] [send_file] 進度: 100% (4265/4265 bytes)
+[2026-07-17 20:30:12][meeting_v1_integrated] [send_file] 狀態: queued
+[2026-07-17 20:30:15][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:16][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:16][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:17][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:17][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:18][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:18][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:19][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:19][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:20][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:20][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:21][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:21][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:22][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:22][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:23][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:23][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:24][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:24][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:25][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:25][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:26][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:26][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:27][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:27][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:28][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:28][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:29][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:29][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:30][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:30][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:31][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:31][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:32][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:32][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:33][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:33][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:34][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:34][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:35][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:35][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:36][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:36][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:37][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:37][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:38][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:38][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:39][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:39][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:40][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:40][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:41][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:41][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:42][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:42][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:43][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:43][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:44][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:44][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:45][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:45][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:46][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:46][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:47][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:47][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:48][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:48][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:49][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:49][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:50][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:50][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:51][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:51][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:52][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:52][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:53][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:53][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:54][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:54][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:55][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:55][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:56][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:56][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:57][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:57][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:58][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:58][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:59][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:30:59][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:00][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:00][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:01][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:01][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:02][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:02][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:03][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:03][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:04][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:04][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:05][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:05][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:06][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:06][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:07][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:07][meeting_v1_integrated] [send_file] 狀態查詢失敗: org.freedesktop.DBus.Error.UnknownObject: Method "Get" with signature "ss" on interface "org.freedesktop.DBus.Properties" doesn't exist
+
+[2026-07-17 20:31:08][meeting_v1_integrated] [send_to_paired] 傳送失敗: [send_file] 傳送逾時 (超過 60 秒)
+[2026-07-17 20:31:08][meeting_v1_integrated] 
+============================================================
+[2026-07-17 20:31:08][meeting_v1_integrated] [send_to_paired] 傳送統計:
+[2026-07-17 20:31:08][meeting_v1_integrated] [send_to_paired] 成功: 0/1 個檔案
+[2026-07-17 20:31:08][meeting_v1_integrated] [send_to_paired] 失敗: output_meeting_summary.txt
+[2026-07-17 20:31:08][meeting_v1_integrated] ============================================================
+
+[2026-07-17 20:31:08][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt] 藍牙傳送失敗: [send_to_paired] 所有檔案傳送失敗
+[2026-07-17 20:31:08][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt]    檢查項目:
+[2026-07-17 20:31:08][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt]      確保藍牙裝置已配對且在範圍內
+[2026-07-17 20:31:08][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt]      執行: systemctl --user status obex
+[2026-07-17 20:31:08][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt]      執行: systemctl --user restart obex
+
+[2026-07-17 20:31:08][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt] step6 耗時: 60.64 秒
+
+[2026-07-17 20:31:08][meeting_v1_integrated] 
+============================================================
+[2026-07-17 20:31:08][meeting_v1_integrated]    工作流程完成
+[2026-07-17 20:31:08][meeting_v1_integrated] ============================================================
+
+[2026-07-17 20:31:08][meeting_v1_integrated] [MeetingWorkflow][run]  計時統計:
+[2026-07-17 20:31:08][meeting_v1_integrated] [MeetingWorkflow][run]  step2: 328.51 秒
+[2026-07-17 20:31:08][meeting_v1_integrated] [MeetingWorkflow][run]  step3: 2079.24 秒
+[2026-07-17 20:31:08][meeting_v1_integrated] [MeetingWorkflow][run]  step4: 115.14 秒
+[2026-07-17 20:31:08][meeting_v1_integrated] [MeetingWorkflow][run]  step5: 711.22 秒
+[2026-07-17 20:31:08][meeting_v1_integrated] [MeetingWorkflow][run]  step6: 60.64 秒
+[2026-07-17 20:31:08][meeting_v1_integrated] [MeetingWorkflow][run]  總耗時: 3294.75 秒
+[2026-07-17 20:31:08][meeting_v1_integrated] [MeetingWorkflow][run] 全流程結束
+

@@ -1469,7 +1469,7 @@ def main():
         overlap_seconds=60,
         enable_bluetooth=True,           # 啟用藍牙傳送
         enable_proximity_monitor=False,  # 選用:藍牙監控
-        enable_recording=True,            # 測試階段先關閉錄音，直接用既有音訊檔
+        enable_recording=False,            # 測試階段先關閉錄音，直接用既有音訊檔
         include_actions_and_summary_files=False,  # False: 不包含 actions/summary，僅傳送最終總報告 TXT
         include_decisions_in_final_txt=False,  # False: 最終總報告不包含 Decisions
     )
