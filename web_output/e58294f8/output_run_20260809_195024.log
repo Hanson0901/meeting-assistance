@@ -1,0 +1,18 @@
+[2026-08-09 19:50:25][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-09 19:50:25][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-09 19:50:25][meeting_v1_integrated] [WEB] 建立會話: e58294f8
+[2026-08-09 19:53:39][meeting_v1_integrated] [WEB][e58294f8] 開始 ASR...
+[2026-08-09 19:53:39][meeting_v1_integrated] 
+============================================================
+[2026-08-09 19:53:39][meeting_v1_integrated]   步驟 2/6: 語音轉文字 (ASR)
+[2026-08-09 19:53:39][meeting_v1_integrated] ============================================================
+
+[2026-08-09 19:53:39][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] 讀取音訊: /home/cgu-csie/meeting-assistence/web_output/e58294f8/output_audio.mkv
+[2026-08-09 19:53:39][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe]  按 Ctrl+C 可提前結束轉錄
+
+[2026-08-09 19:53:39][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] 音訊檔不存在
+
+[2026-08-09 19:53:39][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] step2 耗時: 0.00 秒
+
+[2026-08-09 19:53:39][meeting_v1_integrated] [WEB][e58294f8] ASR 失敗
+[2026-08-09 19:53:42][meeting_v1_integrated] [WEB][e58294f8] 上傳音頻: /home/cgu-csie/meeting-assistence/web_output/e58294f8/output_audio.mkv

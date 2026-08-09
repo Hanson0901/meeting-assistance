@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>會議助理 - 網頁應用</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- 頁頭 -->
+        <header class="header">
+            <h1>🎙️ 會議助理</h1>
+            <p>AI 驅動的會議紀錄與分析工具</p>
+        </header>
+
+        <!-- 主要內容 -->
+        <main class="main-content">
+            <!-- 設置面板 -->
+            <section class="panel setup-panel">
+                <h2>⚙️ 設置</h2>
+                <div class="form-group">
+                    <label for="modelPath">模型路徑:</label>
+                    <input type="text" id="modelPath" placeholder="/home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf" value="/home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf">
+                </div>
+                <div class="form-group">
+                    <label for="intervalMinutes">時間間隔 (分鐘):</label>
+                    <input type="number" id="intervalMinutes" min="1" max="60" value="5">
+                </div>
+                <div class="form-group">
+                    <label for="overlapSeconds">重疊時長 (秒):</label>
+                    <input type="number" id="overlapSeconds" min="0" max="300" value="60">
+                </div>
+                <div class="form-group checkbox">
+                    <input type="checkbox" id="enableBluetooth" checked>
+                    <label for="enableBluetooth">啟用藍牙傳送</label>
+                </div>
+                <button class="btn btn-primary" onclick="startNewSession()">開始新會議</button>
+            </section>
+
+            <!-- 會議進度 -->
+            <section class="panel progress-panel" id="progressPanel" style="display: none;">
+                <h2>📊 會議進度</h2>
+                <div class="session-info">
+                    <p>會話 ID: <code id="sessionId"></code></p>
+                </div>
+
+                <!-- 音頻上傳 -->
+                <div class="step-section">
+                    <h3>📁 步驟 0: 上傳音頻</h3>
+                    <div class="file-upload">
+                        <input type="file" id="audioFile" accept="audio/*,video/*" onchange="handleFileSelect(event)">
+                        <span id="uploadStatus" class="status-text"></span>
+                    </div>
+                </div>
+
+                <!-- 流程步驟 -->
+                <div class="steps-container">
+                    <!-- ASR -->
+                    <div class="step-section">
+                        <div class="step-header">
+                            <h3 id="asrTitle">🗣️ 步驟 1: ASR 語音轉文字</h3>
+                            <span id="asrStatus" class="step-status"></span>
+                        </div>
+                        <p class="step-description">將音頻轉換為文字轉錄</p>
+                        <button class="btn btn-step" onclick="runStep('asr')" id="asrBtn" disabled>執行 ASR</button>
+                    </div>
+
+                    <!-- PKD -->
+                    <div class="step-section">
+                        <div class="step-header">
+                            <h3 id="pkdTitle">👥 步驟 2: PKD 報告</h3>
+                            <span id="pkdStatus" class="step-status"></span>
+                        </div>
+                        <p class="step-description">生成 People (參與者) / Keypoints (重點) / Decisions (決策)</p>
+                        <button class="btn btn-step" onclick="runStep('pkd')" id="pkdBtn" disabled>執行 PKD</button>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="step-section">
+                        <div class="step-header">
+                            <h3 id="actionsTitle">✅ 步驟 3: 提取行動項目</h3>
+                            <span id="actionsStatus" class="step-status"></span>
+                        </div>
+                        <p class="step-description">提取需要跟進的行動項目和任務</p>
+                        <button class="btn btn-step" onclick="runStep('actions')" id="actionsBtn" disabled>執行 Actions</button>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="step-section">
+                        <div class="step-header">
+                            <h3 id="summaryTitle">📋 步驟 4: 生成摘要</h3>
+                            <span id="summaryStatus" class="step-status"></span>
+                        </div>
+                        <p class="step-description">生成整體會議摘要和總結</p>
+                        <button class="btn btn-step" onclick="runStep('summary')" id="summaryBtn" disabled>執行 Summary</button>
+                    </div>
+
+                    <!-- Export -->
+                    <div class="step-section">
+                        <div class="step-header">
+                            <h3 id="exportTitle">📤 步驟 5: 匯出 TXT</h3>
+                            <span id="exportStatus" class="step-status"></span>
+                        </div>
+                        <p class="step-description">將所有結果匯出為 TXT 檔案</p>
+                        <button class="btn btn-step" onclick="runStep('export')" id="exportBtn" disabled>執行 Export</button>
+                    </div>
+
+                    <!-- Bluetooth -->
+                    <div class="step-section">
+                        <div class="step-header">
+                            <h3 id="bluetoothTitle">📱 步驟 6: 藍牙傳送</h3>
+                            <span id="bluetoothStatus" class="step-status"></span>
+                        </div>
+                        <p class="step-description">將檔案傳送到配對的藍牙裝置</p>
+                        <button class="btn btn-step" onclick="runStep('bluetooth')" id="bluetoothBtn" disabled>執行 Bluetooth</button>
+                    </div>
+                </div>
+
+                <!-- 訊息和錯誤 -->
+                <section class="panel messages-panel">
+                    <h3>📢 訊息日誌</h3>
+                    <div class="messages-log" id="messagesLog">
+                        <p class="info-text">會話已建立，請上傳音頻檔案開始</p>
+                    </div>
+                </section>
+
+                <!-- 下載區域 -->
+                <section class="panel download-panel" id="downloadPanel" style="display: none;">
+                    <h3>📥 下載結果</h3>
+                    <div class="download-list" id="downloadList"></div>
+                </section>
+
+                <!-- 操作按鈕 -->
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="refreshStatus()">🔄 刷新狀態</button>
+                    <button class="btn btn-danger" onclick="endSession()">❌ 結束會議</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- 頁尾 -->
+        <footer class="footer">
+            <p>會議助理 Web 應用 © 2024 | 基於 AI 的會議紀錄系統</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
