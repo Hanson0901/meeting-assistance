@@ -8,6 +8,16 @@ import threading
 
 _ORIGINAL_PRINT = builtins.print
 _PRINT_PATCHED = False
+_LOG_CALLBACK = None  # 日誌回調函數
+
+
+def set_log_callback(callback):
+    """設置日誌回調函數
+    
+    回調函數簽名: callback(message: str, prefix: str, timestamp: str)
+    """
+    global _LOG_CALLBACK
+    _LOG_CALLBACK = callback
 
 
 def setup_print_logging(default_log_path: str = None, process_name: str = "", announce: bool = True):
@@ -39,6 +49,13 @@ def setup_print_logging(default_log_path: str = None, process_name: str = "", an
         prefix = f"[{timestamp}]"
         if process_name:
             prefix += f"[{process_name}]"
+
+        # 調用日誌回調函數
+        if _LOG_CALLBACK:
+            try:
+                _LOG_CALLBACK(message.rstrip('\n'), prefix, timestamp, process_name)
+            except Exception:
+                pass
 
         try:
             with lock:

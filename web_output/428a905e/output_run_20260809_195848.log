@@ -27,3 +27,10 @@
 [2026-08-09 20:08:01][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] 使用 conda Python 執行 PKD：
 [2026-08-09 20:08:01][meeting_v1_integrated]    sudo -u cgu-csie /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/run_pkd_conda.py --output-dir /home/cgu-csie/meeting-assistence/web_output/428a905e --output-prefix output --model-path /home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf --interval-minutes 5 --overlap-seconds 60
 
+[2026-08-09 20:45:06][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] cache 已寫入: /home/cgu-csie/meeting-assistence/web_output/428a905e/output_cache.json
+
+[2026-08-09 20:45:06][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] step3 完成：P/K/D 已寫入 cache
+[2026-08-09 20:45:06][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] step3 耗時: 2224.72 秒
+
+[2026-08-09 20:45:06][meeting_v1_integrated] [WEB][428a905e] PKD 完成
+[2026-08-10 08:41:16][meeting_v1_integrated] [WEB] 清除會話: 428a905e

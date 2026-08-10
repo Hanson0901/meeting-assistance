@@ -157,7 +157,7 @@ async function runStep(stepName) {
             return;
         }
         
-        showMessage(`▶ ${stepName.toUpperCase()} 已開始執行...`, 'info');
+        showMessage(`▶ ${stepName.toUpperCase()} 已開始執行...`, 'info', stepName);
         updateStepStatus(stepName, 'running');
         
         // 開始監控狀態
@@ -413,7 +413,7 @@ function enableStepButtons() {
 /**
  * 顯示訊息 - 創建可展開的訊息項
  */
-function showMessage(message, type = 'info') {
+function showMessage(message, type = 'info', stepName = null) {
     const messagesLog = document.getElementById('messagesLog');
     
     // 清除初始提示
@@ -425,6 +425,11 @@ function showMessage(message, type = 'info') {
     // 創建訊息項
     const msgItem = document.createElement('div');
     msgItem.className = `message-item ${type}`;
+    
+    // 存儲步驟名稱，以便展開時使用
+    if (stepName) {
+        msgItem.dataset.stepName = stepName;
+    }
     
     const icon = {
         'success': '✓',
@@ -460,10 +465,64 @@ function expandMessage(messageItem) {
     
     // 如果展開，則加載相關日誌
     if (messageItem.classList.contains('expanded')) {
-        const logContainer = messageItem.querySelector('.message-item-logs');
-        if (logContainer && logContainer.textContent.includes('點擊查看')) {
-            updateSystemLogs();
+        const stepName = messageItem.dataset.stepName;
+        if (stepName) {
+            // 從步驟特定的 API 加載日誌
+            loadStepLogs(stepName, messageItem);
+        } else {
+            // 加載總體系統日誌
+            loadSystemLogs(messageItem);
         }
+    }
+}
+
+/**
+ * 加載特定步驟的日誌
+ */
+async function loadStepLogs(stepName, messageItem) {
+    if (!currentSessionId) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/session/${currentSessionId}/step/${stepName}/logs`);
+        const data = await response.json();
+        
+        if (!data.success) {
+            return;
+        }
+        
+        const logContainer = messageItem.querySelector('.message-item-logs');
+        logContainer.innerHTML = '';
+        
+        data.logs.forEach(log => {
+            const logLine = document.createElement('div');
+            logLine.className = 'log-line';
+            
+            // 根據日誌內容判斷類型
+            if (log.includes('[ERROR]') || log.includes('❌') || log.includes('異常')) {
+                logLine.classList.add('error');
+            } else if (log.includes('[WARN]') || log.includes('⚠')) {
+                logLine.classList.add('warning');
+            } else if (log.includes('✓') || log.includes('[SUCCESS]')) {
+                logLine.classList.add('success');
+            } else if (log.includes('[STEP]') || log.includes('已開始') || log.includes('完成')) {
+                logLine.classList.add('step');
+            } else if (log.includes('[DEBUG]')) {
+                logLine.classList.add('debug');
+            } else {
+                logLine.classList.add('info');
+            }
+            
+            logLine.textContent = log;
+            logContainer.appendChild(logLine);
+        });
+        
+        // 自動滾到底部
+        logContainer.scrollTop = logContainer.scrollHeight;
+        
+    } catch (error) {
+        console.error('加載步驟日誌錯誤:', error);
     }
 }
 
@@ -546,6 +605,56 @@ async function updateSystemLogs() {
 function clearSystemLogs() {
     const logsContainer = document.getElementById('systemLogs');
     logsContainer.innerHTML = '<div class="log-line info">日誌已清空...</div>';
+}
+
+/**
+ * 在訊息項中加載系統日誌
+ */
+async function loadSystemLogs(messageItem) {
+    if (!currentSessionId) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/session/${currentSessionId}/logs`);
+        const data = await response.json();
+        
+        if (!data.success) {
+            return;
+        }
+        
+        const logContainer = messageItem.querySelector('.message-item-logs');
+        logContainer.innerHTML = '';
+        
+        data.logs.forEach(log => {
+            const logLine = document.createElement('div');
+            logLine.className = 'log-line';
+            
+            // 根據日誌內容判斷類型
+            if (log.includes('[ERROR]') || log.includes('❌') || log.includes('異常')) {
+                logLine.classList.add('error');
+            } else if (log.includes('[WARN]') || log.includes('⚠')) {
+                logLine.classList.add('warning');
+            } else if (log.includes('✓') || log.includes('[SUCCESS]')) {
+                logLine.classList.add('success');
+            } else if (log.includes('[STEP]') || log.includes('已開始') || log.includes('完成')) {
+                logLine.classList.add('step');
+            } else if (log.includes('[DEBUG]')) {
+                logLine.classList.add('debug');
+            } else {
+                logLine.classList.add('info');
+            }
+            
+            logLine.textContent = log;
+            logContainer.appendChild(logLine);
+        });
+        
+        // 自動滾到底部
+        logContainer.scrollTop = logContainer.scrollHeight;
+        
+    } catch (error) {
+        console.error('加載系統日誌錯誤:', error);
+    }
 }
 
 /**

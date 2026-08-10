@@ -25,7 +25,7 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 from meeting_v1_integrated import MeetingWorkflow
-from print_log_utils import setup_print_logging
+from print_log_utils import setup_print_logging, set_log_callback
 
 # ==========================================
 # Flask App 初始化
@@ -48,25 +48,48 @@ app.config['MAX_CONTENT_LENGTH'] = 2000 * 1024 * 1024  # 2GB 上傳限制
 workflows: Dict[str, MeetingWorkflow] = {}
 workflow_states: Dict[str, Dict[str, Any]] = {}
 session_logs: Dict[str, list] = {}  # 存儲每個會話的日誌
+step_logs: Dict[str, Dict[str, list]] = {}  # 存儲每個會話每個步驟的日誌：{session_id: {step_name: [logs]}}
 
-# 日誌工具類
-class LogCapture:
-    """捕捉日誌並存儲到內存"""
-    def __init__(self, session_id=None):
-        self.session_id = session_id
-        self.logs = []
+# 進程名前綴到步驟的映射
+PROCESS_TO_STEP = {
+    'run_asr_conda': 'asr',
+    'run_pkd_conda': 'pkd',
+    'run_actions_conda': 'actions',
+    'run_summary_conda': 'summary',
+    'run_export_conda': 'export',
+    'run_bluetooth_conda': 'bluetooth'
+}
+
+
+def log_collection_callback(message, prefix, timestamp, process_name):
+    """日誌收集回調函數
     
-    def add_log(self, message):
-        """添加日誌"""
-        timestamp = datetime.now().strftime("%H:%M:%S")
-        log_entry = f"[{timestamp}] {message}"
-        self.logs.append(log_entry)
-        if self.session_id and self.session_id in session_logs:
-            session_logs[self.session_id].append(log_entry)
+    根據進程名分類日誌到不同步驟
+    """
+    # 查找對應的步驟
+    step_name = PROCESS_TO_STEP.get(process_name)
     
-    def get_logs(self):
-        """獲取日誌"""
-        return self.logs
+    if not step_name:
+        return
+    
+    # 從所有活躍會話中查找使用該步驟的會話
+    # （簡單方案：存儲當前活躍的會話 ID）
+    if hasattr(log_collection_callback, 'current_session_id'):
+        session_id = log_collection_callback.current_session_id
+        
+        # 初始化該會話的步驟日誌
+        if session_id not in step_logs:
+            step_logs[session_id] = {}
+        if step_name not in step_logs[session_id]:
+            step_logs[session_id][step_name] = []
+        
+        # 添加日誌
+        formatted_log = f"[{timestamp}] {message}"
+        step_logs[session_id][step_name].append(formatted_log)
+
+
+# 設置日誌回調
+set_log_callback(log_collection_callback)
 
 
 def log_message(session_id, message):
@@ -131,6 +154,7 @@ def create_session():
         
         # 初始化會話日誌
         session_logs[session_id] = []
+        step_logs[session_id] = {}  # 初始化步驟日誌
         
         print(f"[WEB] 建立會話: {session_id}")
         session_logs[session_id].append(f"[{datetime.now().strftime('%H:%M:%S')}] 會話已建立")
@@ -205,6 +229,9 @@ def run_asr(session_id):
         
         def asr_task():
             try:
+                # 設置當前會話 ID 用於日誌回調
+                log_collection_callback.current_session_id = session_id
+                
                 log_message(session_id, f"[STEP] 開始執行 ASR 語音轉文字...")
                 result = workflow.step2_transcribe()
                 
@@ -217,10 +244,16 @@ def run_asr(session_id):
                     log_message(session_id, f"[ERROR] ASR 轉錄失敗 - 請檢查音頻檔案格式")
                 
                 state['current_step'] = None
+                # 清除當前會話 ID
+                if hasattr(log_collection_callback, 'current_session_id'):
+                    delattr(log_collection_callback, 'current_session_id')
             except Exception as e:
                 state['errors'].append(f'❌ ASR 錯誤: {str(e)}')
                 log_message(session_id, f"[ERROR] ASR 異常: {e}")
                 state['current_step'] = None
+                # 清除當前會話 ID
+                if hasattr(log_collection_callback, 'current_session_id'):
+                    delattr(log_collection_callback, 'current_session_id')
         
         thread = threading.Thread(target=asr_task, daemon=True)
         thread.start()
@@ -249,6 +282,9 @@ def run_pkd(session_id):
         
         def pkd_task():
             try:
+                # 設置當前會話 ID 用於日誌回調
+                log_collection_callback.current_session_id = session_id
+                
                 log_message(session_id, f"[STEP] 開始執行 PKD 報告提取...")
                 result = workflow.step3_extract_pkd()
                 
@@ -261,10 +297,16 @@ def run_pkd(session_id):
                     log_message(session_id, f"[ERROR] PKD 報告生成失敗")
                 
                 state['current_step'] = None
+                # 清除當前會話 ID
+                if hasattr(log_collection_callback, 'current_session_id'):
+                    delattr(log_collection_callback, 'current_session_id')
             except Exception as e:
                 state['errors'].append(f'❌ PKD 錯誤: {str(e)}')
                 log_message(session_id, f"[ERROR] PKD 異常: {e}")
                 state['current_step'] = None
+                # 清除當前會話 ID
+                if hasattr(log_collection_callback, 'current_session_id'):
+                    delattr(log_collection_callback, 'current_session_id')
         
         thread = threading.Thread(target=pkd_task, daemon=True)
         thread.start()
@@ -293,6 +335,9 @@ def run_actions(session_id):
         
         def actions_task():
             try:
+                # 設置當前會話 ID 用於日誌回調
+                log_collection_callback.current_session_id = session_id
+                
                 log_message(session_id, f"[STEP] 開始提取行動項目...")
                 result = workflow.step4_extract_actions()
                 
@@ -305,10 +350,16 @@ def run_actions(session_id):
                     log_message(session_id, f"[ERROR] 行動項目提取失敗")
                 
                 state['current_step'] = None
+                # 清除當前會話 ID
+                if hasattr(log_collection_callback, 'current_session_id'):
+                    delattr(log_collection_callback, 'current_session_id')
             except Exception as e:
                 state['errors'].append(f'❌ Actions 錯誤: {str(e)}')
                 log_message(session_id, f"[ERROR] Actions 異常: {e}")
                 state['current_step'] = None
+                # 清除當前會話 ID
+                if hasattr(log_collection_callback, 'current_session_id'):
+                    delattr(log_collection_callback, 'current_session_id')
         
         thread = threading.Thread(target=actions_task, daemon=True)
         thread.start()
@@ -337,6 +388,9 @@ def run_summary(session_id):
         
         def summary_task():
             try:
+                # 設置當前會話 ID 用於日誌回調
+                log_collection_callback.current_session_id = session_id
+                
                 log_message(session_id, f"[STEP] 開始生成會議摘要...")
                 result = workflow.step5_generate_summary()
                 
@@ -349,10 +403,16 @@ def run_summary(session_id):
                     log_message(session_id, f"[ERROR] 會議摘要生成失敗")
                 
                 state['current_step'] = None
+                # 清除當前會話 ID
+                if hasattr(log_collection_callback, 'current_session_id'):
+                    delattr(log_collection_callback, 'current_session_id')
             except Exception as e:
                 state['errors'].append(f'❌ Summary 錯誤: {str(e)}')
                 log_message(session_id, f"[ERROR] Summary 異常: {e}")
                 state['current_step'] = None
+                # 清除當前會話 ID
+                if hasattr(log_collection_callback, 'current_session_id'):
+                    delattr(log_collection_callback, 'current_session_id')
         
         thread = threading.Thread(target=summary_task, daemon=True)
         thread.start()
@@ -381,6 +441,9 @@ def run_export(session_id):
         
         def export_task():
             try:
+                # 設置當前會話 ID 用於日誌回調
+                log_collection_callback.current_session_id = session_id
+                
                 log_message(session_id, f"[STEP] 開始將結果匯出為 TXT 檔案...")
                 result = workflow.step6_export_txt()
                 
@@ -409,10 +472,16 @@ def run_export(session_id):
                     log_message(session_id, f"[ERROR] TXT 匯出失敗")
                 
                 state['current_step'] = None
+                # 清除當前會話 ID
+                if hasattr(log_collection_callback, 'current_session_id'):
+                    delattr(log_collection_callback, 'current_session_id')
             except Exception as e:
                 state['errors'].append(f'❌ Export 錯誤: {str(e)}')
                 log_message(session_id, f"[ERROR] Export 異常: {e}")
                 state['current_step'] = None
+                # 清除當前會話 ID
+                if hasattr(log_collection_callback, 'current_session_id'):
+                    delattr(log_collection_callback, 'current_session_id')
         
         thread = threading.Thread(target=export_task, daemon=True)
         thread.start()
@@ -441,12 +510,18 @@ def run_bluetooth(session_id):
         
         def bluetooth_task():
             try:
+                # 設置當前會話 ID 用於日誌回調
+                log_collection_callback.current_session_id = session_id
+                
                 log_message(session_id, f"[STEP] 開始進行藍牙檔案傳送...")
                 
                 if not workflow.enable_bluetooth:
                     state['messages'].append('⚠ 藍牙功能未啟用')
                     log_message(session_id, f"[WARN] 藍牙功能未啟用")
                     state['current_step'] = None
+                    # 清除當前會話 ID
+                    if hasattr(log_collection_callback, 'current_session_id'):
+                        delattr(log_collection_callback, 'current_session_id')
                     return
                 
                 # 收集要傳送的檔案
@@ -459,6 +534,9 @@ def run_bluetooth(session_id):
                     state['errors'].append('❌ 沒有檔案可傳送')
                     log_message(session_id, f"[ERROR] 沒有檔案可傳送")
                     state['current_step'] = None
+                    # 清除當前會話 ID
+                    if hasattr(log_collection_callback, 'current_session_id'):
+                        delattr(log_collection_callback, 'current_session_id')
                     return
                 
                 # 執行藍牙傳送
@@ -473,10 +551,16 @@ def run_bluetooth(session_id):
                     log_message(session_id, f"[ERROR] 藍牙傳送失敗: {e}")
                 
                 state['current_step'] = None
+                # 清除當前會話 ID
+                if hasattr(log_collection_callback, 'current_session_id'):
+                    delattr(log_collection_callback, 'current_session_id')
             except Exception as e:
                 state['errors'].append(f'❌ Bluetooth 錯誤: {str(e)}')
                 log_message(session_id, f"[ERROR] Bluetooth 異常: {e}")
                 state['current_step'] = None
+                # 清除當前會話 ID
+                if hasattr(log_collection_callback, 'current_session_id'):
+                    delattr(log_collection_callback, 'current_session_id')
         
         thread = threading.Thread(target=bluetooth_task, daemon=True)
         thread.start()
@@ -509,6 +593,29 @@ def get_logs(session_id):
         }), 200
     except Exception as e:
         print(f"[WEB][get_logs] 錯誤: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/session/<session_id>/step/<step_name>/logs', methods=['GET'])
+def get_step_logs(session_id, step_name):
+    """獲取特定步驟的日誌"""
+    if session_id not in step_logs:
+        return jsonify({'success': False, 'error': '會話不存在'}), 404
+    
+    try:
+        step_logs_data = step_logs[session_id].get(step_name, [])
+        
+        # 只返回最後 200 條日誌以節省頻寬
+        recent_logs = step_logs_data[-200:] if len(step_logs_data) > 200 else step_logs_data
+        
+        return jsonify({
+            'success': True,
+            'step': step_name,
+            'logs': recent_logs,
+            'total': len(step_logs_data)
+        }), 200
+    except Exception as e:
+        print(f"[WEB][get_step_logs] 錯誤: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
