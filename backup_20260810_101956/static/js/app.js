@@ -4,7 +4,6 @@
 
 let currentSessionId = null;
 let statusCheckInterval = null;
-let currentHistorySessionId = null;
 
 // ==========================================
 // 主要函數
@@ -494,7 +493,30 @@ async function loadStepLogs(stepName, messageItem) {
         }
         
         const logContainer = messageItem.querySelector('.message-item-logs');
-        renderLogLines(logContainer, data.logs);
+        logContainer.innerHTML = '';
+        
+        data.logs.forEach(log => {
+            const logLine = document.createElement('div');
+            logLine.className = 'log-line';
+            
+            // 根據日誌內容判斷類型
+            if (log.includes('[ERROR]') || log.includes('❌') || log.includes('異常')) {
+                logLine.classList.add('error');
+            } else if (log.includes('[WARN]') || log.includes('⚠')) {
+                logLine.classList.add('warning');
+            } else if (log.includes('✓') || log.includes('[SUCCESS]')) {
+                logLine.classList.add('success');
+            } else if (log.includes('[STEP]') || log.includes('已開始') || log.includes('完成')) {
+                logLine.classList.add('step');
+            } else if (log.includes('[DEBUG]')) {
+                logLine.classList.add('debug');
+            } else {
+                logLine.classList.add('info');
+            }
+            
+            logLine.textContent = log;
+            logContainer.appendChild(logLine);
+        });
         
         // 自動滾到底部
         logContainer.scrollTop = logContainer.scrollHeight;
@@ -502,44 +524,6 @@ async function loadStepLogs(stepName, messageItem) {
     } catch (error) {
         console.error('加載步驟日誌錯誤:', error);
     }
-}
-
-/**
- * 根據日誌內容判斷顯示樣式類別（與後端 print_log_utils.classify_log_line 保持一致）
- */
-function getLogLineClass(log) {
-    if (log.includes('[ERROR]') || log.includes('❌') || log.includes('異常')) {
-        return 'error';
-    } else if (log.includes('[WARN]') || log.includes('⚠')) {
-        return 'warning';
-    } else if (log.includes('✓') || log.includes('[SUCCESS]')) {
-        return 'success';
-    } else if (log.includes('[STEP]') || log.includes('已開始') || log.includes('完成')) {
-        return 'step';
-    } else if (log.includes('[DEBUG]')) {
-        return 'debug';
-    }
-    return 'info';
-}
-
-/**
- * 將一組日誌字串渲染到指定容器中（共享於系統日誌、步驟日誌與歷史 session 日誌）
- */
-function renderLogLines(container, logs) {
-    container.innerHTML = '';
-    if (!logs || logs.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'log-line info';
-        empty.textContent = '（無日誌內容）';
-        container.appendChild(empty);
-        return;
-    }
-    logs.forEach(log => {
-        const logLine = document.createElement('div');
-        logLine.className = `log-line ${getLogLineClass(log)}`;
-        logLine.textContent = log;
-        container.appendChild(logLine);
-    });
 }
 
 /**
@@ -573,7 +557,30 @@ async function updateSystemLogs() {
         }
         
         const logsContainer = document.getElementById('systemLogs');
-        renderLogLines(logsContainer, data.logs);
+        logsContainer.innerHTML = '';
+        
+        data.logs.forEach(log => {
+            const logLine = document.createElement('div');
+            logLine.className = 'log-line';
+            
+            // 根據日誌內容判斷類型
+            if (log.includes('[ERROR]') || log.includes('❌') || log.includes('異常')) {
+                logLine.classList.add('error');
+            } else if (log.includes('[WARN]') || log.includes('⚠')) {
+                logLine.classList.add('warning');
+            } else if (log.includes('✓') || log.includes('[SUCCESS]')) {
+                logLine.classList.add('success');
+            } else if (log.includes('[STEP]') || log.includes('已開始') || log.includes('完成')) {
+                logLine.classList.add('step');
+            } else if (log.includes('[DEBUG]')) {
+                logLine.classList.add('debug');
+            } else {
+                logLine.classList.add('info');
+            }
+            
+            logLine.textContent = log;
+            logsContainer.appendChild(logLine);
+        });
         
         // 自動滾到底部
         logsContainer.scrollTop = logsContainer.scrollHeight;
@@ -617,7 +624,30 @@ async function loadSystemLogs(messageItem) {
         }
         
         const logContainer = messageItem.querySelector('.message-item-logs');
-        renderLogLines(logContainer, data.logs);
+        logContainer.innerHTML = '';
+        
+        data.logs.forEach(log => {
+            const logLine = document.createElement('div');
+            logLine.className = 'log-line';
+            
+            // 根據日誌內容判斷類型
+            if (log.includes('[ERROR]') || log.includes('❌') || log.includes('異常')) {
+                logLine.classList.add('error');
+            } else if (log.includes('[WARN]') || log.includes('⚠')) {
+                logLine.classList.add('warning');
+            } else if (log.includes('✓') || log.includes('[SUCCESS]')) {
+                logLine.classList.add('success');
+            } else if (log.includes('[STEP]') || log.includes('已開始') || log.includes('完成')) {
+                logLine.classList.add('step');
+            } else if (log.includes('[DEBUG]')) {
+                logLine.classList.add('debug');
+            } else {
+                logLine.classList.add('info');
+            }
+            
+            logLine.textContent = log;
+            logContainer.appendChild(logLine);
+        });
         
         // 自動滾到底部
         logContainer.scrollTop = logContainer.scrollHeight;
@@ -699,201 +729,6 @@ function startStatusCheck() {
  */
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-// ==========================================
-// 歷史 Session 查看功能
-// ==========================================
-
-/**
- * 顯示歷史 Session 列表面板
- */
-function showHistoryView() {
-    document.getElementById('historyDetailPanel').style.display = 'none';
-    document.getElementById('historyPanel').style.display = 'block';
-    loadSessionHistory();
-}
-
-/**
- * 關閉歷史 Session 面板，回到主要介面
- */
-function closeHistoryView() {
-    document.getElementById('historyPanel').style.display = 'none';
-    document.getElementById('historyDetailPanel').style.display = 'none';
-}
-
-/**
- * 從伺服器載入所有歷史 session 列表
- */
-async function loadSessionHistory() {
-    const listEl = document.getElementById('historyList');
-    const countEl = document.getElementById('historyCount');
-    listEl.innerHTML = '<div class="history-empty">載入中...</div>';
-
-    try {
-        const response = await fetch('/api/sessions/history');
-        const data = await response.json();
-
-        if (!data.success) {
-            listEl.innerHTML = `<div class="history-empty">載入失敗: ${escapeHtml(data.error || '未知錯誤')}</div>`;
-            return;
-        }
-
-        countEl.textContent = `共 ${data.total} 個 session`;
-
-        if (data.total === 0) {
-            listEl.innerHTML = '<div class="history-empty">尚未發現任何歷史 session</div>';
-            return;
-        }
-
-        listEl.innerHTML = '';
-        data.sessions.forEach(s => {
-            const card = document.createElement('div');
-            card.className = 'history-card';
-            card.onclick = () => viewHistorySession(s.session_id);
-
-            const badge = (label, ok) => `<span class="step-badge ${ok ? 'done' : 'pending'}">${label}</span>`;
-
-            card.innerHTML = `
-                <div class="history-card-header">
-                    <code class="history-card-id">${escapeHtml(s.session_id)}</code>
-                    ${s.is_active ? '<span class="live-badge">進行中</span>' : ''}
-                </div>
-                <div class="history-card-time">
-                    <span>建立: ${escapeHtml(s.created_at)}</span>
-                    <span>最新: ${escapeHtml(s.updated_at)}</span>
-                </div>
-                <div class="history-card-badges">
-                    ${badge('ASR', s.steps.asr)}
-                    ${badge('簡報', s.steps.pkd)}
-                    ${badge('行動項', s.steps.actions)}
-                    ${badge('摘要', s.steps.summary)}
-                    ${badge('匯出', s.steps.export)}
-                </div>
-                <div class="history-card-footer">
-                    <span>${s.has_log ? '📝 有執行日誌' : '⚠️ 無執行日誌'}</span>
-                    <span>${s.file_count} 個檔案</span>
-                </div>
-            `;
-            listEl.appendChild(card);
-        });
-    } catch (error) {
-        console.error('載入歷史 session 錯誤:', error);
-        listEl.innerHTML = '<div class="history-empty">載入失敗，請重試</div>';
-    }
-}
-
-/**
- * 進入指定 session 的詳細頁面（顯示日誌與可下載檔案）
- */
-function viewHistorySession(sessionId) {
-    currentHistorySessionId = sessionId;
-    document.getElementById('historyPanel').style.display = 'none';
-    document.getElementById('historyDetailPanel').style.display = 'block';
-    document.getElementById('historyDetailSessionId').textContent = sessionId;
-    document.getElementById('historyDetailMeta').textContent = '';
-
-    loadHistoryFiles(sessionId);
-    loadHistoryLog(sessionId);
-}
-
-/**
- * 從詳細頁面返回歷史列表
- */
-function backToHistoryList() {
-    currentHistorySessionId = null;
-    document.getElementById('historyDetailPanel').style.display = 'none';
-    document.getElementById('historyPanel').style.display = 'block';
-}
-
-/**
- * 載入指定 session 的可下載檔案列表
- */
-async function loadHistoryFiles(sessionId) {
-    const filesEl = document.getElementById('historyFilesList');
-    filesEl.innerHTML = '<div class="history-empty">載入中...</div>';
-
-    try {
-        const response = await fetch(`/api/sessions/${sessionId}/files`);
-        const data = await response.json();
-
-        if (!data.success) {
-            filesEl.innerHTML = `<div class="history-empty">載入失敗: ${escapeHtml(data.error || '未知錯誤')}</div>`;
-            return;
-        }
-
-        if (!data.files || data.files.length === 0) {
-            filesEl.innerHTML = '<div class="history-empty">此 session 尚無可下載檔案</div>';
-            return;
-        }
-
-        filesEl.innerHTML = '';
-        data.files.forEach(f => {
-            const item = document.createElement('a');
-            item.className = 'download-item';
-            item.href = `/api/sessions/${sessionId}/download-file/${encodeURIComponent(f.name)}`;
-            item.setAttribute('download', f.name);
-            const sizeKb = (f.size_bytes / 1024).toFixed(1);
-            item.innerHTML = `
-                <span class="download-item-name">📄 ${escapeHtml(f.name)}</span>
-                <span class="download-item-meta">${sizeKb} KB · ${escapeHtml(f.mtime)}</span>
-            `;
-            filesEl.appendChild(item);
-        });
-    } catch (error) {
-        console.error('載入檔案列表錯誤:', error);
-        filesEl.innerHTML = '<div class="history-empty">載入失敗，請重試</div>';
-    }
-}
-
-/**
- * 載入指定 session 的 output_run.log 內容（正確顯示，支援尾部截斷或完整顯示）
- */
-async function loadHistoryLog(sessionId) {
-    const logEl = document.getElementById('historyLogContainer');
-    const metaEl = document.getElementById('historyLogMeta');
-    logEl.innerHTML = '<div class="log-line info">載入中...</div>';
-    metaEl.textContent = '';
-
-    const showFull = document.getElementById('historyLogFull').checked;
-    const url = showFull
-        ? `/api/sessions/${sessionId}/output_log?full=1`
-        : `/api/sessions/${sessionId}/output_log?tail=500`;
-
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (!data.success) {
-            logEl.innerHTML = `<div class="log-line error">載入失敗: ${escapeHtml(data.error || '未知錯誤')}</div>`;
-            return;
-        }
-
-        if (!data.log_file) {
-            logEl.innerHTML = `<div class="log-line info">${escapeHtml(data.message || '尚未產生執行日誌')}</div>`;
-            return;
-        }
-
-        renderLogLines(logEl, data.logs);
-
-        const sizeKb = (data.size_bytes / 1024).toFixed(1);
-        const truncatedNote = data.truncated
-            ? `（僅顯示最後 ${data.returned_lines} / ${data.total_lines} 行，勾選「顯示全部」可看完整內容）`
-            : `（共 ${data.total_lines} 行，已全部顯示）`;
-        metaEl.textContent = `日誌檔: ${data.log_file} · ${sizeKb} KB · 最後修改: ${data.mtime} ${truncatedNote}`;
-    } catch (error) {
-        console.error('載入執行日誌錯誤:', error);
-        logEl.innerHTML = '<div class="log-line error">載入失敗，請重試</div>';
-    }
-}
-
-/**
- * 重新載入當前歷史 session 的日誌
- */
-function reloadHistoryLog() {
-    if (currentHistorySessionId) {
-        loadHistoryLog(currentHistorySessionId);
-    }
 }
 
 // ==========================================

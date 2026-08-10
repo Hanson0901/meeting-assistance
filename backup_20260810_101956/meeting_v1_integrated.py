@@ -397,12 +397,9 @@ class MeetingWorkflow:
         self.include_decisions_in_final_txt = include_decisions_in_final_txt
 
         os.makedirs(output_dir, exist_ok=True)
-        # 注意：日誌檔案固定命名為 {prefix}_run.log（不含時間戳），
-        # 這樣同一個 session 的所有步驟（含透過 sudo 執行的 conda worker）
-        # 都會寫入同一份檔案，Web 介面才能正確、完整地顯示執行紀錄。
         default_log_file = os.path.join(
             output_dir,
-            f"{output_prefix}_run.log",
+            f"{output_prefix}_run_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.log",
         )
         self.log_file = setup_print_logging(
             default_log_path=default_log_file,
@@ -684,7 +681,7 @@ class MeetingWorkflow:
             asr_script = os.path.join(project_root, "speech", "run_asr_conda.py")
 
             cmd = [
-                "sudo", "-u", "cgu-csie", "--preserve-env=MEETING_LOG_FILE,PYTHONPATH",         # 重要：用你的帳號跑 conda，不要用 root；並保留日誌環境變數，確保寫入同一份 log
+                "sudo", "-u", "cgu-csie",         # 重要：用你的帳號跑 conda，不要用 root
                 conda_python,
                 asr_script,
                 "--audio", self.audio_file,
@@ -736,7 +733,7 @@ class MeetingWorkflow:
             out_json = os.path.join(self.output_dir, f"{self.output_prefix}_pkd_cache.json")
 
             cmd = [
-                "sudo", "-u", "cgu-csie", "--preserve-env=MEETING_LOG_FILE,PYTHONPATH",
+                "sudo", "-u", "cgu-csie",
                 conda_python, worker,
                 "--output-dir", self.output_dir,
                 "--output-prefix", self.output_prefix,
@@ -801,7 +798,7 @@ class MeetingWorkflow:
             worker = os.path.join(project_root, "run_actions_conda.py")
             out_json = os.path.join(self.output_dir, f"{self.output_prefix}_actions_cache.json")
             cmd = [
-                "sudo", "-u", "cgu-csie", "--preserve-env=MEETING_LOG_FILE,PYTHONPATH",
+                "sudo", "-u", "cgu-csie",
                 conda_python, worker,
                 "--output-dir", self.output_dir,
                 "--output-prefix", self.output_prefix,
@@ -884,7 +881,7 @@ class MeetingWorkflow:
             )
 
             cmd = [
-                "sudo", "-u", "cgu-csie", "--preserve-env=MEETING_LOG_FILE,PYTHONPATH",
+                "sudo", "-u", "cgu-csie",
                 conda_python, worker,
                 "--output-dir", self.output_dir,
                 "--output-prefix", self.output_prefix,

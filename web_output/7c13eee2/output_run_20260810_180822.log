@@ -1,0 +1,28 @@
+[2026-08-10 18:08:23][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-10 18:08:23][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-10 18:08:23][meeting_v1_integrated] [WEB] 建立會話: 7c13eee2
+[2026-08-10 18:09:15][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-10 18:09:15][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-10 18:09:15][meeting_v1_integrated] [WEB] 建立會話: cd730475
+[2026-08-10 18:10:01][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-10 18:10:01][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-10 18:10:01][meeting_v1_integrated] [WEB] 建立會話: 00205e8b
+[2026-08-10 18:12:34][meeting_v1_integrated] [WEB][00205e8b] 上傳音頻: /home/cgu-csie/meeting-assistence/web_output/00205e8b/output_audio.mkv
+[2026-08-10 18:12:34][meeting_v1_integrated] [WEB][00205e8b] 檔案大小: 52.74 MB
+[2026-08-10 18:12:52][meeting_v1_integrated] [STEP] 開始執行 ASR 語音轉文字...
+[2026-08-10 18:12:52][meeting_v1_integrated] 
+============================================================
+[2026-08-10 18:12:52][meeting_v1_integrated]   步驟 2/6: 語音轉文字 (ASR)
+[2026-08-10 18:12:52][meeting_v1_integrated] ============================================================
+
+[2026-08-10 18:12:52][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] 讀取音訊: /home/cgu-csie/meeting-assistence/web_output/00205e8b/output_audio.mkv
+[2026-08-10 18:12:52][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe]  按 Ctrl+C 可提前結束轉錄
+
+[2026-08-10 18:12:52][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] 使用 conda Python 執行 ASR：
+[2026-08-10 18:12:52][meeting_v1_integrated]    sudo -u cgu-csie /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/speech/run_asr_conda.py --audio /home/cgu-csie/meeting-assistence/web_output/00205e8b/output_audio.mkv --outdir /home/cgu-csie/meeting-assistence/web_output/00205e8b --prefix output --alpha 0.0 --overlap 5.0 --verbose
+
+[2026-08-10 18:16:54][meeting_v1_integrated] [WEB] 建立會話: 160eb42f
+[2026-08-10 18:19:40][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] ASR 轉錄完成
+[2026-08-10 18:19:40][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] step2 耗時: 408.41 秒
+
+[2026-08-10 18:19:40][meeting_v1_integrated] [SUCCESS] ASR 轉錄完成

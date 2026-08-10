@@ -1,0 +1,111 @@
+[WEB] 會議助理 Web 應用啟動...
+[WEB] 上傳資料夾: /home/cgu-csie/meeting-assistence/uploads
+[WEB] 輸出資料夾: /home/cgu-csie/meeting-assistence/web_output
+[WEB] 訪問 http://localhost:5000
+ * Serving Flask app 'web_app'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://111.250.69.249:5000
+[33mPress CTRL+C to quit[0m
+61.230.55.40 - - [10/Aug/2026 18:21:31] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:21:35] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:21:40] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:21:45] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:21:50] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:21:51] "GET /api/sessions/history HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:21:55] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:21:59] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:22:00] "GET /api/sessions/history HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:22:00] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:22:05] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:22:07] "GET /api/sessions/00205e8b/output_log?tail=5 HTTP/1.1" 200 -
+127.0.0.1 - - [10/Aug/2026 18:22:08] "GET /api/sessions/428a905e/output_log?tail=5 HTTP/1.1" 200 -
+127.0.0.1 - - [10/Aug/2026 18:22:08] "GET /api/sessions/a6a10590/output_log?tail=5 HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:22:10] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:22:15] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:22:20] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:22:25] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:22:36] "GET /api/sessions/00205e8b/files HTTP/1.1" 200 -
+127.0.0.1 - - [10/Aug/2026 18:22:36] "GET /api/sessions/00205e8b/download-file/output_1.srt HTTP/1.1" 200 -
+127.0.0.1 - - [10/Aug/2026 18:22:36] "[33mGET /api/sessions/00205e8b/download-file/..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:22:36] "[33mGET /api/sessions/nonexistent123/output_log HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:22:36] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:22:38] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:22:43] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:22:46] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [10/Aug/2026 18:22:48] "GET /static/js/app.js HTTP/1.1" 200 -
+127.0.0.1 - - [10/Aug/2026 18:22:48] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:22:50] "GET /static/js/app.js HTTP/1.1" 200 -
+127.0.0.1 - - [10/Aug/2026 18:22:53] "GET /static/css/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [10/Aug/2026 18:22:53] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:22:58] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:22:59] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:23:01] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [10/Aug/2026 18:23:03] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:23:08] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:23:08] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+160.119.76.42 - - [10/Aug/2026 18:23:09] code 400, message Bad request syntax ('\x03\x00\x00\x13\x0eà\x00\x00\x00\x00\x00\x01\x00\x08\x00\x02\x00\x00\x00')
+160.119.76.42 - - [10/Aug/2026 18:23:09] "[35m[1m\x03\x00\x00\x13\x0eà\x00\x00\x00\x00\x00\x01\x00\x08\x00\x02\x00\x00\x00[0m" HTTPStatus.BAD_REQUEST -
+61.230.55.40 - - [10/Aug/2026 18:23:09] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+160.119.76.42 - - [10/Aug/2026 18:23:13] code 400, message Bad HTTP/0.9 request type ('\x12\x01\x00/\x00\x00\x01\x00\x00\x00\x1a\x00\x06\x01\x00')
+160.119.76.42 - - [10/Aug/2026 18:23:13] "[35m[1m\x12\x01\x00/\x00\x00\x01\x00\x00\x00\x1a\x00\x06\x01\x00 \x00\x01\x02\x00!\x00\x01\x03\x00"\x00\x04\x04\x00&\x00\x01ÿ\x0e\x00\x07Ð\x00\x00\x02\x00\x00\x00\x00\x00\x00[0m" HTTPStatus.BAD_REQUEST -
+127.0.0.1 - - [10/Aug/2026 18:23:13] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:23:15] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:23:18] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:23:20] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:23:23] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:23:25] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:23:28] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:23:30] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:23:33] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:23:35] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:23:38] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:23:40] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:23:43] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:23:45] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:23:48] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:23:50] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:23:53] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:23:55] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:23:58] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:24:00] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:24:03] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:24:05] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [10/Aug/2026 18:24:08] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:24:33] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:24:34] "[33mGET /api/session/160eb42f/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:24:34] "GET / HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:24:34] "GET /static/css/style.css HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:24:34] "GET /static/js/app.js HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:24:37] "GET /api/sessions/history HTTP/1.1" 200 -
+127.0.0.1 - - [10/Aug/2026 18:24:59] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:25:23] "GET /api/sessions/history HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:25:26] "GET /api/sessions/history HTTP/1.1" 200 -
+127.0.0.1 - - [10/Aug/2026 18:25:59] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:26:40] "GET /api/sessions/428a905e/output_log?tail=500 HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:26:40] "GET /api/sessions/428a905e/files HTTP/1.1" 200 -
+127.0.0.1 - - [10/Aug/2026 18:26:59] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:27:12] "GET /api/sessions/428a905e/download-file/finald_output_1.md HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:27:21] "GET /api/sessions/428a905e/download-file/finald_output_1.md HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:27:34] "GET /api/sessions/history HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:27:38] "POST /api/session/create HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:27:42] "GET /api/sessions/history HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:27:43] "GET /api/session/e251d5db/status HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:27:43] "GET /api/session/e251d5db/logs HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:27:48] "GET /api/session/e251d5db/status HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:27:48] "GET /api/session/e251d5db/logs HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:27:53] "GET /api/session/e251d5db/status HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:27:53] "GET /api/session/e251d5db/logs HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:27:58] "GET /api/session/e251d5db/status HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:27:58] "GET /api/session/e251d5db/logs HTTP/1.1" 200 -
+127.0.0.1 - - [10/Aug/2026 18:27:59] "[33mGET /api/session/7c13eee2/status HTTP/1.1[0m" 404 -
+61.230.55.40 - - [10/Aug/2026 18:28:03] "GET /api/session/e251d5db/status HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:28:03] "GET /api/session/e251d5db/logs HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:28:08] "GET /api/session/e251d5db/status HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:28:08] "GET /api/session/e251d5db/logs HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:28:13] "GET /api/session/e251d5db/status HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:28:13] "GET /api/session/e251d5db/logs HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:28:18] "GET /api/session/e251d5db/status HTTP/1.1" 200 -
+61.230.55.40 - - [10/Aug/2026 18:28:18] "GET /api/session/e251d5db/logs HTTP/1.1" 200 -

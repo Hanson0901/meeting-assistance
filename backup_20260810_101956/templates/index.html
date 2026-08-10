@@ -14,11 +14,6 @@
             <p>AI 驅動的會議紀錄與分析工具</p>
         </header>
 
-        <!-- 頂部導覽 -->
-        <div class="top-nav">
-            <button class="btn btn-nav" id="historyNavBtn" onclick="showHistoryView()">📜 歷史 Session</button>
-        </div>
-
         <!-- 主要內容 -->
         <main class="main-content">
             <!-- 設置面板 -->
@@ -160,51 +155,6 @@
                 <div class="action-buttons">
                     <button class="btn btn-success" onclick="refreshStatus()">🔄 刷新狀態</button>
                     <button class="btn btn-danger" onclick="endSession()">❌ 結束會議</button>
-                </div>
-            </section>
-
-            <!-- 歷史 Session 列表 -->
-            <section class="panel history-panel" id="historyPanel" style="display: none;">
-                <div class="history-panel-header">
-                    <h2>📜 歷史 Session</h2>
-                    <div class="history-toolbar">
-                        <button class="btn btn-small btn-primary" onclick="loadSessionHistory()">🔄 重新整理</button>
-                        <button class="btn btn-small" onclick="closeHistoryView()">← 返回</button>
-                    </div>
-                </div>
-                <p class="history-count" id="historyCount"></p>
-                <div class="history-list" id="historyList">
-                    <div class="history-empty">載入中...</div>
-                </div>
-            </section>
-
-            <!-- 歷史 Session 詳細資訊 -->
-            <section class="panel history-detail-panel" id="historyDetailPanel" style="display: none;">
-                <div class="history-detail-header">
-                    <h2>📄 Session <code id="historyDetailSessionId"></code></h2>
-                    <button class="btn btn-small" onclick="backToHistoryList()">← 返回列表</button>
-                </div>
-                <div class="history-detail-meta" id="historyDetailMeta"></div>
-
-                <div class="history-files-section">
-                    <h3>📥 輸出檔案</h3>
-                    <div class="download-list" id="historyFilesList">
-                        <div class="history-empty">載入中...</div>
-                    </div>
-                </div>
-
-                <div class="history-log-section">
-                    <div class="logs-header">
-                        <h3>🔍 完整執行日誌 (output_run.log)</h3>
-                        <button class="btn btn-small btn-primary" onclick="reloadHistoryLog()">🔄 重新載入</button>
-                        <label class="auto-refresh-label">
-                            <input type="checkbox" id="historyLogFull" onchange="reloadHistoryLog()"> 顯示全部（不截斷）
-                        </label>
-                    </div>
-                    <p class="log-meta" id="historyLogMeta"></p>
-                    <div class="logs-container history-log-container" id="historyLogContainer">
-                        <div class="log-line info">載入中...</div>
-                    </div>
                 </div>
             </section>
         </main>
