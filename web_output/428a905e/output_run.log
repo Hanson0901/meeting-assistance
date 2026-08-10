@@ -418,3 +418,37 @@
 [2026-08-09 20:45:06][run_pkd_conda] [run_pkd_conda] PKD OK -> /home/cgu-csie/meeting-assistence/web_output/428a905e/output_pkd_cache.json
 [2026-08-09 20:45:06][run_pkd_conda] [run_pkd_conda] 總耗時: 2224.55 秒
 
+[2026-08-10 18:50:40][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-10 18:50:40][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-10 18:50:40][meeting_v1_integrated] [WEB] 恢復會話: 428a905e, 已完成步驟: ['asr', 'pkd'], 音訊存在: True
+[2026-08-10 18:50:54][meeting_v1_integrated] [STEP] 開始提取行動項目...
+[2026-08-10 18:50:54][meeting_v1_integrated] 
+============================================================
+[2026-08-10 18:50:54][meeting_v1_integrated]   步驟 4/6: 提取行動項目 (conda worker)
+[2026-08-10 18:50:54][meeting_v1_integrated] ============================================================
+
+[2026-08-10 18:50:54][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions] 使用 conda Python 執行 Actions：
+[2026-08-10 18:50:54][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions]   sudo -u cgu-csie --preserve-env=MEETING_LOG_FILE,PYTHONPATH /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/run_actions_conda.py --output-dir /home/cgu-csie/meeting-assistence/web_output/428a905e --output-prefix output
+
+[2026-08-10 18:51:59][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-10 18:51:59][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-10 18:51:59][meeting_v1_integrated] [WEB] 恢復會話: daa75a22, 已完成步驟: [], 音訊存在: False
+[2026-08-10 18:52:06][run_actions_conda] llama_context: n_ctx_per_seq (2048) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+[2026-08-10 18:52:06][run_actions_conda] [BaseExtractor][init] Loaded model [actions]: /home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf
+[2026-08-10 18:53:58][run_actions_conda] [run_actions_conda] ACTIONS OK -> /home/cgu-csie/meeting-assistence/web_output/428a905e/output_actions_cache.json
+[2026-08-10 18:53:58][run_actions_conda] [run_actions_conda] 模型載入時間: 71.38 秒
+[2026-08-10 18:53:58][run_actions_conda] [run_actions_conda] 生成時間: 112.50 秒
+[2026-08-10 18:53:58][run_actions_conda] [run_actions_conda] run_actions_conda 總耗時: 183.88 秒
+
+[2026-08-10 18:53:59][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions] cache 已更新: /home/cgu-csie/meeting-assistence/web_output/428a905e/output_cache.json
+
+[2026-08-10 18:53:59][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions] 行動項目已輸出: /home/cgu-csie/meeting-assistence/web_output/428a905e/output_actions.txt
+[2026-08-10 18:53:59][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions] step4 耗時: 184.57 秒
+
+[2026-08-10 18:53:59][meeting_v1_integrated] [SUCCESS] 行動項目提取完成
+[2026-08-10 18:55:06][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-10 18:55:06][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-10 18:55:06][meeting_v1_integrated] [WEB] 建立會話: 514de729
+[2026-08-10 18:55:30][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-10 18:55:30][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-10 18:55:30][meeting_v1_integrated] [WEB] 恢復會話: 00205e8b, 已完成步驟: ['asr'], 音訊存在: True

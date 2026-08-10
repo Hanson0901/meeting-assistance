@@ -888,6 +888,114 @@ async function loadHistoryLog(sessionId) {
 }
 
 /**
+ * 恢復歷史 session：讓使用者可以接續尚未完成的步驟繼續執行，
+ * 而不僅僅是唯讀查看歷史內容。
+ *
+ * 流程：
+ *   1. 呼叫後端 /api/sessions/<id>/resume，後端會依照 session 目錄中
+ *      既有的檔案判斷哪些步驟已完成，並重新建立對應的 workflow。
+ *   2. 切換畫面：關閉歷史面板，顯示與「新建會議」相同的進度面板，
+ *      並依據已完成步驟正確標記各步驟狀態、啟用下一個可執行的按鈕。
+ *   3. 之後即可直接沿用既有的「執行 ASR/PKD/Actions/Summary/Export/藍牙」按鈕，
+ *      完全重用原有流程，已完成的步驟不會被要求重新執行。
+ */
+async function resumeHistorySession(sessionId) {
+    if (!sessionId) {
+        showMessage('❌ 找不到要恢復的 session', 'error');
+        return;
+    }
+
+    const resumeBtn = document.getElementById('resumeSessionBtn');
+
+    try {
+        if (resumeBtn) {
+            resumeBtn.disabled = true;
+            resumeBtn.textContent = '⏳ 恢復中...';
+        }
+        showMessage(`正在恢復 session ${sessionId}...`, 'info');
+
+        const modelPath = document.getElementById('modelPath').value.trim();
+        const intervalMinutes = parseInt(document.getElementById('intervalMinutes').value);
+        const overlapSeconds = parseInt(document.getElementById('overlapSeconds').value);
+        const enableBluetooth = document.getElementById('enableBluetooth').checked;
+
+        const response = await fetch(`/api/sessions/${sessionId}/resume`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model_path: modelPath,
+                interval_minutes: intervalMinutes,
+                overlap_seconds: overlapSeconds,
+                enable_bluetooth: enableBluetooth
+            })
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+            showMessage(`❌ 恢復 session 失敗: ${data.error}`, 'error');
+            return;
+        }
+
+        // 切換畫面：關閉歷史面板與設置面板，顯示進度面板
+        document.getElementById('historyPanel').style.display = 'none';
+        document.getElementById('historyDetailPanel').style.display = 'none';
+        document.querySelector('.setup-panel').style.display = 'none';
+        document.getElementById('progressPanel').style.display = 'block';
+
+        currentSessionId = sessionId;
+        document.getElementById('sessionId').textContent = currentSessionId;
+
+        // 重置上傳狀態顯示，並依偵測結果還原
+        document.getElementById('audioFile').value = '';
+        const uploadStatusEl = document.getElementById('uploadStatus');
+        if (data.audio_exists) {
+            uploadStatusEl.textContent = '✓ 偵測到既有音訊檔案（可直接繼續，或重新上傳以取代）';
+            uploadStatusEl.className = 'status-text success';
+        } else {
+            uploadStatusEl.textContent = '⚠ 尚未偵測到音訊檔案，請上傳後再執行 ASR';
+            uploadStatusEl.className = 'status-text';
+        }
+
+        // 重置所有步驟狀態顯示，再依已完成步驟標記
+        const stepNames = ['asr', 'pkd', 'actions', 'summary', 'export', 'bluetooth'];
+        stepNames.forEach(step => {
+            const statusEl = document.getElementById(`${step}Status`);
+            if (statusEl) {
+                statusEl.className = 'step-status';
+                statusEl.textContent = '';
+            }
+        });
+        data.steps_completed.forEach(step => updateStepStatus(step, 'completed'));
+
+        // 先全部禁用，再依已完成步驟開放下一個可執行按鈕
+        disableStepButtons();
+        updateNextEnabledButtons(data.steps_completed);
+
+        // 還原已產出的下載檔案列表
+        updateDownloadList(data.files);
+
+        const doneLabel = data.steps_completed.length > 0
+            ? data.steps_completed.join(', ')
+            : '無（尚未開始）';
+        showMessage(`✓ 已恢復 session ${sessionId}（已完成步驟: ${doneLabel}），可繼續執行後續步驟`, 'success');
+
+        // 開始定期檢查狀態（沿用既有的狀態輪詢機制）
+        startStatusCheck();
+
+    } catch (error) {
+        showMessage(`❌ 恢復 session 錯誤: ${error.message}`, 'error');
+    } finally {
+        if (resumeBtn) {
+            resumeBtn.disabled = false;
+            resumeBtn.textContent = '▶️ 繼續執行未完成步驟';
+        }
+    }
+}
+
+/**
  * 重新載入當前歷史 session 的日誌
  */
 function reloadHistoryLog() {

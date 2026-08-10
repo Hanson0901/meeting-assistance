@@ -186,6 +186,11 @@
                 </div>
                 <div class="history-detail-meta" id="historyDetailMeta"></div>
 
+                <div class="history-detail-actions" id="historyDetailActions">
+                    <button class="btn btn-primary" id="resumeSessionBtn" onclick="resumeHistorySession(currentHistorySessionId)">▶️ 繼續執行未完成步驟</button>
+                    <p class="resume-hint">將依照此設置面板目前的模型路徑/參數設定，恢復此 session 並接續尚未完成的步驟（已完成的步驟不會重新執行）。</p>
+                </div>
+
                 <div class="history-files-section">
                     <h3>📥 輸出檔案</h3>
                     <div class="download-list" id="historyFilesList">

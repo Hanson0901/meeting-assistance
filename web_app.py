@@ -291,7 +291,7 @@ def run_pkd(session_id):
                 log_collection_callback.current_session_id = session_id
                 
                 log_message(session_id, f"[STEP] 開始執行 PKD 報告提取...")
-                result = workflow.step3_extract_pkd()
+                result = workflow.step3_run_pkd_reports()
                 
                 if result:
                     state['steps_completed'].append('pkd')
@@ -882,6 +882,180 @@ def download_session_file(session_id, filename):
         print(f"[WEB][download_session_file] 錯誤: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+
+@app.route('/api/sessions/<session_id>/resume', methods=['POST'])
+def resume_session(session_id):
+    """恢復一個歷史 session，讓使用者可以接續尚未完成的步驟繼續執行
+
+    行為：
+      - 若此 session 目前已是「活躍」狀態（伺服器記憶體中已有對應的 workflow，
+        例如剛剛才恢復過、或本來就還在執行中），直接回傳目前狀態，不重複建立。
+      - 否則，依照 session_id 對應的輸出目錄，重新建立一個 MeetingWorkflow物件，
+        並透過掃描目錄中既有的檔案（.srt / *_pkd_cache.json / *_actions_cache.json /
+        *_summary_cache.json / *_meeting_summary.txt）推斷出哪些步驟已經完成，
+        同時把先前步驟產生的中間結果（people/keypoints/decisions/actions/summary）
+        讀回 workflow.cache，這樣即使中間跳過的步驟沒有重新執行，
+        最後的「匯出 TXT」步驟仍能正確組合出完整內容。
+      - 恢復後的 session 會被登記進與一般「建立新會議」session 相同的
+        workflows / workflow_states / session_logs / step_logs 字典，
+        因此前端可以直接沿用既有的 /api/session/<id>/step/<step> 等路由
+        繼續執行後續步驟，完全不需要另外實作一套執行邏輯。
+    """
+    session_dir = _get_session_output_dir(session_id)
+    if not session_dir or not os.path.isdir(session_dir):
+        return jsonify({'success': False, 'error': '找不到此 session 的輸出目錄'}), 404
+
+    try:
+        # 若此 session 已經是活躍狀態，直接回傳目前狀態即可
+        if session_id in workflows and session_id in workflow_states:
+            workflow = workflows[session_id]
+            state = workflow_states[session_id]
+            audio_exists = bool(workflow.audio_file and os.path.exists(workflow.audio_file))
+            return jsonify({
+                'success': True,
+                'session_id': session_id,
+                'resumed': False,
+                'already_active': True,
+                'steps_completed': state['steps_completed'],
+                'audio_exists': audio_exists,
+                'files': state['files'],
+            }), 200
+
+        data = request.json or {}
+        model_path = data.get('model_path', '/home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf')
+        interval_minutes = int(data.get('interval_minutes', 5))
+        overlap_seconds = int(data.get('overlap_seconds', 60))
+        enable_bluetooth = data.get('enable_bluetooth', True)
+
+        workflow = MeetingWorkflow(
+            audio_device="hw:2,0",
+            output_dir=session_dir,
+            output_prefix=OUTPUT_PREFIX,
+            model_path=model_path,
+            interval_minutes=interval_minutes,
+            overlap_seconds=overlap_seconds,
+            enable_recording=False,
+            enable_bluetooth=enable_bluetooth,
+            enable_proximity_monitor=False,
+            enable_write_output=True,
+            include_actions_and_summary_files=True,
+            include_decisions_in_final_txt=True,
+        )
+
+        try:
+            entries = os.listdir(session_dir)
+        except Exception:
+            entries = []
+
+        def _exists(fname):
+            return os.path.exists(os.path.join(session_dir, fname))
+
+        # 尋找既有音訊檔（優先使用預設命名，找不到再掃描目錄中常見的音訊/視訊副檔名）
+        default_audio = os.path.join(session_dir, f'{OUTPUT_PREFIX}_audio.mkv')
+        found_audio = default_audio if os.path.exists(default_audio) else None
+        if not found_audio:
+            audio_exts = ('.mkv', '.wav', '.mp3', '.mp4', '.m4a', '.aac', '.flac', '.ogg', '.webm')
+            for name in entries:
+                if name.lower().endswith(audio_exts):
+                    found_audio = os.path.join(session_dir, name)
+                    break
+        if found_audio:
+            workflow.audio_file = found_audio
+
+        steps_completed = []
+        if any(e.endswith('.srt') for e in entries):
+            steps_completed.append('asr')
+
+        # 讀回 step3 (PKD) 的既有結果，讓 step6 匯出時仍能取得 people/keypoints/decisions
+        cache_json = os.path.join(session_dir, f'{OUTPUT_PREFIX}_cache.json')
+        if os.path.exists(cache_json):
+            try:
+                with open(cache_json, 'r', encoding='utf-8') as f:
+                    cache_data = json.load(f)
+                for key in ('people', 'keypoints', 'decisions', 'actions_text', 'title', 'summary'):
+                    if key in cache_data:
+                        workflow.cache[key] = cache_data[key]
+            except Exception as e:
+                print(f"[WEB][resume_session] 讀取 {OUTPUT_PREFIX}_cache.json 失敗: {e}")
+
+        if _exists(f'{OUTPUT_PREFIX}_pkd_cache.json'):
+            steps_completed.append('pkd')
+
+        # 讀回 step4 (Actions) 的既有結果
+        actions_cache_json = os.path.join(session_dir, f'{OUTPUT_PREFIX}_actions_cache.json')
+        if os.path.exists(actions_cache_json):
+            steps_completed.append('actions')
+            try:
+                with open(actions_cache_json, 'r', encoding='utf-8') as f:
+                    adata = json.load(f)
+                workflow.cache['segments'] = adata.get('segments', [])
+                workflow.cache['actions_lines'] = adata.get('actions_lines', [])
+                workflow.cache['actions_text'] = adata.get('actions_text', workflow.cache.get('actions_text', ''))
+            except Exception as e:
+                print(f"[WEB][resume_session] 讀取 {OUTPUT_PREFIX}_actions_cache.json 失敗: {e}")
+
+        # 讀回 step5 (Summary) 的既有結果
+        summary_cache_json = os.path.join(session_dir, f'{OUTPUT_PREFIX}_summary_cache.json')
+        if os.path.exists(summary_cache_json):
+            steps_completed.append('summary')
+            try:
+                with open(summary_cache_json, 'r', encoding='utf-8') as f:
+                    sdata = json.load(f)
+                raw_title = sdata.get('title', None)
+                raw_summary = sdata.get('summary', None)
+                if raw_title and '無法生成標題' not in str(raw_title):
+                    workflow.cache['title'] = str(raw_title).strip()
+                if raw_summary and '無法生成摘要' not in str(raw_summary):
+                    workflow.cache['summary'] = str(raw_summary).strip()
+            except Exception as e:
+                print(f"[WEB][resume_session] 讀取 {OUTPUT_PREFIX}_summary_cache.json 失敗: {e}")
+
+        files = {}
+        if _exists(f'{OUTPUT_PREFIX}_meeting_summary.txt'):
+            steps_completed.append('export')
+            files['meeting_summary'] = os.path.join(session_dir, f'{OUTPUT_PREFIX}_meeting_summary.txt')
+        if os.path.exists(workflow.actions_file):
+            files['actions'] = workflow.actions_file
+        if os.path.exists(workflow.summary_file):
+            files['summary'] = workflow.summary_file
+
+        audio_exists = bool(workflow.audio_file and os.path.exists(workflow.audio_file))
+
+        workflows[session_id] = workflow
+        workflow_states[session_id] = {
+            'status': 'resumed',
+            'steps_completed': steps_completed,
+            'current_step': None,
+            'errors': [],
+            'messages': [
+                f"✓ 已恢復歷史 session（已完成步驟: {', '.join(steps_completed) if steps_completed else '無'}）"
+            ],
+            'audio_file': workflow.audio_file if audio_exists else None,
+            'files': files,
+        }
+
+        if session_id not in session_logs:
+            session_logs[session_id] = []
+        if session_id not in step_logs:
+            step_logs[session_id] = {}
+        session_logs[session_id].append(
+            f"[{datetime.now().strftime('%H:%M:%S')}] 已恢復 session，可繼續執行未完成步驟"
+        )
+
+        print(f"[WEB] 恢復會話: {session_id}, 已完成步驟: {steps_completed}, 音訊存在: {audio_exists}")
+
+        return jsonify({
+            'success': True,
+            'session_id': session_id,
+            'resumed': True,
+            'already_active': False,
+            'steps_completed': steps_completed,
+            'audio_exists': audio_exists,
+            'files': files,
+        }), 200
+    except Exception as e:
+        print(f"[WEB][resume_session] 錯誤: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 # ==========================================
 # 錯誤處理
