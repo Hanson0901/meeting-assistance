@@ -5,6 +5,9 @@
 let currentSessionId = null;
 let statusCheckInterval = null;
 let currentHistorySessionId = null;
+let isRecording = false;
+let btDevices = [];
+let selectedBluetoothDevice = null;
 
 // ==========================================
 // 主要函數
@@ -23,7 +26,7 @@ async function startNewSession() {
         const enableBluetooth = document.getElementById('enableBluetooth').checked;
         
         if (!modelPath) {
-            showMessage('❌ 請輸入模型路徑', 'error');
+            showMessage('請輸入模型路徑', 'error');
             return;
         }
         
@@ -43,7 +46,7 @@ async function startNewSession() {
         const data = await response.json();
         
         if (!data.success) {
-            showMessage(`❌ 建立會話失敗: ${data.error}`, 'error');
+            showMessage(`建立會話失敗: ${data.error}`, 'error');
             return;
         }
         
@@ -58,9 +61,19 @@ async function startNewSession() {
         document.getElementById('audioFile').value = '';
         document.getElementById('uploadStatus').textContent = '';
         document.getElementById('uploadStatus').className = '';
+
+        // 重置錄音與藍牙裝置選擇狀態
+        isRecording = false;
+        updateRecordButtonUI();
+        btDevices = [];
+        selectedBluetoothDevice = null;
+        const btListEl = document.getElementById('btDeviceList');
+        if (btListEl) btListEl.innerHTML = '';
+        const btStatusEl = document.getElementById('btScanStatus');
+        if (btStatusEl) { btStatusEl.textContent = ''; btStatusEl.className = 'status-text'; }
         
-        showMessage(`✓ 會議會話已建立: ${currentSessionId}`, 'success');
-        showMessage('📁 請上傳音頻檔案開始處理...', 'info');
+        showMessage(`會議會話已建立: ${currentSessionId}`, 'success');
+        showMessage('請上傳音頻檔案開始處理...', 'info');
         
         // 確保 ASR 按鈕保持禁用（直到上傳檔案）
         document.getElementById('asrBtn').disabled = true;
@@ -69,7 +82,7 @@ async function startNewSession() {
         startStatusCheck();
         
     } catch (error) {
-        showMessage(`❌ 錯誤: ${error.message}`, 'error');
+        showMessage(`錯誤: ${error.message}`, 'error');
     }
 }
 
@@ -84,7 +97,7 @@ async function handleFileSelect(event) {
     }
     
     if (!currentSessionId) {
-        showMessage('❌ 請先建立會議會話', 'error');
+        showMessage('請先建立會議會話', 'error');
         return;
     }
     
@@ -102,20 +115,21 @@ async function handleFileSelect(event) {
         const data = await response.json();
         
         if (!data.success) {
-            showMessage(`❌ 上傳失敗: ${data.error}`, 'error');
+            showMessage(`上傳失敗: ${data.error}`, 'error');
             return;
         }
         
-        document.getElementById('uploadStatus').textContent = `✓ ${file.name} 已上傳`;
-        document.getElementById('uploadStatus').className = 'status-text success';
-        showMessage(`✓ 音頻檔案已上傳: ${file.name}`, 'success');
+        const uploadStatusEl = document.getElementById('uploadStatus');
+        uploadStatusEl.innerHTML = iconSVG('success', 15) + ` ${escapeHtml(file.name)} 已上傳`;
+        uploadStatusEl.className = 'status-text success';
+        showMessage(`音頻檔案已上傳: ${file.name}`, 'success');
         
         // 上傳成功後啟用 ASR 按鈕
         document.getElementById('asrBtn').disabled = false;
-        showMessage('📢 已準備好執行 ASR，請點擊「執行 ASR」按鈕', 'info');
+        showMessage('已準備好執行 ASR，請點擊「執行 ASR」按鈕', 'info');
         
     } catch (error) {
-        showMessage(`❌ 上傳錯誤: ${error.message}`, 'error');
+        showMessage(`上傳錯誤: ${error.message}`, 'error');
     }
 }
 
@@ -124,15 +138,15 @@ async function handleFileSelect(event) {
  */
 async function runStep(stepName) {
     if (!currentSessionId) {
-        showMessage('❌ 會話不存在', 'error');
+        showMessage('會話不存在', 'error');
         return;
     }
     
     // ASR 必須有上傳的音頻檔案
     if (stepName === 'asr') {
         const uploadStatus = document.getElementById('uploadStatus');
-        if (!uploadStatus.textContent.includes('✓')) {
-            showMessage('❌ 請先上傳音頻檔案後再執行 ASR', 'error');
+        if (!uploadStatus.classList.contains('success')) {
+            showMessage('請先上傳音頻檔案後再執行 ASR', 'error');
             return;
         }
     }
@@ -153,19 +167,19 @@ async function runStep(stepName) {
         const data = await response.json();
         
         if (!data.success) {
-            showMessage(`❌ ${stepName.toUpperCase()} 啟動失敗: ${data.error}`, 'error');
+            showMessage(`${stepName.toUpperCase()} 啟動失敗: ${data.error}`, 'error');
             enableStepButtons();
             return;
         }
         
-        showMessage(`▶ ${stepName.toUpperCase()} 已開始執行...`, 'info', stepName);
+        showMessage(`${stepName.toUpperCase()} 已開始執行...`, 'info', stepName);
         updateStepStatus(stepName, 'running');
         
         // 開始監控狀態
         monitorStep(stepName);
         
     } catch (error) {
-        showMessage(`❌ 錯誤: ${error.message}`, 'error');
+        showMessage(`錯誤: ${error.message}`, 'error');
         enableStepButtons();
     }
 }
@@ -203,7 +217,7 @@ async function monitorStep(stepName) {
             const stepError = status.errors.find(e => e.toLowerCase().includes(stepName));
             if (stepError) {
                 updateStepStatus(stepName, 'error');
-                showMessage(`❌ ${stepError}`, 'error');
+                showMessage(stepError, 'error');
                 enableStepButtons();
                 break;
             }
@@ -289,7 +303,7 @@ function endSession() {
         currentSessionId = null;
         document.querySelector('.setup-panel').style.display = 'block';
         document.getElementById('progressPanel').style.display = 'none';
-        document.getElementById('messagesLog').innerHTML = '<div class="message-item info"><div class="message-item-header"><span class="message-item-icon">ℹ️</span><span class="message-item-text">等待操作...</span><span class="message-item-expand">▶</span></div></div>';
+        document.getElementById('messagesLog').innerHTML = '<div class="message-item info"><div class="message-item-header"><span class="message-item-icon">' + iconSVG('info', 16) + '</span><span class="message-item-text">等待操作...</span><span class="message-item-expand">' + iconSVG('chevron-right', 14) + '</span></div></div>';
         document.getElementById('systemLogs').innerHTML = '<div class="log-line info">等待日誌信息...</div>';
         document.getElementById('downloadPanel').style.display = 'none';
         document.getElementById('downloadList').innerHTML = '';
@@ -299,10 +313,327 @@ function endSession() {
             clearInterval(statusCheckInterval);
         }
         
-        showMessage('✓ 會議已結束', 'success');
+        showMessage('會議已結束', 'success');
         
     } catch (error) {
-        showMessage(`❌ 錯誤: ${error.message}`, 'error');
+        showMessage(`錯誤: ${error.message}`, 'error');
+    }
+}
+
+// ==========================================
+// 主題切換功能（燈泡按鈕：手動覆蓋淺色/深色背景）
+// ==========================================
+
+/**
+ * 切換淺色/深色主題，並更新燈泡圖示
+ * 使用 data-theme 屬性覆蓋 CSS 中依系統設定的預設值
+ */
+function toggleTheme() {
+    const root = document.documentElement;
+    const current = getCurrentTheme();
+    const next = current === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('meetingAssistantTheme', next);
+    updateThemeToggleIcon(next);
+}
+
+/**
+ * 取得目前生效的主題（優先讀取手動設定，否則以系統偏好為準）
+ */
+function getCurrentTheme() {
+    const attr = document.documentElement.getAttribute('data-theme');
+    if (attr === 'dark' || attr === 'light') {
+        return attr;
+    }
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+/**
+ * 更新燈泡按鈕圖示：淺色模式顯示「亮燈」，深色模式顯示「熄燈」
+ */
+function updateThemeToggleIcon(theme) {
+    const iconEl = document.getElementById('themeToggleIcon');
+    if (!iconEl) return;
+    const iconName = theme === 'dark' ? 'bulb-off' : 'bulb-on';
+    iconEl.outerHTML = `<span data-icon="${iconName}" data-icon-size="18" id="themeToggleIcon">${iconSVG(iconName, 18)}</span>`;
+}
+
+/**
+ * 初始化主題：讀取先前儲存的手動選擇，否則跟隨系統設定
+ */
+function initTheme() {
+    const saved = localStorage.getItem('meetingAssistantTheme');
+    if (saved === 'dark' || saved === 'light') {
+        document.documentElement.setAttribute('data-theme', saved);
+    }
+    updateThemeToggleIcon(getCurrentTheme());
+}
+
+// ==========================================
+// 錄音功能（使用樹梅派麥克風）
+// ==========================================
+
+/**
+ * 切換錄音狀態：尚未錄音時開始錄音，正在錄音時停止錄音
+ */
+function toggleRecording() {
+    if (isRecording) {
+        stopRecording();
+    } else {
+        startRecording();
+    }
+}
+
+/**
+ * 開始使用樹梅派麥克風錄音
+ */
+async function startRecording() {
+    if (!currentSessionId) {
+        showMessage('請先建立會議會話', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/session/${currentSessionId}/record/start`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+
+        if (!data.success) {
+            showMessage(`開始錄音失敗: ${data.error}`, 'error');
+            return;
+        }
+
+        isRecording = true;
+        updateRecordButtonUI();
+
+        // 錄音期間停用檔案上傳與 ASR 按鈕
+        const fileInput = document.getElementById('audioFile');
+        if (fileInput) fileInput.disabled = true;
+        const asrBtn = document.getElementById('asrBtn');
+        if (asrBtn) asrBtn.disabled = true;
+
+        const uploadStatusEl = document.getElementById('uploadStatus');
+        uploadStatusEl.innerHTML = '<span class="loading-spinner"></span> 麥克風錄音中...';
+        uploadStatusEl.className = 'status-text';
+
+        showMessage('已開始使用樹梅派麥克風錄音，請於錄製完成後點擊「停止錄音」', 'info');
+
+    } catch (error) {
+        showMessage(`開始錄音錯誤: ${error.message}`, 'error');
+    }
+}
+
+/**
+ * 停止錄音，並將產生的音訊檔案設為本次會議的音頻來源
+ */
+async function stopRecording() {
+    if (!currentSessionId) {
+        return;
+    }
+
+    const recordBtn = document.getElementById('recordBtn');
+    if (recordBtn) recordBtn.disabled = true;
+
+    try {
+        showMessage('正在停止錄音並處理音訊...', 'info');
+
+        const response = await fetch(`/api/session/${currentSessionId}/record/stop`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+
+        isRecording = false;
+        updateRecordButtonUI();
+
+        const fileInput = document.getElementById('audioFile');
+        if (fileInput) fileInput.disabled = false;
+
+        if (!data.success) {
+            showMessage(`停止錄音失敗: ${data.error}`, 'error');
+            return;
+        }
+
+        const uploadStatusEl = document.getElementById('uploadStatus');
+        if (data.ready) {
+            uploadStatusEl.innerHTML = iconSVG('success', 15) + ' 麥克風錄音已完成，可執行 ASR';
+            uploadStatusEl.className = 'status-text success';
+            const asrBtn = document.getElementById('asrBtn');
+            if (asrBtn) asrBtn.disabled = false;
+            showMessage('錄音已完成，已準備好執行 ASR', 'success');
+        } else {
+            uploadStatusEl.innerHTML = iconSVG('warning', 15) + ' 錄音已停止，但尚未產生可用的音訊檔案';
+            uploadStatusEl.className = 'status-text';
+            showMessage('錄音已停止，但尚未偵測到輸出音訊檔案', 'warning');
+        }
+
+    } catch (error) {
+        showMessage(`停止錄音錯誤: ${error.message}`, 'error');
+    } finally {
+        if (recordBtn) recordBtn.disabled = false;
+    }
+}
+
+/**
+ * 更新錄音按鈕的圖示、文字與樣式
+ */
+function updateRecordButtonUI() {
+    const recordBtn = document.getElementById('recordBtn');
+    const iconEl = document.getElementById('recordBtnIcon');
+    const labelEl = document.getElementById('recordBtnLabel');
+    if (!recordBtn || !iconEl || !labelEl) return;
+
+    if (isRecording) {
+        recordBtn.classList.add('recording');
+        iconEl.outerHTML = `<span data-icon="stop-circle" data-icon-size="16" id="recordBtnIcon">${iconSVG('stop-circle', 16)}</span>`;
+        labelEl.textContent = '停止錄音';
+    } else {
+        recordBtn.classList.remove('recording');
+        iconEl.outerHTML = `<span data-icon="mic" data-icon-size="16" id="recordBtnIcon">${iconSVG('mic', 16)}</span>`;
+        labelEl.textContent = '錄音';
+    }
+}
+
+// ==========================================
+// 藍牙裝置搜尋與選擇功能
+// ==========================================
+
+/**
+ * 搜尋附近的藍牙裝置（包含已配對與尚未配對的裝置）
+ */
+async function scanBluetoothDevices() {
+    if (!currentSessionId) {
+        showMessage('請先建立會議會話', 'error');
+        return;
+    }
+
+    const scanBtn = document.getElementById('btScanBtn');
+    const statusEl = document.getElementById('btScanStatus');
+
+    try {
+        if (scanBtn) scanBtn.disabled = true;
+        if (statusEl) {
+            statusEl.innerHTML = '<span class="loading-spinner"></span> 搜尋中（約需數秒）...';
+            statusEl.className = 'status-text';
+        }
+
+        const response = await fetch(`/api/session/${currentSessionId}/bluetooth/scan`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+
+        if (!data.success) {
+            if (statusEl) {
+                statusEl.innerHTML = iconSVG('error', 15) + ` 搜尋失敗: ${escapeHtml(data.error || '未知錯誤')}`;
+                statusEl.className = 'status-text';
+            }
+            return;
+        }
+
+        btDevices = data.devices || [];
+        renderBluetoothDevices();
+
+        if (statusEl) {
+            statusEl.innerHTML = iconSVG('success', 15) + ` 找到 ${btDevices.length} 個裝置`;
+            statusEl.className = 'status-text success';
+        }
+
+    } catch (error) {
+        if (statusEl) {
+            statusEl.innerHTML = iconSVG('error', 15) + ` 搜尋錯誤: ${escapeHtml(error.message)}`;
+            statusEl.className = 'status-text';
+        }
+    } finally {
+        if (scanBtn) scanBtn.disabled = false;
+    }
+}
+
+/**
+ * 將搜尋到的藍牙裝置渲染為可點擊選擇的列表
+ */
+function renderBluetoothDevices() {
+    const listEl = document.getElementById('btDeviceList');
+    if (!listEl) return;
+
+    if (!btDevices || btDevices.length === 0) {
+        listEl.innerHTML = '<div class="bt-empty-hint">尚未搜尋到任何裝置，請點擊「搜尋裝置」</div>';
+        return;
+    }
+
+    listEl.innerHTML = '';
+    btDevices.forEach(d => {
+        const isSelected = selectedBluetoothDevice && selectedBluetoothDevice.mac === d.mac;
+        const badgeClass = d.connected ? 'connected' : (d.paired ? 'paired' : 'unpaired');
+        const badgeLabel = d.connected ? '已連線' : (d.paired ? '已配對' : '未配對');
+
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = `bt-device-item${isSelected ? ' selected' : ''}`;
+        item.dataset.mac = d.mac;
+        item.onclick = () => selectBluetoothDevice(d.mac);
+
+        item.innerHTML = `
+            ${isSelected ? iconSVG('success', 15) : ''}
+            <span class="bt-device-name">${escapeHtml(d.name || '(未命名裝置)')}</span>
+            <span class="bt-device-mac">${escapeHtml(d.mac)}</span>
+            <span class="bt-badge ${badgeClass}">${badgeLabel}</span>
+        `;
+        listEl.appendChild(item);
+    });
+}
+
+/**
+ * 選擇指定的藍牙裝置作為本次傳送目標（會嘗試配對/信任該裝置）
+ */
+async function selectBluetoothDevice(mac) {
+    if (!currentSessionId) {
+        return;
+    }
+
+    const device = btDevices.find(d => d.mac === mac);
+    if (!device) {
+        return;
+    }
+
+    const statusEl = document.getElementById('btScanStatus');
+    if (statusEl) {
+        statusEl.innerHTML = `<span class="loading-spinner"></span> 正在配對 ${escapeHtml(device.name || mac)}...`;
+        statusEl.className = 'status-text';
+    }
+
+    try {
+        const response = await fetch(`/api/session/${currentSessionId}/bluetooth/select`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mac: device.mac, name: device.name })
+        });
+        const data = await response.json();
+
+        if (!data.success) {
+            if (statusEl) {
+                statusEl.innerHTML = iconSVG('error', 15) + ` 配對失敗: ${escapeHtml(data.error || '未知錯誤')}`;
+                statusEl.className = 'status-text';
+            }
+            return;
+        }
+
+        selectedBluetoothDevice = { mac: data.mac, name: data.name };
+        renderBluetoothDevices();
+
+        if (statusEl) {
+            statusEl.innerHTML = iconSVG('success', 15) + ` 已選擇裝置: ${escapeHtml(data.name || data.mac)}`;
+            statusEl.className = 'status-text success';
+        }
+        showMessage(`已選擇藍牙裝置: ${data.name || data.mac}，執行 Bluetooth 步驟時將傳送至此裝置`, 'success');
+
+    } catch (error) {
+        if (statusEl) {
+            statusEl.innerHTML = iconSVG('error', 15) + ` 配對錯誤: ${escapeHtml(error.message)}`;
+            statusEl.className = 'status-text';
+        }
     }
 }
 
@@ -344,13 +675,13 @@ function updateStepStatus(stepName, status) {
     
     switch (status) {
         case 'completed':
-            statusEl.textContent = '✓ 已完成';
+            statusEl.innerHTML = iconSVG('success', 14) + ' 已完成';
             break;
         case 'running':
             statusEl.innerHTML = '<span class="loading-spinner"></span> 執行中';
             break;
         case 'error':
-            statusEl.textContent = '✗ 錯誤';
+            statusEl.innerHTML = iconSVG('error', 14) + ' 錯誤';
             break;
         default:
             statusEl.textContent = '';
@@ -372,7 +703,7 @@ function updateNextEnabledButtons(completedSteps) {
         if (index === 0) {
             // ASR 只有在上傳了檔案後才啟用
             const uploadStatus = document.getElementById('uploadStatus');
-            if (uploadStatus && uploadStatus.textContent.includes('✓')) {
+            if (uploadStatus && uploadStatus.classList.contains('success')) {
                 btn.disabled = false;
             }
         } else {
@@ -432,18 +763,18 @@ function showMessage(message, type = 'info', stepName = null) {
         msgItem.dataset.stepName = stepName;
     }
     
-    const icon = {
-        'success': '✓',
-        'error': '✗',
-        'warning': '⚠',
-        'info': 'ℹ️'
-    }[type] || 'ℹ️';
+    const iconName = {
+        'success': 'success',
+        'error': 'error',
+        'warning': 'warning',
+        'info': 'info'
+    }[type] || 'info';
     
     msgItem.innerHTML = `
         <div class="message-item-header" onclick="expandMessage(this.parentElement)">
-            <span class="message-item-icon">${icon}</span>
+            <span class="message-item-icon">${iconSVG(iconName, 16)}</span>
             <span class="message-item-text">${escapeHtml(message)}</span>
-            <span class="message-item-expand">▶</span>
+            <span class="message-item-expand">${iconSVG('chevron-right', 14)}</span>
         </div>
         <div class="message-item-details">
             <div class="logs-container message-item-logs" style="max-height: 200px; margin: 0;">
@@ -656,7 +987,7 @@ function updateDownloadList(files) {
         
         item.innerHTML = `
             <div class="file-info">
-                <div class="file-name">📄 ${displayName}</div>
+                <div class="file-name">${iconSVG('document', 15)} ${displayName}</div>
                 <div class="file-path">${filepath}</div>
             </div>
             <button class="btn btn-success" onclick="downloadFile('${filename}')">下載</button>
@@ -771,7 +1102,7 @@ async function loadSessionHistory() {
                     ${badge('匯出', s.steps.export)}
                 </div>
                 <div class="history-card-footer">
-                    <span>${s.has_log ? '📝 有執行日誌' : '⚠️ 無執行日誌'}</span>
+                    <span>${s.has_log ? iconSVG('file-check', 14) + ' 有執行日誌' : iconSVG('file-x', 14) + ' 無執行日誌'}</span>
                     <span>${s.file_count} 個檔案</span>
                 </div>
             `;
@@ -835,7 +1166,7 @@ async function loadHistoryFiles(sessionId) {
             item.setAttribute('download', f.name);
             const sizeKb = (f.size_bytes / 1024).toFixed(1);
             item.innerHTML = `
-                <span class="download-item-name">📄 ${escapeHtml(f.name)}</span>
+                <span class="download-item-name">${iconSVG('document', 15)} ${escapeHtml(f.name)}</span>
                 <span class="download-item-meta">${sizeKb} KB · ${escapeHtml(f.mtime)}</span>
             `;
             filesEl.appendChild(item);
@@ -901,7 +1232,7 @@ async function loadHistoryLog(sessionId) {
  */
 async function resumeHistorySession(sessionId) {
     if (!sessionId) {
-        showMessage('❌ 找不到要恢復的 session', 'error');
+        showMessage('找不到要恢復的 session', 'error');
         return;
     }
 
@@ -910,7 +1241,7 @@ async function resumeHistorySession(sessionId) {
     try {
         if (resumeBtn) {
             resumeBtn.disabled = true;
-            resumeBtn.textContent = '⏳ 恢復中...';
+            resumeBtn.innerHTML = '<span class="loading-spinner"></span> 恢復中...';
         }
         showMessage(`正在恢復 session ${sessionId}...`, 'info');
 
@@ -935,7 +1266,7 @@ async function resumeHistorySession(sessionId) {
         const data = await response.json();
 
         if (!data.success) {
-            showMessage(`❌ 恢復 session 失敗: ${data.error}`, 'error');
+            showMessage(`恢復 session 失敗: ${data.error}`, 'error');
             return;
         }
 
@@ -952,10 +1283,10 @@ async function resumeHistorySession(sessionId) {
         document.getElementById('audioFile').value = '';
         const uploadStatusEl = document.getElementById('uploadStatus');
         if (data.audio_exists) {
-            uploadStatusEl.textContent = '✓ 偵測到既有音訊檔案（可直接繼續，或重新上傳以取代）';
+            uploadStatusEl.innerHTML = iconSVG('success', 15) + ' 偵測到既有音訊檔案（可直接繼續，或重新上傳以取代）';
             uploadStatusEl.className = 'status-text success';
         } else {
-            uploadStatusEl.textContent = '⚠ 尚未偵測到音訊檔案，請上傳後再執行 ASR';
+            uploadStatusEl.innerHTML = iconSVG('warning', 15) + ' 尚未偵測到音訊檔案，請上傳後再執行 ASR';
             uploadStatusEl.className = 'status-text';
         }
 
@@ -980,17 +1311,17 @@ async function resumeHistorySession(sessionId) {
         const doneLabel = data.steps_completed.length > 0
             ? data.steps_completed.join(', ')
             : '無（尚未開始）';
-        showMessage(`✓ 已恢復 session ${sessionId}（已完成步驟: ${doneLabel}），可繼續執行後續步驟`, 'success');
+        showMessage(`已恢復 session ${sessionId}（已完成步驟: ${doneLabel}），可繼續執行後續步驟`, 'success');
 
         // 開始定期檢查狀態（沿用既有的狀態輪詢機制）
         startStatusCheck();
 
     } catch (error) {
-        showMessage(`❌ 恢復 session 錯誤: ${error.message}`, 'error');
+        showMessage(`恢復 session 錯誤: ${error.message}`, 'error');
     } finally {
         if (resumeBtn) {
             resumeBtn.disabled = false;
-            resumeBtn.textContent = '▶️ 繼續執行未完成步驟';
+            resumeBtn.innerHTML = iconSVG('play', 16) + ' 繼續執行未完成步驟';
         }
     }
 }
@@ -1010,6 +1341,14 @@ function reloadHistoryLog() {
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('會議助理網頁應用已載入');
+
+    // 渲染預先宣告的 [data-icon] 圖示
+    if (typeof renderIcons === 'function') {
+        renderIcons();
+    }
+
+    // 初始化主題（讀取先前手動選擇的深淺色設定）
+    initTheme();
     
     // 禁用所有步驟按鈕（直到建立會話）
     const stepNames = ['asr', 'pkd', 'actions', 'summary', 'export', 'bluetooth'];

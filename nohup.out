@@ -1,0 +1,66 @@
+[0;34m╔════════════════════════════════════════════╗[0m
+[0;34m║     會議助理 - 網頁應用啟動程序           ║[0m
+[0;34m╚════════════════════════════════════════════╝[0m
+
+[1;33m[1/5][0m 檢查 Python...
+[0;32m✓ Python 3.10.19 已安裝[0m
+
+[1;33m[2/5][0m 檢查項目目錄...
+[0;32m✓ 項目目錄: /home/cgu-csie/meeting-assistence[0m
+
+[1;33m[3/5][0m 檢查 Python 依賴...
+[0;32m✓ Flask 已安裝[0m
+
+[1;33m[4/5][0m 檢查必要文件...
+[0;32m✓[0m web_app.py
+[0;32m✓[0m templates/index.html
+[0;32m✓[0m static/css/style.css
+[0;32m✓[0m static/js/app.js
+[0;32m✓[0m meeting_v1_integrated.py
+
+[1;33m[5/5][0m 創建必要目錄...
+[0;32m✓ 目錄已創建或已存在[0m
+
+[0;34m╔════════════════════════════════════════════╗[0m
+[0;34m║             配置信息                       ║[0m
+[0;34m╚════════════════════════════════════════════╝[0m
+[1;33m應用地址:[0m        http://localhost:5000
+[1;33m項目目錄:[0m        /home/cgu-csie/meeting-assistence
+[1;33m上傳目錄:[0m        /home/cgu-csie/meeting-assistence/uploads
+[1;33m輸出目錄:[0m        /home/cgu-csie/meeting-assistence/web_output
+
+[0;34m按 Enter 鍵啟動應用... 或按 Ctrl+C 取消[0m
+./start_web_app.sh: line 85: read: read error: 0: Bad file descriptor
+[0;34m╔════════════════════════════════════════════╗[0m
+[0;34m║     會議助理 - 網頁應用啟動程序           ║[0m
+[0;34m╚════════════════════════════════════════════╝[0m
+
+[1;33m[1/5][0m 檢查 Python...
+[0;32m✓ Python 3.10.19 已安裝[0m
+
+[1;33m[2/5][0m 檢查項目目錄...
+[0;32m✓ 項目目錄: /home/cgu-csie/meeting-assistence[0m
+
+[1;33m[3/5][0m 檢查 Python 依賴...
+[0;32m✓ Flask 已安裝[0m
+
+[1;33m[4/5][0m 檢查必要文件...
+[0;32m✓[0m web_app.py
+[0;32m✓[0m templates/index.html
+[0;32m✓[0m static/css/style.css
+[0;32m✓[0m static/js/app.js
+[0;32m✓[0m meeting_v1_integrated.py
+
+[1;33m[5/5][0m 創建必要目錄...
+[0;32m✓ 目錄已創建或已存在[0m
+
+[0;34m╔════════════════════════════════════════════╗[0m
+[0;34m║             配置信息                       ║[0m
+[0;34m╚════════════════════════════════════════════╝[0m
+[1;33m應用地址:[0m        http://localhost:5000
+[1;33m項目目錄:[0m        /home/cgu-csie/meeting-assistence
+[1;33m上傳目錄:[0m        /home/cgu-csie/meeting-assistence/uploads
+[1;33m輸出目錄:[0m        /home/cgu-csie/meeting-assistence/web_output
+
+[0;34m按 Enter 鍵啟動應用... 或按 Ctrl+C 取消[0m
+./start_web_app.sh: line 85: read: read error: 0: Bad file descriptor

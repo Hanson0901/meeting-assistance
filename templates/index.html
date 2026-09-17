@@ -4,26 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>會議助理 - 網頁應用</title>
+
+    <!-- 字型 -->
+    <link rel="preconnect" href="https://api.fontshare.com">
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <!-- 頁頭 -->
-        <header class="header">
-            <h1>🎙️ 會議助理</h1>
-            <p>AI 驅動的會議紀錄與分析工具</p>
-        </header>
-
-        <!-- 頂部導覽 -->
-        <div class="top-nav">
-            <button class="btn btn-nav" id="historyNavBtn" onclick="showHistoryView()">📜 歷史 Session</button>
+    <div class="top-bar">
+        <div class="top-bar-inner">
+            <div class="brand">
+                <span class="logo-mark" data-icon="logo-mark" data-icon-size="34"></span>
+                <div class="brand-text">
+                    <h1>會議助理</h1>
+                    <p>AI 驅動的會議紀錄與分析工具</p>
+                </div>
+            </div>
+            <div class="top-nav">
+                <button class="btn btn-icon-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="切換深淡色主題">
+                    <span data-icon="bulb-on" data-icon-size="18" id="themeToggleIcon"></span>
+                </button>
+                <button class="btn btn-nav" id="historyNavBtn" onclick="showHistoryView()">
+                    <span data-icon="history" data-icon-size="16"></span>歷史 Session
+                </button>
+            </div>
         </div>
+    </div>
 
+    <div class="container">
         <!-- 主要內容 -->
         <main class="main-content">
             <!-- 設置面板 -->
             <section class="panel setup-panel">
-                <h2>⚙️ 設置</h2>
+                <h2><span data-icon="settings" data-icon-size="19"></span>設置</h2>
                 <div class="form-group">
                     <label for="modelPath">模型路徑:</label>
                     <input type="text" id="modelPath" placeholder="/home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf" value="/home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf">
@@ -45,16 +62,20 @@
 
             <!-- 會議進度 -->
             <section class="panel progress-panel" id="progressPanel" style="display: none;">
-                <h2>📊 會議進度</h2>
+                <h2><span data-icon="activity" data-icon-size="19"></span>會議進度</h2>
                 <div class="session-info">
                     <p>會話 ID: <code id="sessionId"></code></p>
                 </div>
 
                 <!-- 音頻上傳 -->
                 <div class="step-section">
-                    <h3>📁 步驟 0: 上傳音頻</h3>
+                    <h3><span data-icon="upload" data-icon-size="17"></span>步驟 0: 上傳音頻</h3>
                     <div class="file-upload">
                         <input type="file" id="audioFile" accept="audio/*,video/*" onchange="handleFileSelect(event)">
+                        <button class="btn btn-record" id="recordBtn" onclick="toggleRecording()">
+                            <span data-icon="mic" data-icon-size="16" id="recordBtnIcon"></span>
+                            <span id="recordBtnLabel">錄音</span>
+                        </button>
                         <span id="uploadStatus" class="status-text"></span>
                     </div>
                 </div>
@@ -64,7 +85,7 @@
                     <!-- ASR -->
                     <div class="step-section">
                         <div class="step-header">
-                            <h3 id="asrTitle">🗣️ 步驟 1: ASR 語音轉文字</h3>
+                            <h3 id="asrTitle"><span data-icon="waveform" data-icon-size="17"></span>步驟 1: ASR 語音轉文字</h3>
                             <span id="asrStatus" class="step-status"></span>
                         </div>
                         <p class="step-description">將音頻轉換為文字轉錄</p>
@@ -74,7 +95,7 @@
                     <!-- PKD -->
                     <div class="step-section">
                         <div class="step-header">
-                            <h3 id="pkdTitle">👥 步驟 2: PKD 報告</h3>
+                            <h3 id="pkdTitle"><span data-icon="people" data-icon-size="17"></span>步驟 2: PKD 報告</h3>
                             <span id="pkdStatus" class="step-status"></span>
                         </div>
                         <p class="step-description">生成 People (參與者) / Keypoints (重點) / Decisions (決策)</p>
@@ -84,7 +105,7 @@
                     <!-- Actions -->
                     <div class="step-section">
                         <div class="step-header">
-                            <h3 id="actionsTitle">✅ 步驟 3: 提取行動項目</h3>
+                            <h3 id="actionsTitle"><span data-icon="check-list" data-icon-size="17"></span>步驟 3: 提取行動項目</h3>
                             <span id="actionsStatus" class="step-status"></span>
                         </div>
                         <p class="step-description">提取需要跟進的行動項目和任務</p>
@@ -94,7 +115,7 @@
                     <!-- Summary -->
                     <div class="step-section">
                         <div class="step-header">
-                            <h3 id="summaryTitle">📋 步驟 4: 生成摘要</h3>
+                            <h3 id="summaryTitle"><span data-icon="clipboard" data-icon-size="17"></span>步驟 4: 生成摘要</h3>
                             <span id="summaryStatus" class="step-status"></span>
                         </div>
                         <p class="step-description">生成整體會議摘要和總結</p>
@@ -104,7 +125,7 @@
                     <!-- Export -->
                     <div class="step-section">
                         <div class="step-header">
-                            <h3 id="exportTitle">📤 步驟 5: 匯出 TXT</h3>
+                            <h3 id="exportTitle"><span data-icon="export" data-icon-size="17"></span>步驟 5: 匯出 TXT</h3>
                             <span id="exportStatus" class="step-status"></span>
                         </div>
                         <p class="step-description">將所有結果匯出為 TXT 檔案</p>
@@ -114,23 +135,30 @@
                     <!-- Bluetooth -->
                     <div class="step-section">
                         <div class="step-header">
-                            <h3 id="bluetoothTitle">📱 步驟 6: 藍牙傳送</h3>
+                            <h3 id="bluetoothTitle"><span data-icon="signal" data-icon-size="17"></span>步驟 6: 藍牙傳送</h3>
                             <span id="bluetoothStatus" class="step-status"></span>
                         </div>
-                        <p class="step-description">將檔案傳送到配對的藍牙裝置</p>
+                        <p class="step-description">搜尋並選擇藍牙裝置，將檔案傳送過去（未選擇時將自動使用已配對的第一個裝置）</p>
+                        <div class="bluetooth-scan-row">
+                            <button class="btn btn-nav" onclick="scanBluetoothDevices()" id="btScanBtn">
+                                <span data-icon="signal" data-icon-size="15"></span>搜尋裝置
+                            </button>
+                            <span id="btScanStatus" class="status-text"></span>
+                        </div>
+                        <div class="bluetooth-device-list" id="btDeviceList"></div>
                         <button class="btn btn-step" onclick="runStep('bluetooth')" id="bluetoothBtn" disabled>執行 Bluetooth</button>
                     </div>
                 </div>
 
                 <!-- 訊息和錯誤 -->
                 <section class="panel messages-panel">
-                    <h3>📢 訊息日誌</h3>
+                    <h3><span data-icon="message" data-icon-size="17"></span>訊息日誌</h3>
                     <div class="messages-log" id="messagesLog">
                         <div class="message-item info">
                             <div class="message-item-header">
-                                <span class="message-item-icon">ℹ️</span>
+                                <span class="message-item-icon" data-icon="info" data-icon-size="16"></span>
                                 <span class="message-item-text">等待操作...</span>
-                                <span class="message-item-expand">▶</span>
+                                <span class="message-item-expand" data-icon="chevron-right" data-icon-size="14"></span>
                             </div>
                         </div>
                     </div>
@@ -139,8 +167,8 @@
                 <!-- 系統日誌 -->
                 <section class="panel logs-panel">
                     <div class="logs-header">
-                        <h3>🔍 系統日誌</h3>
-                        <button class="btn btn-small btn-primary" onclick="clearSystemLogs()">清空</button>
+                        <h3><span data-icon="terminal" data-icon-size="17"></span>系統日誌</h3>
+                        <button class="btn btn-small btn-primary" style="width:auto;margin-top:0;" onclick="clearSystemLogs()">清空</button>
                         <label class="auto-refresh-label">
                             <input type="checkbox" id="autoRefreshLogs" checked> 自動更新
                         </label>
@@ -152,24 +180,32 @@
 
                 <!-- 下載區域 -->
                 <section class="panel download-panel" id="downloadPanel" style="display: none;">
-                    <h3>📥 下載結果</h3>
+                    <h3><span data-icon="download" data-icon-size="17"></span>下載結果</h3>
                     <div class="download-list" id="downloadList"></div>
                 </section>
 
                 <!-- 操作按鈕 -->
                 <div class="action-buttons">
-                    <button class="btn btn-success" onclick="refreshStatus()">🔄 刷新狀態</button>
-                    <button class="btn btn-danger" onclick="endSession()">❌ 結束會議</button>
+                    <button class="btn btn-success" onclick="refreshStatus()">
+                        <span data-icon="refresh" data-icon-size="16"></span>刷新狀態
+                    </button>
+                    <button class="btn btn-danger" onclick="endSession()">
+                        <span data-icon="close-circle" data-icon-size="16"></span>結束會議
+                    </button>
                 </div>
             </section>
 
             <!-- 歷史 Session 列表 -->
             <section class="panel history-panel" id="historyPanel" style="display: none;">
                 <div class="history-panel-header">
-                    <h2>📜 歷史 Session</h2>
+                    <h2><span data-icon="history" data-icon-size="19"></span>歷史 Session</h2>
                     <div class="history-toolbar">
-                        <button class="btn btn-small btn-primary" onclick="loadSessionHistory()">🔄 重新整理</button>
-                        <button class="btn btn-small" onclick="closeHistoryView()">← 返回</button>
+                        <button class="btn btn-small btn-primary" style="width:auto;margin-top:0;" onclick="loadSessionHistory()">
+                            <span data-icon="refresh" data-icon-size="14"></span>重新整理
+                        </button>
+                        <button class="btn btn-small" onclick="closeHistoryView()">
+                            <span data-icon="arrow-left" data-icon-size="14"></span>返回
+                        </button>
                     </div>
                 </div>
                 <p class="history-count" id="historyCount"></p>
@@ -181,18 +217,22 @@
             <!-- 歷史 Session 詳細資訊 -->
             <section class="panel history-detail-panel" id="historyDetailPanel" style="display: none;">
                 <div class="history-detail-header">
-                    <h2>📄 Session <code id="historyDetailSessionId"></code></h2>
-                    <button class="btn btn-small" onclick="backToHistoryList()">← 返回列表</button>
+                    <h2><span data-icon="document" data-icon-size="19"></span>Session <code id="historyDetailSessionId"></code></h2>
+                    <button class="btn btn-small" onclick="backToHistoryList()">
+                        <span data-icon="arrow-left" data-icon-size="14"></span>返回列表
+                    </button>
                 </div>
                 <div class="history-detail-meta" id="historyDetailMeta"></div>
 
                 <div class="history-detail-actions" id="historyDetailActions">
-                    <button class="btn btn-primary" id="resumeSessionBtn" onclick="resumeHistorySession(currentHistorySessionId)">▶️ 繼續執行未完成步驟</button>
+                    <button class="btn btn-primary" id="resumeSessionBtn" onclick="resumeHistorySession(currentHistorySessionId)">
+                        <span data-icon="play" data-icon-size="16"></span>繼續執行未完成步驟
+                    </button>
                     <p class="resume-hint">將依照此設置面板目前的模型路徑/參數設定，恢復此 session 並接續尚未完成的步驟（已完成的步驟不會重新執行）。</p>
                 </div>
 
                 <div class="history-files-section">
-                    <h3>📥 輸出檔案</h3>
+                    <h3><span data-icon="download" data-icon-size="17"></span>輸出檔案</h3>
                     <div class="download-list" id="historyFilesList">
                         <div class="history-empty">載入中...</div>
                     </div>
@@ -200,8 +240,10 @@
 
                 <div class="history-log-section">
                     <div class="logs-header">
-                        <h3>🔍 完整執行日誌 (output_run.log)</h3>
-                        <button class="btn btn-small btn-primary" onclick="reloadHistoryLog()">🔄 重新載入</button>
+                        <h3><span data-icon="terminal" data-icon-size="17"></span>完整執行日誌 (output_run.log)</h3>
+                        <button class="btn btn-small btn-primary" style="width:auto;margin-top:0;" onclick="reloadHistoryLog()">
+                            <span data-icon="refresh" data-icon-size="14"></span>重新載入
+                        </button>
                         <label class="auto-refresh-label">
                             <input type="checkbox" id="historyLogFull" onchange="reloadHistoryLog()"> 顯示全部（不截斷）
                         </label>
@@ -216,10 +258,11 @@
 
         <!-- 頁尾 -->
         <footer class="footer">
-            <p>會議助理 Web 應用 © 2024 | 基於 AI 的會議紀錄系統</p>
+            <p>會議助理 Web 應用 © 2024 · 基於 AI 的會議紀錄系統</p>
         </footer>
     </div>
 
+    <script src="{{ url_for('static', filename='js/icons.js') }}"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

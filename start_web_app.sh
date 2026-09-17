@@ -11,6 +11,9 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# 使用 conda 環境的 Python（包含 Flask 等相依套件）
+PYTHON_BIN="/home/cgu-csie/miniconda3/envs/py3_10/bin/python3.10"
+
 echo -e "${BLUE}╔════════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║     會議助理 - 網頁應用啟動程序           ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════════╝${NC}"
@@ -18,12 +21,12 @@ echo ""
 
 # 檢查 Python
 echo -e "${YELLOW}[1/5]${NC} 檢查 Python..."
-if ! command -v python3 &> /dev/null; then
-    echo -e "${RED}✗ 找不到 Python 3${NC}"
+if [ ! -x "$PYTHON_BIN" ]; then
+    echo -e "${RED}✗ 找不到 conda 環境 Python: ${PYTHON_BIN}${NC}"
     exit 1
 fi
-PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
-echo -e "${GREEN}✓ Python ${PYTHON_VERSION} 已安裝${NC}"
+PYTHON_VERSION=$($PYTHON_BIN --version 2>&1 | awk '{print $2}')
+echo -e "${GREEN}✓ Python ${PYTHON_VERSION} (conda py3_10 環境) 已安裝${NC}"
 echo ""
 
 # 檢查項目目錄
@@ -34,9 +37,9 @@ echo ""
 
 # 檢查依賴
 echo -e "${YELLOW}[3/5]${NC} 檢查 Python 依賴..."
-if ! python3 -c "import flask" 2>/dev/null; then
+if ! $PYTHON_BIN -c "import flask" 2>/dev/null; then
     echo -e "${YELLOW}! Flask 未安裝，正在安裝...${NC}"
-    pip install Flask>=2.3.0 Flask-CORS>=4.0.0 Werkzeug>=2.3.0
+    $PYTHON_BIN -m pip install "Flask>=2.3.0" "Flask-CORS>=4.0.0" "Werkzeug>=2.3.0"
     echo -e "${GREEN}✓ Flask 已安裝${NC}"
 else
     echo -e "${GREEN}✓ Flask 已安裝${NC}"
@@ -80,13 +83,17 @@ echo -e "${YELLOW}上傳目錄:${NC}        $PROJECT_ROOT/uploads"
 echo -e "${YELLOW}輸出目錄:${NC}        $PROJECT_ROOT/web_output"
 echo ""
 
-# 詢問是否啟動
-echo -e "${BLUE}按 Enter 鍵啟動應用... 或按 Ctrl+C 取消${NC}"
-read
+# 若在非互動式（例如 nohup / 背景執行）環境下執行，跳過按 Enter 提示，直接啟動
+if [ -t 0 ]; then
+    echo -e "${BLUE}按 Enter 鍵啟動應用... 或按 Ctrl+C 取消${NC}"
+    read
+else
+    echo -e "${BLUE}偵測到非互動式環境（如 nohup），略過確認，直接啟動...${NC}"
+fi
 
 # 啟動應用
 echo -e "${GREEN}正在啟動應用...${NC}"
 echo ""
 
 cd "$PROJECT_ROOT"
-python3 web_app.py
+exec $PYTHON_BIN web_app.py

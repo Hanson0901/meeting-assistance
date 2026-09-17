@@ -126,7 +126,147 @@ class BluetoothFileSender:
             return devices
         except Exception as e:
             raise ObexPushError(f"[藍芽] 無法取得配對裝置: {e}")
-    
+
+    def _get_adapter_path(self):
+        """取得藍牙控制器 (adapter) 的 D-Bus 物件路徑"""
+        manager = dbus.Interface(
+            self.bluez_bus.get_object("org.bluez", "/"),
+            "org.freedesktop.DBus.ObjectManager"
+        )
+        objects = manager.GetManagedObjects()
+        for path, interfaces in objects.items():
+            if "org.bluez.Adapter1" in interfaces:
+                return path
+        raise ObexPushError("[藍芽] 找不到藍牙控制器 (adapter)，請確認裝置已開啟藍牙")
+
+    def scan_devices(self, duration: float = 6.0):
+        """
+        搜尋附近的藍牙裝置 (含已配對與尚未配對)
+
+        Args:
+            duration: 掃描秒數
+
+        Returns:
+            裝置列表，每個裝置為 {mac, name, paired, connected, rssi}
+        """
+        try:
+            adapter_path = self._get_adapter_path()
+            adapter = dbus.Interface(
+                self.bluez_bus.get_object("org.bluez", adapter_path),
+                "org.bluez.Adapter1"
+            )
+
+            try:
+                adapter.StartDiscovery()
+            except dbus.exceptions.DBusException as e:
+                # 若已經在掃描中則忽略，繼續等待收集結果
+                if "InProgress" not in str(e):
+                    raise
+
+            time.sleep(duration)
+
+            try:
+                adapter.StopDiscovery()
+            except dbus.exceptions.DBusException:
+                pass
+
+            manager = dbus.Interface(
+                self.bluez_bus.get_object("org.bluez", "/"),
+                "org.freedesktop.DBus.ObjectManager"
+            )
+            objects = manager.GetManagedObjects()
+
+            devices = []
+            for path, interfaces in objects.items():
+                if "org.bluez.Device1" in interfaces:
+                    props = interfaces["org.bluez.Device1"]
+                    mac = str(props.get("Address", ""))
+                    if not mac:
+                        continue
+                    rssi = props.get("RSSI")
+                    devices.append({
+                        "mac": mac,
+                        "name": str(props.get("Name", props.get("Alias", "未知裝置"))),
+                        "paired": bool(props.get("Paired", False)),
+                        "connected": bool(props.get("Connected", False)),
+                        "rssi": int(rssi) if rssi is not None else None,
+                    })
+
+            # 排序: 已連線 > 已配對 > 訊號強度
+            devices.sort(key=lambda d: (
+                0 if d["connected"] else 1,
+                0 if d["paired"] else 1,
+                -(d["rssi"] if d["rssi"] is not None else -999)
+            ))
+            return devices
+        except ObexPushError:
+            raise
+        except Exception as e:
+            raise ObexPushError(f"[藍芽] 搜尋裝置失敗: {e}")
+
+    def pair_and_trust(self, mac: str, timeout: float = 15.0) -> bool:
+        """
+        配對並信任指定的裝置 (若已配對則跳過配對步驟)，供使用者從搜尋列表中選擇後呼叫
+
+        Args:
+            mac: 裝置 MAC 位址
+            timeout: 配對逾時秒數
+
+        Returns:
+            True 表示裝置現已配對並信任
+        """
+        try:
+            manager = dbus.Interface(
+                self.bluez_bus.get_object("org.bluez", "/"),
+                "org.freedesktop.DBus.ObjectManager"
+            )
+            objects = manager.GetManagedObjects()
+
+            device_path = None
+            for path, interfaces in objects.items():
+                if "org.bluez.Device1" in interfaces:
+                    if str(interfaces["org.bluez.Device1"].get("Address", "")) == mac:
+                        device_path = path
+                        break
+
+            if not device_path:
+                raise ObexPushError(f"[配對] 找不到裝置: {mac}，請重新搜尋")
+
+            device = dbus.Interface(
+                self.bluez_bus.get_object("org.bluez", device_path),
+                "org.bluez.Device1"
+            )
+            props_iface = dbus.Interface(
+                self.bluez_bus.get_object("org.bluez", device_path),
+                "org.freedesktop.DBus.Properties"
+            )
+
+            already_paired = bool(props_iface.Get("org.bluez.Device1", "Paired"))
+            if not already_paired:
+                print(f"[配對] 開始與 {mac} 配對...")
+                device.Pair(timeout=timeout)
+                print(f"[配對] 配對成功: {mac}")
+
+            try:
+                props_iface.Set("org.bluez.Device1", "Trusted", True)
+            except Exception as e:
+                print(f"[配對] 設定信任失敗 (可忽略): {e}")
+
+            try:
+                if not bool(props_iface.Get("org.bluez.Device1", "Connected")):
+                    device.Connect(timeout=timeout)
+            except Exception as e:
+                # 部分裝置配對/信任後不需要主動連線即可傳送檔案，此處失敗可忽略
+                print(f"[配對] 主動連線失敗 (可忽略): {e}")
+
+            return True
+        except dbus.exceptions.DBusException as e:
+            raise ObexPushError(f"[配對] 配對失敗: {e}")
+        except ObexPushError:
+            raise
+        except Exception as e:
+            raise ObexPushError(f"[配對] 未預期的錯誤: {e}")
+
     def send_file(self, file_path: str, device_mac: str) -> bool:
         """
         透過 OBEX 傳送檔案
@@ -623,14 +763,22 @@ class MeetingWorkflow:
             )
 
             self.is_recording = True
-            signal.signal(signal.SIGINT, _on_sigint)
+            try:
+                # 僅在主執行緒可註冊訊號處理器；透過 Web 背景執行緒錄音時略過即可，
+                # 停止錄音改由 is_recording 旗標控制（見 web_app.py 的 /record/stop）。
+                signal.signal(signal.SIGINT, _on_sigint)
+            except ValueError:
+                pass
 
             print("[MeetingWorkflow][step1_record] 錄音進行中...\n")
             while self.is_recording:
                 time.sleep(0.2)
 
         finally:
-            signal.signal(signal.SIGINT, old_handler)
+            try:
+                signal.signal(signal.SIGINT, old_handler)
+            except ValueError:
+                pass
 
             for p in (arecord_proc, ffmpeg_proc):
                 try:

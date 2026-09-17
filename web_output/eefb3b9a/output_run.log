@@ -1,0 +1,1195 @@
+[2026-08-18 11:29:05][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-18 11:29:05][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-18 11:29:05][meeting_v1_integrated] [WEB] 建立會話: eefb3b9a
+[2026-08-18 11:29:05][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-18 11:29:05][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-18 11:29:05][meeting_v1_integrated] [WEB] 建立會話: 8323b2b7
+[2026-08-18 11:29:16][meeting_v1_integrated] [STEP] 開始使用麥克風錄音（裝置: hw:2,0）...
+[2026-08-18 11:29:16][meeting_v1_integrated] 
+============================================================
+[2026-08-18 11:29:16][meeting_v1_integrated]   步驟 1/6: 開始錄音
+[2026-08-18 11:29:16][meeting_v1_integrated] ============================================================
+
+[2026-08-18 11:29:16][meeting_v1_integrated] [MeetingWorkflow][step1_record] 音訊設備: hw:2,0
+[2026-08-18 11:29:16][meeting_v1_integrated] [MeetingWorkflow][step1_record] 輸出檔案: /home/cgu-csie/meeting-assistence/web_output/8323b2b7/output_audio.mkv
+[2026-08-18 11:29:16][meeting_v1_integrated] [MeetingWorkflow][step1_record]  按 Ctrl+C 結束錄音
+
+[2026-08-18 11:29:16][meeting_v1_integrated] [MeetingWorkflow][step1_record] 錄音進行中...
+
+[2026-08-18 11:29:17][meeting_v1_integrated] [STEP] 收到停止錄音指令，正在完成檔案封裝...
+[2026-08-18 11:29:17][meeting_v1_integrated] [MeetingWorkflow][step1_record] step1 耗時: 1.80 秒
+
+[2026-08-18 11:29:17][meeting_v1_integrated] [MeetingWorkflow][step1_record] 錄音已停止
+[2026-08-18 11:29:17][meeting_v1_integrated] [MeetingWorkflow][step1_record] 音訊檔案已儲存: /home/cgu-csie/meeting-assistence/web_output/8323b2b7/output_audio.mkv
+[2026-08-18 11:29:17][meeting_v1_integrated] [SUCCESS] 錄音完成，檔案: /home/cgu-csie/meeting-assistence/web_output/8323b2b7/output_audio.mkv
+[2026-08-18 11:40:37][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-18 11:40:37][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-18 11:40:37][meeting_v1_integrated] [WEB] 建立會話: 81eea0fc
+[2026-08-18 11:40:41][meeting_v1_integrated] [STEP] 開始搜尋附近的藍牙裝置...
+[2026-08-18 11:40:47][meeting_v1_integrated] [SUCCESS] 藍牙搜尋完成，找到 7 個裝置
+[2026-08-18 11:41:12][meeting_v1_integrated] [STEP] 開始搜尋附近的藍牙裝置...
+[2026-08-18 11:41:18][meeting_v1_integrated] [SUCCESS] 藍牙搜尋完成，找到 9 個裝置
+[2026-08-18 11:43:01][meeting_v1_integrated] [WEB] 清除會話: 81eea0fc
+[2026-08-18 14:33:43][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-18 14:33:43][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-18 14:33:43][meeting_v1_integrated] [WEB] 建立會話: 6f57ac28
+[2026-08-18 14:43:25][meeting_v1_integrated] [WEB][6f57ac28] 上傳音頻: /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_audio.wav
+[2026-08-18 14:43:25][meeting_v1_integrated] [WEB][6f57ac28] 檔案大小: 52.55 MB
+[2026-08-18 14:43:33][meeting_v1_integrated] [STEP] 開始執行 ASR 語音轉文字...
+[2026-08-18 14:43:33][meeting_v1_integrated] 
+============================================================
+[2026-08-18 14:43:33][meeting_v1_integrated]   步驟 2/6: 語音轉文字 (ASR)
+[2026-08-18 14:43:33][meeting_v1_integrated] ============================================================
+
+[2026-08-18 14:43:33][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] 讀取音訊: /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_audio.wav
+[2026-08-18 14:43:33][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe]  按 Ctrl+C 可提前結束轉錄
+
+[2026-08-18 14:43:33][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] 使用 conda Python 執行 ASR：
+[2026-08-18 14:43:33][meeting_v1_integrated]    sudo -u cgu-csie --preserve-env=MEETING_LOG_FILE,PYTHONPATH /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/speech/run_asr_conda.py --audio /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_audio.wav --outdir /home/cgu-csie/meeting-assistence/web_output/6f57ac28 --prefix output --alpha 0.0 --overlap 5.0 --verbose
+
+[2026-08-18 14:43:39][run_asr_conda] [run_asr] 開始 ASR 轉錄...
+
+[2026-08-18 14:43:39][run_asr_conda] 載入模型中...
+[2026-08-18 14:43:39][run_asr_conda] funasr version: 1.3.0.
+[2026-08-18 14:45:16][run_asr_conda] 成功載入本地模型
+[2026-08-18 14:45:16][run_asr_conda] funasr version: 1.3.0.
+[2026-08-18 14:45:17][run_asr_conda] 模型載入完成
+============================================================
+[2026-08-18 14:45:17][run_asr_conda] 模型載入耗時: 98.13 秒
+[2026-08-18 14:45:17][run_asr_conda] 等待音訊檔案: /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_audio.wav
+[2026-08-18 14:45:17][run_asr_conda] 開始處理...
+
+[2026-08-18 14:45:19][run_asr_conda] [30.0s] 處理30.0s語音片段...
+[2026-08-18 14:45:30][run_asr_conda] [30.0s] 獲得 15 個語音片段
+[2026-08-18 14:45:31][run_asr_conda] [0.1s-0.3s] [Speaker 未知] 好，
+[2026-08-18 14:45:31][run_asr_conda] [0.3s-1.4s] [Speaker 未知] 標變更奇怪喲。
+[2026-08-18 14:45:31][run_asr_conda] [3.9s-4.2s] [Speaker 1] 呃，
+[2026-08-18 14:45:31][run_asr_conda] [4.2s-5.0s] [Speaker 1] 大家早安，
+[2026-08-18 14:45:31][run_asr_conda] [5.0s-6.6s] [Speaker 1] 我是總招林子祥。
+[2026-08-18 14:45:31][run_asr_conda] [7.0s-10.2s] [Speaker 1] 今天是我們二零二六校園創畫文藝節，
+[2026-08-18 14:45:31][run_asr_conda] [10.8s-12.6s] [Speaker 1] 第二次正式籌備會議，
+[2026-08-18 14:45:31][run_asr_conda] [12.9s-14.9s] [Speaker 1] 距離活動只剩下兩個半月。
+[2026-08-18 14:45:31][run_asr_conda] [15.3s-18.7s] [Speaker 1] 所以今天主要希望把整個活動方向確認下來，
+[2026-08-18 14:45:31][run_asr_conda] [18.8s-20.0s] [Speaker 1] 包括主題定位、
+[2026-08-18 14:45:31][run_asr_conda] [20.1s-20.9s] [Speaker 1] 流程安排、
+[2026-08-18 14:45:31][run_asr_conda] [21.3s-23.4s] [Speaker 1] 預算控制以及宣傳方式。
+[2026-08-18 14:45:31][run_asr_conda] [24.1s-26.6s] [Speaker 1] 因爲這次學校給我們的資源比去年少。
+[2026-08-18 14:45:31][run_asr_conda] [26.8s-28.4s] [Speaker 1] 所以我們不能再像以前一樣，
+[2026-08-18 14:45:31][run_asr_conda] [28.4s-29.5s] [Speaker 1] 什麼都想做。
+[2026-08-18 14:45:32][run_asr_conda] [55.0s] 處理30.0s語音片段...
+[2026-08-18 14:45:43][run_asr_conda] [55.0s] 獲得 11 個語音片段
+[2026-08-18 14:45:43][run_asr_conda] [25.1s-26.5s] [Speaker 1] 給我們的資源比去年少，
+[2026-08-18 14:45:43][run_asr_conda] [26.9s-29.2s] [Speaker 1] 所以我們不能再像以前一樣什麼都想做。
+[2026-08-18 14:45:43][run_asr_conda] [29.9s-32.8s] [Speaker 1] 我認爲今年最重要的就是把活動品質做好，
+[2026-08-18 14:45:43][run_asr_conda] [33.1s-34.9s] [Speaker 1] 而不是以美追求規模。
+[2026-08-18 14:45:43][run_asr_conda] [36.0s-39.0s] [Speaker 1] 目前學校這邊的活動經費是二十五萬元，
+[2026-08-18 14:45:43][run_asr_conda] [39.5s-41.4s] [Speaker 1] 比去年少了將近八萬。
+[2026-08-18 14:45:43][run_asr_conda] [41.8s-44.3s] [Speaker 1] 而且今年場地使用規定也比較嚴格，
+[2026-08-18 14:45:43][run_asr_conda] [44.6s-46.5s] [Speaker 1] 尤其是音量結束時間，
+[2026-08-18 14:45:43][run_asr_conda] [46.6s-47.6s] [Speaker 1] 還有安全管制，
+[2026-08-18 14:45:43][run_asr_conda] [47.6s-48.8s] [Speaker 1] 都需要重新申請。
+[2026-08-18 14:45:43][run_asr_conda] [49.3s-54.7s] [Speaker 1] 所以今天希望大家可以針對各自負責的部分提出目前狀況與問題。
+[2026-08-18 14:45:44][run_asr_conda] [80.0s] 處理30.0s語音片段...
+[2026-08-18 14:45:55][run_asr_conda] [80.0s] 獲得 12 個語音片段
+[2026-08-18 14:45:55][run_asr_conda] [50.1s-54.6s] [Speaker 1] 天希望大家可以針對各自負責的部分提出目前狀況與問題，
+[2026-08-18 14:45:55][run_asr_conda] [55.1s-57.1s] [Speaker 1] 我們在一起確認最後方向。
+[2026-08-18 14:45:55][run_asr_conda] [57.5s-58.2s] [Speaker 1] 那麼雨涵，
+[2026-08-18 14:45:55][run_asr_conda] [58.5s-60.4s] [Speaker 1] 你從計劃內容開始吧。
+[2026-08-18 14:45:55][run_asr_conda] [62.4s-62.9s] [Speaker 2] 大家好，
+[2026-08-18 14:45:55][run_asr_conda] [62.9s-64.8s] [Speaker 2] 我是細化組長陳雨涵。
+[2026-08-18 14:45:55][run_asr_conda] [65.2s-67.8s] [Speaker 2] 目前我們規劃的主題叫做 recamgts，
+[2026-08-18 14:45:55][run_asr_conda] [68.0s-71.0s] [Speaker 2] 核心概念是希望把校園文化重新連接。
+[2026-08-18 14:45:55][run_asr_conda] [71.5s-72.4s] [Speaker 2] 因爲這些年，
+[2026-08-18 14:45:55][run_asr_conda] [72.5s-75.3s] [Speaker 2] 很多學生其實對校園活動參與度下降，
+[2026-08-18 14:45:55][run_asr_conda] [75.5s-76.8s] [Speaker 2] 尤其疫情之後，
+[2026-08-18 14:45:55][run_asr_conda] [77.1s-79.8s] [Speaker 2] 大家變得比較少參加大型實體活動。
+[2026-08-18 14:45:56][run_asr_conda] [105.0s] 處理30.0s語音片段...
+[2026-08-18 14:46:07][run_asr_conda] [105.0s] 獲得 14 個語音片段
+[2026-08-18 14:46:08][run_asr_conda] [75.2s-76.8s] [Speaker 2] 這樣尤其疫情之後，
+[2026-08-18 14:46:08][run_asr_conda] [77.2s-80.0s] [Speaker 2] 大家變得比較少參加大型實體活動。
+[2026-08-18 14:46:08][run_asr_conda] [80.3s-82.4s] [Speaker 2] 所以我們這次不只是辦演員會，
+[2026-08-18 14:46:08][run_asr_conda] [82.7s-85.6s] [Speaker 2] 而是希望讓學生重新感受到校園互動。
+[2026-08-18 14:46:08][run_asr_conda] [86.1s-86.5s] [Speaker 2] 目前，
+[2026-08-18 14:46:08][run_asr_conda] [86.5s-88.4s] [Speaker 2] 活動內容分成四個區塊，
+[2026-08-18 14:46:08][run_asr_conda] [88.8s-90.7s] [Speaker 2] 第一個是主舞臺表演區。
+[2026-08-18 14:46:08][run_asr_conda] [90.9s-92.7s] [Speaker 2] 第二個是社團展示區，
+[2026-08-18 14:46:08][run_asr_conda] [93.0s-94.7s] [Speaker 2] 第三個是創意設集區。
+[2026-08-18 14:46:08][run_asr_conda] [94.9s-98.4s] [Speaker 2] 第二個是夜間互動活動主舞臺部分，
+[2026-08-18 14:46:08][run_asr_conda] [98.7s-99.7s] [Speaker 2] 我們目前規劃，
+[2026-08-18 14:46:08][run_asr_conda] [99.7s-101.0s] [Speaker 2] 下午是社團演出，
+[2026-08-18 14:46:08][run_asr_conda] [101.1s-104.0s] [Speaker 2] 晚上則安排學生樂團與邀請歌手、
+[2026-08-18 14:46:08][run_asr_conda] [104.5s-104.9s] [Speaker 2] 社團。
+[2026-08-18 14:46:09][run_asr_conda] [130.0s] 處理30.0s語音片段...
+[2026-08-18 14:46:19][run_asr_conda] [130.0s] 獲得 14 個語音片段
+[2026-08-18 14:46:20][run_asr_conda] [100.1s-101.0s] [Speaker 2] 我是社團演出，
+[2026-08-18 14:46:20][run_asr_conda] [101.2s-105.0s] [Speaker 2] 晚上則安排學生樂團與邀請歌手社團，
+[2026-08-18 14:46:20][run_asr_conda] [105.0s-108.1s] [Speaker 2] 展示區則會讓各系學會社團。
+[2026-08-18 14:46:20][run_asr_conda] [108.1s-114.8s] [Speaker 2] 社團參加增加參與感創意是及目前預計招募學校內的學生創作者，
+[2026-08-18 14:46:20][run_asr_conda] [114.8s-115.6s] [Speaker 2] 像手座、
+[2026-08-18 14:46:20][run_asr_conda] [115.8s-116.2s] [Speaker 2] 插畫、
+[2026-08-18 14:46:20][run_asr_conda] [116.3s-117.2s] [Speaker 2] 甜點等等。
+[2026-08-18 14:46:20][run_asr_conda] [117.5s-118.6s] [Speaker 2] 至於夜間活動，
+[2026-08-18 14:46:20][run_asr_conda] [118.7s-120.1s] [Speaker 2] 我們目前有兩個方案，
+[2026-08-18 14:46:20][run_asr_conda] [120.4s-122.2s] [Speaker 2] 第一個是露天電影院，
+[2026-08-18 14:46:20][run_asr_conda] [122.4s-124.2s] [Speaker 2] 第二個是夜間音樂會，
+[2026-08-18 14:46:20][run_asr_conda] [124.5s-126.2s] [Speaker 2] 但這部分還沒確定。
+[2026-08-18 14:46:20][run_asr_conda] [126.4s-128.0s] [Speaker 2] 另外我想提出一個問題，
+[2026-08-18 14:46:20][run_asr_conda] [128.4s-129.8s] [Speaker 2] 我覺得現在內容活。
+[2026-08-18 14:46:21][run_asr_conda] [155.0s] 處理30.0s語音片段...
+[2026-08-18 14:46:31][run_asr_conda] [155.0s] 獲得 13 個語音片段
+[2026-08-18 14:46:32][run_asr_conda] [125.0s-126.2s] [Speaker 2] 部分還沒確定。
+[2026-08-18 14:46:32][run_asr_conda] [126.5s-128.0s] [Speaker 2] 另外我想提出一個問題，
+[2026-08-18 14:46:32][run_asr_conda] [128.5s-131.9s] [Speaker 2] 我覺得現在內容活活動內容其實有點太分散。
+[2026-08-18 14:46:32][run_asr_conda] [132.2s-133.5s] [Speaker 2] 雖然看起來很多元，
+[2026-08-18 14:46:32][run_asr_conda] [133.6s-135.5s] [Speaker 2] 但主題連接不夠強，
+[2026-08-18 14:46:32][run_asr_conda] [135.9s-138.4s] [Speaker 2] 目前比較像是很多活動放在一起，
+[2026-08-18 14:46:32][run_asr_conda] [138.6s-140.3s] [Speaker 2] 而不是一個完整的文化節。
+[2026-08-18 14:46:32][run_asr_conda] [140.8s-141.7s] [Speaker 2] 所以我在想，
+[2026-08-18 14:46:32][run_asr_conda] [141.8s-144.2s] [Speaker 2] 我們是不是需要一個更明確的核心，
+[2026-08-18 14:46:32][run_asr_conda] [144.2s-145.4s] [Speaker 2] 各一核心概念。
+[2026-08-18 14:46:32][run_asr_conda] [145.8s-146.2s] [Speaker 2] 例如，
+[2026-08-18 14:46:32][run_asr_conda] [146.2s-150.2s] [Speaker 2] 每個區域都圍繞青春校園回憶或未來創意去設計，
+[2026-08-18 14:46:32][run_asr_conda] [150.8s-153.2s] [Speaker 2] 不然參加的人可能感受不到整體性。
+[2026-08-18 14:46:33][run_asr_conda] [180.0s] 處理30.0s語音片段...
+[2026-08-18 14:46:44][run_asr_conda] [180.0s] 獲得 17 個語音片段
+[2026-08-18 14:46:46][run_asr_conda] [150.1s-151.2s] [Speaker 2] 計不然，
+[2026-08-18 14:46:46][run_asr_conda] [151.2s-153.2s] [Speaker 2] 參加的人可能感受不到整體性。
+[2026-08-18 14:46:46][run_asr_conda] [155.2s-155.4s] [Speaker 1] 呃，
+[2026-08-18 14:46:46][run_asr_conda] [155.4s-156.3s] [Speaker 1] 我懂你的意思。
+[2026-08-18 14:46:46][run_asr_conda] [156.8s-158.5s] [Speaker 1] 現在比較像大型原油會，
+[2026-08-18 14:46:46][run_asr_conda] [159.1s-162.2s] [Speaker 1] 但還沒有正呃還沒有真正形成品牌感。
+[2026-08-18 14:46:46][run_asr_conda] [162.9s-163.4s] [Speaker 1] 博軍，
+[2026-08-18 14:46:46][run_asr_conda] [163.7s-165.8s] [Speaker 1] 你認爲如果要加強主力，
+[2026-08-18 14:46:46][run_asr_conda] [165.8s-167.4s] [Speaker 1] 宣傳上會有幫助嗎？
+[2026-08-18 14:46:46][run_asr_conda] [169.3s-169.7s] [Speaker 3] 大家好，
+[2026-08-18 14:46:46][run_asr_conda] [169.7s-171.2s] [Speaker 3] 我是公關宣傳組長。
+[2026-08-18 14:46:46][run_asr_conda] [171.2s-171.7s] [Speaker 3] 王博軍，
+[2026-08-18 14:46:46][run_asr_conda] [172.1s-173.1s] [Speaker 3] 我覺得會差很多。
+[2026-08-18 14:46:46][run_asr_conda] [173.4s-175.4s] [Speaker 3] 因爲現在學生看到活動海報，
+[2026-08-18 14:46:46][run_asr_conda] [175.4s-176.6s] [Speaker 3] 最重要的是記憶點，
+[2026-08-18 14:46:46][run_asr_conda] [177.0s-178.5s] [Speaker 3] 如果只有寫校園文化節，
+[2026-08-18 14:46:46][run_asr_conda] [178.5s-179.8s] [Speaker 3] 其實很容易被忽略。
+[2026-08-18 14:46:47][run_asr_conda] [205.0s] 處理30.0s語音片段...
+[2026-08-18 14:46:58][run_asr_conda] [205.0s] 獲得 15 個語音片段
+[2026-08-18 14:46:59][run_asr_conda] [175.1s-176.7s] [Speaker 3] 動海報最重要的是記憶點，
+[2026-08-18 14:46:59][run_asr_conda] [177.0s-178.6s] [Speaker 3] 如果只有寫校園文化節，
+[2026-08-18 14:46:59][run_asr_conda] [178.6s-179.7s] [Speaker 3] 其實很容易被忽略。
+[2026-08-18 14:46:59][run_asr_conda] [180.0s-181.9s] [Speaker 3] 但如果我們能有一個明確概念，
+[2026-08-18 14:46:59][run_asr_conda] [182.2s-184.6s] [Speaker 3] 例如找回大學最自由的時光，
+[2026-08-18 14:46:59][run_asr_conda] [184.8s-186.6s] [Speaker 3] 或是重新連接校園生活，
+[2026-08-18 14:46:59][run_asr_conda] [186.8s-189.4s] [Speaker 3] 這種比較有情感的主題會更容易吸引人。
+[2026-08-18 14:46:59][run_asr_conda] [189.7s-191.6s] [Speaker 3] 而且現在宣傳的方式也跟以前不一樣，
+[2026-08-18 14:46:59][run_asr_conda] [191.8s-193.2s] [Speaker 3] 以前貼海報可能就有效。
+[2026-08-18 14:46:59][run_asr_conda] [193.6s-197.1s] [Speaker 3] 但現在學生大部分都是看 instagram cs 或者是短影音。
+[2026-08-18 14:46:59][run_asr_conda] [197.3s-199.5s] [Speaker 3] 所以我們這次如果還只是傳統宣傳，
+[2026-08-18 14:46:59][run_asr_conda] [199.5s-200.7s] [Speaker 3] 我覺得效果不會太好。
+[2026-08-18 14:46:59][run_asr_conda] [201.0s-202.1s] [Speaker 3] 我目前有幾個方向，
+[2026-08-18 14:46:59][run_asr_conda] [202.9s-203.3s] [Speaker 3] 第一，
+[2026-08-18 14:46:59][run_asr_conda] [203.5s-204.7s] [Speaker 3] 我們可以提前做斷。
+[2026-08-18 14:47:00][run_asr_conda] [230.0s] 處理30.0s語音片段...
+[2026-08-18 14:47:11][run_asr_conda] [230.0s] 獲得 21 個語音片段
+[2026-08-18 14:47:12][run_asr_conda] [200.0s-200.8s] [Speaker 3] 我不會太好，
+[2026-08-18 14:47:12][run_asr_conda] [201.1s-202.2s] [Speaker 3] 我目前有幾個方向，
+[2026-08-18 14:47:12][run_asr_conda] [202.8s-203.3s] [Speaker 3] 第一，
+[2026-08-18 14:47:12][run_asr_conda] [203.5s-205.3s] [Speaker 3] 我們可以提前做段影宣傳，
+[2026-08-18 14:47:12][run_asr_conda] [205.6s-210.3s] [Speaker 3] 例如社團彩排花絮工作人員準備過程校園街坊盜圖。
+[2026-08-18 14:47:12][run_asr_conda] [210.3s-213.0s] [Speaker 3] 影片讓這次知道活動不是突然出現，
+[2026-08-18 14:47:12][run_asr_conda] [213.0s-214.1s] [Speaker 3] 而是慢慢被期待。
+[2026-08-18 14:47:12][run_asr_conda] [214.3s-214.8s] [Speaker 3] 第二，
+[2026-08-18 14:47:12][run_asr_conda] [215.0s-218.2s] [Speaker 3] 我們可以找校內比較有影響力的學生賬號合作，
+[2026-08-18 14:47:12][run_asr_conda] [218.4s-220.3s] [Speaker 3] 像攝影社美食賬號、
+[2026-08-18 14:47:12][run_asr_conda] [220.4s-221.1s] [Speaker 3] 校園媒體。
+[2026-08-18 14:47:12][run_asr_conda] [221.4s-221.8s] [Speaker 3] 第三，
+[2026-08-18 14:47:12][run_asr_conda] [222.1s-223.4s] [Speaker 3] 我認爲這是活動視覺，
+[2026-08-18 14:47:12][run_asr_conda] [223.4s-225.3s] [Speaker 3] 一定要統一包含海報、
+[2026-08-18 14:47:12][run_asr_conda] [225.7s-226.1s] [Speaker 3] IG、
+[2026-08-18 14:47:12][run_asr_conda] [226.1s-226.5s] [Speaker 3] 貼文、
+[2026-08-18 14:47:12][run_asr_conda] [226.7s-227.3s] [Speaker 3] 工作證、
+[2026-08-18 14:47:12][run_asr_conda] [227.5s-227.9s] [Speaker 3] 舞臺、
+[2026-08-18 14:47:12][run_asr_conda] [227.9s-228.3s] [Speaker 3] 背板、
+[2026-08-18 14:47:12][run_asr_conda] [228.3s-228.9s] [Speaker 3] 指示牌。
+[2026-08-18 14:47:12][run_asr_conda] [229.1s-229.9s] [Speaker 3] 如果風格，
+[2026-08-18 14:47:12][run_asr_conda] [255.0s] 處理30.0s語音片段...
+[2026-08-18 14:47:24][run_asr_conda] [255.0s] 獲得 17 個語音片段
+[2026-08-18 14:47:25][run_asr_conda] [225.1s-227.4s] [Speaker 3] 海報 IG 貼文工作證，
+[2026-08-18 14:47:25][run_asr_conda] [227.6s-228.9s] [Speaker 3] 舞臺背板指示牌。
+[2026-08-18 14:47:25][run_asr_conda] [229.2s-230.3s] [Speaker 3] 如果風格不統一，
+[2026-08-18 14:47:25][run_asr_conda] [230.3s-231.9s] [Speaker 3] 整個活動會看起來很零散。
+[2026-08-18 14:47:25][run_asr_conda] [232.9s-233.5s] [Speaker 2] 我同意。
+[2026-08-18 14:47:25][run_asr_conda] [233.7s-235.8s] [Speaker 2] 尤其現在學生很重視活動，
+[2026-08-18 14:47:25][run_asr_conda] [235.8s-236.5s] [Speaker 2] 好不好拍。
+[2026-08-18 14:47:25][run_asr_conda] [236.8s-238.0s] [Speaker 2] 如果場景漂亮、
+[2026-08-18 14:47:25][run_asr_conda] [238.1s-238.8s] [Speaker 2] 燈光好看，
+[2026-08-18 14:47:25][run_asr_conda] [238.8s-240.2s] [Speaker 2] 自然就會有人發現到，
+[2026-08-18 14:47:25][run_asr_conda] [240.6s-244.2s] [Speaker 2] 其實很多活動的擴散都是靠學生自己拍照分享。
+[2026-08-18 14:47:25][run_asr_conda] [244.6s-245.2s] [Speaker 2] 大家好，
+[2026-08-18 14:47:25][run_asr_conda] [245.2s-247.7s] [Speaker 4] 我是財務總部組長李欣雨。
+[2026-08-18 14:47:25][run_asr_conda] [248.1s-250.3s] [Speaker 4] 我先講一下目前的經費狀況。
+[2026-08-18 14:47:25][run_asr_conda] [250.6s-251.2s] [Speaker 4] 老實說，
+[2026-08-18 14:47:25][run_asr_conda] [251.2s-253.3s] [Speaker 4] 現在預算其實蠻喫緊的。
+[2026-08-18 14:47:25][run_asr_conda] [253.4s-254.9s] [Speaker 4] 目前固定支出方，
+[2026-08-18 14:47:26][run_asr_conda] [280.0s] 處理30.0s語音片段...
+[2026-08-18 14:47:37][run_asr_conda] [280.0s] 獲得 15 個語音片段
+[2026-08-18 14:47:38][run_asr_conda] [250.1s-251.3s] [Speaker 4] 狀況老實說，
+[2026-08-18 14:47:38][run_asr_conda] [251.3s-253.3s] [Speaker 4] 現在預算其實蠻喫緊的。
+[2026-08-18 14:47:38][run_asr_conda] [253.5s-253.9s] [Speaker 4] 目前，
+[2026-08-18 14:47:38][run_asr_conda] [254.0s-257.6s] [Speaker 4] 固定支出包含舞臺與音響設備燈光、
+[2026-08-18 14:47:38][run_asr_conda] [257.6s-258.8s] [Speaker 4] 租借場地、
+[2026-08-18 14:47:38][run_asr_conda] [258.8s-262.8s] [Speaker 4] 保證金保險宣傳印刷工作人員不資，
+[2026-08-18 14:47:38][run_asr_conda] [263.2s-265.4s] [Speaker 4] 這些加起來已經接近十八萬。
+[2026-08-18 14:47:38][run_asr_conda] [265.6s-267.5s] [Speaker 4] 如果還要邀請校外歌手，
+[2026-08-18 14:47:38][run_asr_conda] [267.7s-268.1s] [Speaker 4] 費用，
+[2026-08-18 14:47:38][run_asr_conda] [268.1s-270.1s] [Speaker 4] 可能會再增加五到八萬。
+[2026-08-18 14:47:38][run_asr_conda] [270.4s-272.4s] [Speaker 4] 所以我們現在一定要做取捨。
+[2026-08-18 14:47:38][run_asr_conda] [272.7s-274.6s] [Speaker 4] 尤其去年有一個很大的問題，
+[2026-08-18 14:47:38][run_asr_conda] [274.8s-276.5s] [Speaker 4] 就是預算分配不平均，
+[2026-08-18 14:47:38][run_asr_conda] [276.8s-277.9s] [Speaker 4] 舞臺花太多錢，
+[2026-08-18 14:47:38][run_asr_conda] [278.1s-279.9s] [Speaker 4] 但其他區域品質下降。
+[2026-08-18 14:47:38][run_asr_conda] [305.0s] 處理30.0s語音片段...
+[2026-08-18 14:47:50][run_asr_conda] [305.0s] 獲得 12 個語音片段
+[2026-08-18 14:47:50][run_asr_conda] [275.1s-276.5s] [Speaker 5] 是預算分配不平均，
+[2026-08-18 14:47:50][run_asr_conda] [276.8s-278.0s] [Speaker 5] 舞臺花太多錢，
+[2026-08-18 14:47:50][run_asr_conda] [278.2s-279.9s] [Speaker 5] 但其他區域品質下降，
+[2026-08-18 14:47:50][run_asr_conda] [280.2s-282.4s] [Speaker 5] 結果很多學生都擠在子舞臺，
+[2026-08-18 14:47:50][run_asr_conda] [282.6s-284.0s] [Speaker 5] 其他地方几乎沒人。
+[2026-08-18 14:47:50][run_asr_conda] [284.4s-287.6s] [Speaker 5] 所以我覺得今年應該把重點放在整體體驗，
+[2026-08-18 14:47:50][run_asr_conda] [287.8s-289.1s] [Speaker 5] 而不是單一表演。
+[2026-08-18 14:47:50][run_asr_conda] [289.4s-291.2s] [Speaker 5] 另外我也想提醒一件事，
+[2026-08-18 14:47:50][run_asr_conda] [291.6s-294.4s] [Speaker 5] 現在很多企劃內容都還沒有實際的報價，
+[2026-08-18 14:47:50][run_asr_conda] [294.7s-297.6s] [Speaker 5] 如果太晚確認廠商價格可能會變動，
+[2026-08-18 14:47:50][run_asr_conda] [297.9s-300.9s] [Speaker 5] 所以希望這周內能把主要的需求定案，
+[2026-08-18 14:47:50][run_asr_conda] [301.9s-304.0s] [Speaker 1] 那目前贊助狀況怎麼樣？
+[2026-08-18 14:47:51][run_asr_conda] [330.0s] 處理30.0s語音片段...
+[2026-08-18 14:48:03][run_asr_conda] [330.0s] 獲得 16 個語音片段
+[2026-08-18 14:48:06][run_asr_conda] [300.0s-300.9s] [Speaker 3] 他的需求備案。
+[2026-08-18 14:48:06][run_asr_conda] [301.9s-304.0s] [Speaker 3] 那目前贊助狀況怎麼樣？
+[2026-08-18 14:48:06][run_asr_conda] [305.8s-307.0s] [Speaker 3] 目前有接洽幾點，
+[2026-08-18 14:48:06][run_asr_conda] [307.0s-308.8s] [Speaker 3] 廠商包含飲料品牌、
+[2026-08-18 14:48:06][run_asr_conda] [309.0s-310.6s] [Speaker 3] 文創店家跟附近餐廳。
+[2026-08-18 14:48:06][run_asr_conda] [310.9s-311.6s] [Speaker 3] 但問題是，
+[2026-08-18 14:48:06][run_asr_conda] [311.6s-314.2s] [Speaker 3] 今年很多廠商都希望看到流量保證。
+[2026-08-18 14:48:06][run_asr_conda] [314.6s-315.2s] [Speaker 3] 簡單來說，
+[2026-08-18 14:48:06][run_asr_conda] [315.2s-316.7s] [Speaker 3] 他們不只是想要掛 logo，
+[2026-08-18 14:48:06][run_asr_conda] [317.0s-319.0s] [Speaker 3] 而是希望有社羣互光有，
+[2026-08-18 14:48:06][run_asr_conda] [319.0s-319.7s] [Speaker 3] 現場互動，
+[2026-08-18 14:48:06][run_asr_conda] [319.7s-320.5s] [Speaker 3] 有學生參與。
+[2026-08-18 14:48:06][run_asr_conda] [320.8s-322.3s] [Speaker 3] 所以我們活動如果沒有特色，
+[2026-08-18 14:48:06][run_asr_conda] [322.3s-324.1s] [Speaker 3] 其實不太容易達到大型贊助。
+[2026-08-18 14:48:06][run_asr_conda] [325.9s-328.1s] [Speaker 3] 那接下來來談風險問題，
+[2026-08-18 14:48:06][run_asr_conda] [328.4s-329.9s] [Speaker 3] 因爲去年其實發生不少，
+[2026-08-18 14:48:07][run_asr_conda] [355.0s] 處理30.0s語音片段...
+[2026-08-18 14:48:18][run_asr_conda] [355.0s] 獲得 16 個語音片段
+[2026-08-18 14:48:20][run_asr_conda] [325.9s-328.1s] [Speaker 1] 那接下來來談風險問題，
+[2026-08-18 14:48:20][run_asr_conda] [328.4s-330.4s] [Speaker 1] 因爲去年其實發生不少狀況，
+[2026-08-18 14:48:20][run_asr_conda] [330.7s-331.8s] [Speaker 1] 像排線呃，
+[2026-08-18 14:48:20][run_asr_conda] [331.8s-332.5s] [Speaker 1] 排隊動、
+[2026-08-18 14:48:20][run_asr_conda] [332.8s-333.6s] [Speaker 1] 動線混亂，
+[2026-08-18 14:48:20][run_asr_conda] [333.9s-334.8s] [Speaker 1] 音響延遲、
+[2026-08-18 14:48:20][run_asr_conda] [335.1s-336.8s] [Speaker 1] 樂色處理不足，
+[2026-08-18 14:48:20][run_asr_conda] [337.1s-339.6s] [Speaker 1] 甚至還有臨呃攤位臨時缺電，
+[2026-08-18 14:48:20][run_asr_conda] [339.9s-340.5s] [Speaker 1] 這些問題，
+[2026-08-18 14:48:20][run_asr_conda] [340.5s-341.8s] [Speaker 1] 今年不能再發生。
+[2026-08-18 14:48:20][run_asr_conda] [342.4s-345.2s] [Speaker 1] 新余總務這邊目前有改善方案嗎？
+[2026-08-18 14:48:20][run_asr_conda] [346.8s-347.0s] [Speaker 4] 有，
+[2026-08-18 14:48:20][run_asr_conda] [347.1s-348.3s] [Speaker 4] 首先釋放一下，
+[2026-08-18 14:48:20][run_asr_conda] [348.9s-351.2s] [Speaker 4] 去年最大問題是入口在集中，
+[2026-08-18 14:48:20][run_asr_conda] [351.5s-353.4s] [Speaker 4] 所以人流全部都卡在這裏。
+[2026-08-18 14:48:20][run_asr_conda] [353.6s-354.9s] [Speaker 4] 今年我打算改成，
+[2026-08-18 14:48:21][run_asr_conda] [380.0s] 處理30.0s語音片段...
+[2026-08-18 14:48:32][run_asr_conda] [380.0s] 獲得 14 個語音片段
+[2026-08-18 14:48:32][run_asr_conda] [350.1s-351.6s] [Speaker 6] 是入口在其中，
+[2026-08-18 14:48:32][run_asr_conda] [351.6s-353.4s] [Speaker 6] 所以人流全部都卡在這門。
+[2026-08-18 14:48:32][run_asr_conda] [353.7s-355.7s] [Speaker 6] 今年我打算改成雙路口，
+[2026-08-18 14:48:32][run_asr_conda] [356.1s-358.4s] [Speaker 6] 另外會增加指示排雨工作人員。
+[2026-08-18 14:48:32][run_asr_conda] [358.6s-360.1s] [Speaker 6] 第二是熱色問題。
+[2026-08-18 14:48:32][run_asr_conda] [360.3s-361.9s] [Speaker 6] 去年熱色桶數量不足，
+[2026-08-18 14:48:32][run_asr_conda] [362.2s-363.8s] [Speaker 6] 而且清理頻率太低。
+[2026-08-18 14:48:32][run_asr_conda] [364.1s-367.1s] [Speaker 6] 今年我規劃每個區域都有固定熱色點，
+[2026-08-18 14:48:32][run_asr_conda] [367.4s-368.9s] [Speaker 6] 並安排輪班清潔。
+[2026-08-18 14:48:32][run_asr_conda] [369.4s-370.9s] [Speaker 6] 第三是供電問題。
+[2026-08-18 14:48:32][run_asr_conda] [371.1s-373.5s] [Speaker 6] 去年很多攤會臨時增加設備，
+[2026-08-18 14:48:32][run_asr_conda] [373.7s-375.0s] [Speaker 6] 但沒有提前申請，
+[2026-08-18 14:48:32][run_asr_conda] [375.3s-376.5s] [Speaker 6] 導致現場跳電。
+[2026-08-18 14:48:32][run_asr_conda] [376.8s-379.9s] [Speaker 6] 所以今年我們會要求所有攤位提前登進用。
+[2026-08-18 14:48:33][run_asr_conda] [405.0s] 處理30.0s語音片段...
+[2026-08-18 14:48:44][run_asr_conda] [405.0s] 獲得 15 個語音片段
+[2026-08-18 14:48:46][run_asr_conda] [375.4s-376.6s] [Speaker 6] 導致現場跳電。
+[2026-08-18 14:48:46][run_asr_conda] [376.8s-381.7s] [Speaker 6] 所以今年我會要求所有單位提前登記用電需求超過限制，
+[2026-08-18 14:48:46][run_asr_conda] [381.7s-383.4s] [Speaker 6] 就不能自行增加設備。
+[2026-08-18 14:48:46][run_asr_conda] [384.4s-385.5s] [Speaker 2] 我還有一個擔心，
+[2026-08-18 14:48:46][run_asr_conda] [385.8s-386.8s] [Speaker 2] 如果下雨怎麼辦？
+[2026-08-18 14:48:46][run_asr_conda] [387.1s-389.2s] [Speaker 2] 因爲現在很多活動都在戶外。
+[2026-08-18 14:48:46][run_asr_conda] [390.4s-390.7s] [Speaker 1] 嗯，
+[2026-08-18 14:48:46][run_asr_conda] [390.7s-392.3s] [Speaker 1] 這部分我有跟小校確認，
+[2026-08-18 14:48:46][run_asr_conda] [392.6s-394.5s] [Speaker 1] 如果只是小雨活動造成，
+[2026-08-18 14:48:46][run_asr_conda] [394.9s-395.8s] [Speaker 1] 如果是大雨，
+[2026-08-18 14:48:46][run_asr_conda] [395.9s-397.3s] [Speaker 1] 我們需要啓動備案。
+[2026-08-18 14:48:46][run_asr_conda] [397.8s-399.2s] [Speaker 1] 目前備案有兩個方向，
+[2026-08-18 14:48:46][run_asr_conda] [399.6s-400.9s] [Speaker 1] 第一是改到體育館，
+[2026-08-18 14:48:46][run_asr_conda] [401.1s-402.8s] [Speaker 1] 第二是縮小活動規模，
+[2026-08-18 14:48:46][run_asr_conda] [403.4s-404.7s] [Speaker 1] 但這兩個都有問題。
+[2026-08-18 14:48:47][run_asr_conda] [430.0s] 處理30.0s語音片段...
+[2026-08-18 14:48:59][run_asr_conda] [430.0s] 獲得 15 個語音片段
+[2026-08-18 14:49:00][run_asr_conda] [400.1s-401.0s] [Speaker 1] 是改到體育館。
+[2026-08-18 14:49:00][run_asr_conda] [401.2s-402.9s] [Speaker 1] 第二是縮小活動規模。
+[2026-08-18 14:49:00][run_asr_conda] [403.4s-404.6s] [Speaker 1] 但這兩個都有問題，
+[2026-08-18 14:49:00][run_asr_conda] [404.9s-406.6s] [Speaker 1] 因爲體育館空間有限，
+[2026-08-18 14:49:00][run_asr_conda] [406.8s-408.9s] [Speaker 1] 而且很多設備需要重新搭建，
+[2026-08-18 14:49:00][run_asr_conda] [409.7s-412.4s] [Speaker 1] 所以我們最好還是提前準備防雨設備。
+[2026-08-18 14:49:00][run_asr_conda] [414.7s-417.2s] [Speaker 3] 我覺得現在最大的挑戰其實不是辦活動，
+[2026-08-18 14:49:00][run_asr_conda] [417.4s-419.0s] [Speaker 3] 而是讓學生願意參加。
+[2026-08-18 14:49:00][run_asr_conda] [419.4s-422.1s] [Speaker 3] 因爲現在很多學生對學校活動很冷淡，
+[2026-08-18 14:49:00][run_asr_conda] [422.4s-424.3s] [Speaker 3] 尤其大學生生活變得很分散，
+[2026-08-18 14:49:00][run_asr_conda] [424.6s-425.2s] [Speaker 3] 有人打工，
+[2026-08-18 14:49:00][run_asr_conda] [425.2s-425.9s] [Speaker 3] 有人實習，
+[2026-08-18 14:49:00][run_asr_conda] [426.1s-427.5s] [Speaker 3] 有人根本不想要待在學校，
+[2026-08-18 14:49:00][run_asr_conda] [427.8s-429.2s] [Speaker 3] 所以如果活動沒有吸引力，
+[2026-08-18 14:49:00][run_asr_conda] [429.2s-429.9s] [Speaker 3] 很容易變成，
+[2026-08-18 14:49:01][run_asr_conda] [455.0s] 處理30.0s語音片段...
+[2026-08-18 14:49:12][run_asr_conda] [455.0s] 獲得 14 個語音片段
+[2026-08-18 14:49:13][run_asr_conda] [425.1s-425.9s] [Speaker 3] 打工有人實習，
+[2026-08-18 14:49:13][run_asr_conda] [426.1s-427.8s] [Speaker 3] 有人根本不想要待在學校哦，
+[2026-08-18 14:49:13][run_asr_conda] [427.9s-429.2s] [Speaker 3] 這如果活動沒有吸引力，
+[2026-08-18 14:49:13][run_asr_conda] [429.2s-431.6s] [Speaker 3] 很容易變成只有工作人員自己感動。
+[2026-08-18 14:49:13][run_asr_conda] [432.8s-435.2s] [Speaker 2] 這其實也是我最近一直在想的事情。
+[2026-08-18 14:49:13][run_asr_conda] [435.5s-436.3s] [Speaker 2] 以前辦活動，
+[2026-08-18 14:49:13][run_asr_conda] [436.4s-438.5s] [Speaker 2] 大家可能因爲熱鬧就會來，
+[2026-08-18 14:49:13][run_asr_conda] [438.8s-443.3s] [Speaker 2] 但現在學生會考慮值不值得花時間有沒有新鮮感？
+[2026-08-18 14:49:13][run_asr_conda] [443.4s-444.3s] [Speaker 2] 能不能拍照，
+[2026-08-18 14:49:13][run_asr_conda] [444.4s-445.4s] [Speaker 2] 有沒有互動性？
+[2026-08-18 14:49:13][run_asr_conda] [445.6s-448.2s] [Speaker 2] 所以我覺得我們不能只做看錶演，
+[2026-08-18 14:49:13][run_asr_conda] [448.2s-449.5s] [Speaker 2] 應該增加參與感。
+[2026-08-18 14:49:13][run_asr_conda] [449.6s-454.1s] [Speaker 2] 例如集張活動及時互動遊戲現場抽獎社羣任務，
+[2026-08-18 14:49:13][run_asr_conda] [454.1s-454.9s] [Speaker 2] 讓大家不，
+[2026-08-18 14:49:14][run_asr_conda] [480.0s] 處理30.0s語音片段...
+[2026-08-18 14:49:26][run_asr_conda] [480.0s] 獲得 14 個語音片段
+[2026-08-18 14:49:28][run_asr_conda] [450.3s-454.1s] [Speaker 2] 集張活動及時互動遊戲現場抽獎社羣任務，
+[2026-08-18 14:49:28][run_asr_conda] [454.2s-455.7s] [Speaker 2] 讓大家不只是觀衆，
+[2026-08-18 14:49:28][run_asr_conda] [456.4s-457.8s] [Speaker 7] 但互動活動越多，
+[2026-08-18 14:49:28][run_asr_conda] [457.9s-459.4s] [Speaker 7] 人力需求也會增加。
+[2026-08-18 14:49:28][run_asr_conda] [459.6s-461.9s] [Speaker 6] 我們目前職工數量其實不太夠，
+[2026-08-18 14:49:28][run_asr_conda] [462.2s-463.7s] [Speaker 6] 現在只有四十幾位，
+[2026-08-18 14:49:28][run_asr_conda] [464.0s-465.7s] [Speaker 6] 但如果活動範圍太大，
+[2026-08-18 14:49:28][run_asr_conda] [465.8s-467.6s] [Speaker 6] 我怕現場管理會失控。
+[2026-08-18 14:49:28][run_asr_conda] [469.7s-470.6s] [Speaker 1] 既然提到人力，
+[2026-08-18 14:49:28][run_asr_conda] [470.9s-471.7s] [Speaker 1] 我想談呃，
+[2026-08-18 14:49:28][run_asr_conda] [471.7s-473.6s] [Speaker 1] 我也想談一下最近團隊狀況。
+[2026-08-18 14:49:28][run_asr_conda] [474.1s-474.7s] [Speaker 1] 老實說，
+[2026-08-18 14:49:28][run_asr_conda] [474.9s-476.7s] [Speaker 1] 我感覺大家最近有點疲憊，
+[2026-08-18 14:49:28][run_asr_conda] [477.0s-479.9s] [Speaker 1] 尤其很多事情一直修改像海報版本。
+[2026-08-18 14:49:29][run_asr_conda] [505.0s] 處理30.0s語音片段...
+[2026-08-18 14:49:40][run_asr_conda] [505.0s] 獲得 17 個語音片段
+[2026-08-18 14:49:42][run_asr_conda] [475.1s-476.8s] [Speaker 1] 我感覺大家最近有點疲憊，
+[2026-08-18 14:49:42][run_asr_conda] [477.0s-478.6s] [Speaker 1] 遊戲很多事情一直修改，
+[2026-08-18 14:49:42][run_asr_conda] [479.0s-480.9s] [Speaker 1] 像海報版本已經改了四次，
+[2026-08-18 14:49:42][run_asr_conda] [481.8s-482.1s] [Speaker 1] 呃，
+[2026-08-18 14:49:42][run_asr_conda] [482.1s-483.1s] [Speaker 1] 流程表也一直變。
+[2026-08-18 14:49:42][run_asr_conda] [483.6s-485.4s] [Speaker 1] 我知道大家想把活動做好，
+[2026-08-18 14:49:42][run_asr_conda] [485.7s-487.1s] [Speaker 1] 但如果溝通沒整理好，
+[2026-08-18 14:49:42][run_asr_conda] [487.2s-488.1s] [Speaker 1] 只會越來越亂。
+[2026-08-18 14:49:42][run_asr_conda] [488.6s-490.6s] [Speaker 1] 所以從今天開始我希望。
+[2026-08-18 14:49:42][run_asr_conda] [490.9s-491.4s] [Speaker 1] 第一，
+[2026-08-18 14:49:42][run_asr_conda] [491.9s-493.9s] [Speaker 1] 所有需求修改必須先確認。
+[2026-08-18 14:49:42][run_asr_conda] [494.1s-494.6s] [Speaker 1] 第二，
+[2026-08-18 14:49:42][run_asr_conda] [494.9s-496.8s] [Speaker 1] 不要臨時增加大型內容。
+[2026-08-18 14:49:42][run_asr_conda] [497.0s-497.4s] [Speaker 1] 第三，
+[2026-08-18 14:49:42][run_asr_conda] [497.8s-499.8s] [Speaker 1] 每組每週固定回報進度。
+[2026-08-18 14:49:42][run_asr_conda] [500.0s-501.7s] [Speaker 1] 第然後面一定會出問題。
+[2026-08-18 14:49:42][run_asr_conda] [503.8s-505.0s] [Speaker 未知] 我認同遊戲。
+[2026-08-18 14:49:43][run_asr_conda] [530.0s] 處理30.0s語音片段...
+[2026-08-18 14:49:55][run_asr_conda] [530.0s] 獲得 16 個語音片段
+[2026-08-18 14:49:58][run_asr_conda] [500.1s-501.7s] [Speaker 8] 不然後面一定會出問題。
+[2026-08-18 14:49:58][run_asr_conda] [503.8s-505.5s] [Speaker 3] 我認同尤其宣傳，
+[2026-08-18 14:49:58][run_asr_conda] [505.5s-506.8s] [Speaker 3] 其實很怕方向一直改。
+[2026-08-18 14:49:58][run_asr_conda] [507.1s-509.0s] [Speaker 3] 因爲我們很多素材都需要提前做，
+[2026-08-18 14:49:58][run_asr_conda] [509.2s-510.2s] [Speaker 3] 如果主題一直變，
+[2026-08-18 14:49:58][run_asr_conda] [510.3s-513.1s] [Speaker 3] 整個社羣內容都要重做計劃，
+[2026-08-18 14:49:58][run_asr_conda] [513.1s-515.6s] [Speaker 2] 這邊也會盡快打固流程固定。
+[2026-08-18 14:49:58][run_asr_conda] [515.9s-518.7s] [Speaker 2] 我覺得現在最重要的是先穩定可信內容，
+[2026-08-18 14:49:58][run_asr_conda] [518.7s-520.1s] [Speaker 2] 不要一直往外加東西。
+[2026-08-18 14:49:58][run_asr_conda] [521.4s-521.6s] [Speaker 8] 好，
+[2026-08-18 14:49:58][run_asr_conda] [521.8s-523.1s] [Speaker 8] 那我最後整理呃，
+[2026-08-18 14:49:58][run_asr_conda] [523.1s-524.2s] [Speaker 8] 整理一下今天結論，
+[2026-08-18 14:49:58][run_asr_conda] [524.5s-525.0s] [Speaker 8] 第一，
+[2026-08-18 14:49:58][run_asr_conda] [525.3s-527.4s] [Speaker 8] 活動主題方向維持 recampus。
+[2026-08-18 14:49:58][run_asr_conda] [527.5s-528.0s] [Speaker 8] 第二，
+[2026-08-18 14:49:58][run_asr_conda] [528.1s-529.8s] [Speaker 8] 強化整體品牌感與，
+[2026-08-18 14:49:58][run_asr_conda] [555.0s] 處理30.0s語音片段...
+[2026-08-18 14:50:09][run_asr_conda] [555.0s] 獲得 18 個語音片段
+[2026-08-18 14:50:11][run_asr_conda] [525.3s-527.4s] [Speaker 1] 活動主題方向維持 recampus。
+[2026-08-18 14:50:11][run_asr_conda] [527.5s-528.0s] [Speaker 1] 第二，
+[2026-08-18 14:50:11][run_asr_conda] [528.1s-530.7s] [Speaker 1] 強化整體品牌感與視覺統一。
+[2026-08-18 14:50:11][run_asr_conda] [530.9s-531.3s] [Speaker 1] 第三，
+[2026-08-18 14:50:11][run_asr_conda] [531.7s-532.8s] [Speaker 1] 主打學生參與，
+[2026-08-18 14:50:11][run_asr_conda] [533.2s-534.5s] [Speaker 1] 而不是單純表演。
+[2026-08-18 14:50:11][run_asr_conda] [534.8s-535.3s] [Speaker 1] 第四，
+[2026-08-18 14:50:11][run_asr_conda] [535.8s-536.5s] [Speaker 1] 控制預算，
+[2026-08-18 14:50:11][run_asr_conda] [536.6s-538.0s] [Speaker 1] 避免資源過度集中。
+[2026-08-18 14:50:11][run_asr_conda] [538.5s-539.0s] [Speaker 1] 第五，
+[2026-08-18 14:50:11][run_asr_conda] [539.2s-542.0s] [Speaker 1] 本週確認主要廠商與設備需求。
+[2026-08-18 14:50:11][run_asr_conda] [542.4s-542.9s] [Speaker 1] 第六，
+[2026-08-18 14:50:11][run_asr_conda] [543.2s-545.4s] [Speaker 1] 加強備案與現場管理規劃。
+[2026-08-18 14:50:11][run_asr_conda] [546.0s-547.4s] [Speaker 1] 我知道現在壓力很大，
+[2026-08-18 14:50:11][run_asr_conda] [547.6s-550.4s] [Speaker 1] 但我覺得大家至少已經開始有共同方向。
+[2026-08-18 14:50:11][run_asr_conda] [551.0s-551.3s] [Speaker 1] 其實，
+[2026-08-18 14:50:11][run_asr_conda] [551.3s-554.1s] [Speaker 1] 辦活動最難的不是設備或預算，
+[2026-08-18 14:50:11][run_asr_conda] [554.4s-554.9s] [Speaker 1] 而是讓，
+[2026-08-18 14:50:15][run_asr_conda] [檔案結束] 連續10次讀取失敗，且錄音已結束
+[2026-08-18 14:50:15][run_asr_conda] 
+處理剩餘的 long_buffer 資料...
+[2026-08-18 14:50:21][run_asr_conda] 
+處理剩餘的 7 個語音片段
+[2026-08-18 14:50:22][run_asr_conda] [550.1s-551.4s] [Speaker 1] 方向其實，
+[2026-08-18 14:50:22][run_asr_conda] [551.4s-554.2s] [Speaker 1] 辦活動最難的不是設備或預算，
+[2026-08-18 14:50:22][run_asr_conda] [554.4s-556.7s] [Speaker 1] 而是讓所有人往同一個目標前進。
+[2026-08-18 14:50:22][run_asr_conda] [557.3s-559.4s] [Speaker 1] 希望接下來大家能夠繼續互相配合，
+[2026-08-18 14:50:22][run_asr_conda] [559.7s-562.9s] [Speaker 1] 把這次文化節做出真正屬於我們學校的特色。
+[2026-08-18 14:50:22][run_asr_conda] [563.3s-564.5s] [Speaker 1] 今天會議先到這邊，
+[2026-08-18 14:50:22][run_asr_conda] [564.5s-565.5s] [Speaker 1] 大家辛苦了。
+[2026-08-18 14:50:22][run_asr_conda] 程式結束，已清理所有資源
+[2026-08-18 14:50:22][run_asr_conda] 
+[run_asr] ASR 結束
+[2026-08-18 14:50:22][run_asr_conda] [run_asr] ASR 總耗時: 402.78 秒 
+[2026-08-18 14:50:23][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] ASR 轉錄完成
+[2026-08-18 14:50:23][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] step2 耗時: 409.66 秒
+
+[2026-08-18 14:50:23][meeting_v1_integrated] [SUCCESS] ASR 轉錄完成
+[2026-08-18 16:22:11][meeting_v1_integrated] [STEP] 開始執行 PKD 報告提取...
+[2026-08-18 16:22:11][meeting_v1_integrated] 
+============================================================
+[2026-08-18 16:22:11][meeting_v1_integrated]   步驟 3/6: 生成 People/Keypoints/Decisions 報告 (conda worker)
+[2026-08-18 16:22:11][meeting_v1_integrated] ============================================================
+
+[2026-08-18 16:22:11][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] 使用 conda Python 執行 PKD：
+[2026-08-18 16:22:11][meeting_v1_integrated]    sudo -u cgu-csie --preserve-env=MEETING_LOG_FILE,PYTHONPATH /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/run_pkd_conda.py --output-dir /home/cgu-csie/meeting-assistence/web_output/6f57ac28 --output-prefix output --model-path /home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf --interval-minutes 5 --overlap-seconds 60
+
+[2026-08-18 16:22:11][run_pkd_conda] [PKD] 正在導入模型...
+[2026-08-18 16:22:11][run_pkd_conda] [LlamaCppQwen3Extractor][init] Qwen3-4B-Q8_0 核心引擎載入中...
+[2026-08-18 16:22:11][run_pkd_conda] [LlamaCppQwen3Extractor] Pi 5 16GB 模式 (n_ctx=8192)
+[2026-08-18 16:22:58][run_pkd_conda] llama_context: n_ctx_per_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+[2026-08-18 16:22:59][run_pkd_conda] [LlamaCppQwen3Extractor] 模型載入成功
+[2026-08-18 16:22:59][run_pkd_conda] [PKD] 模型導入完成 (耗時: 47.90 秒)
+
+[2026-08-18 16:54:32][run_pkd_conda] 
+⏱️  PKD 任務詳細統計
+[2026-08-18 16:54:32][run_pkd_conda] ============================================================
+[2026-08-18 16:54:32][run_pkd_conda]  1. 模型導入時間 :    47.90 秒
+[2026-08-18 16:54:32][run_pkd_conda]  2. People 任務  :   336.32 秒
+[2026-08-18 16:54:32][run_pkd_conda]  3. Keypoints 任務:   971.92 秒
+[2026-08-18 16:54:32][run_pkd_conda]  4. Decisions 任務:   585.19 秒
+[2026-08-18 16:54:32][run_pkd_conda] ------------------------------------------------------------
+[2026-08-18 16:54:32][run_pkd_conda]  總執行耗時      :  1941.40 秒
+[2026-08-18 16:54:32][run_pkd_conda] ============================================================
+
+[2026-08-18 16:54:32][run_pkd_conda] [run_pkd_conda] PKD OK -> /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_pkd_cache.json
+[2026-08-18 16:54:32][run_pkd_conda] [run_pkd_conda] 總耗時: 1941.72 秒
+
+[2026-08-18 16:54:33][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] cache 已寫入: /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_cache.json
+
+[2026-08-18 16:54:33][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] step3 完成：P/K/D 已寫入 cache
+[2026-08-18 16:54:33][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] step3 耗時: 1941.90 秒
+
+[2026-08-18 16:54:33][meeting_v1_integrated] [SUCCESS] PKD 報告生成完成
+[2026-08-18 17:17:41][meeting_v1_integrated] [STEP] 開始提取行動項目...
+[2026-08-18 17:17:41][meeting_v1_integrated] 
+============================================================
+[2026-08-18 17:17:41][meeting_v1_integrated]   步驟 4/6: 提取行動項目 (conda worker)
+[2026-08-18 17:17:41][meeting_v1_integrated] ============================================================
+
+[2026-08-18 17:17:41][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions] 使用 conda Python 執行 Actions：
+[2026-08-18 17:17:41][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions]   sudo -u cgu-csie --preserve-env=MEETING_LOG_FILE,PYTHONPATH /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/run_actions_conda.py --output-dir /home/cgu-csie/meeting-assistence/web_output/6f57ac28 --output-prefix output
+
+[2026-08-18 17:17:43][run_actions_conda] llama_context: n_ctx_per_seq (2048) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+[2026-08-18 17:17:43][run_actions_conda] [BaseExtractor][init] Loaded model [actions]: /home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf
+[2026-08-18 17:20:58][run_actions_conda] [run_actions_conda] ACTIONS OK -> /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_actions_cache.json
+[2026-08-18 17:20:58][run_actions_conda] [run_actions_conda] 模型載入時間: 1.09 秒
+[2026-08-18 17:20:58][run_actions_conda] [run_actions_conda] 生成時間: 194.75 秒
+[2026-08-18 17:20:58][run_actions_conda] [run_actions_conda] run_actions_conda 總耗時: 195.83 秒
+
+[2026-08-18 17:20:58][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions] cache 已更新: /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_cache.json
+
+[2026-08-18 17:20:58][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions] 行動項目已輸出: /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_actions.txt
+[2026-08-18 17:20:58][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions] step4 耗時: 196.36 秒
+
+[2026-08-18 17:20:58][meeting_v1_integrated] [SUCCESS] 行動項目提取完成
+[2026-08-18 18:05:34][meeting_v1_integrated] [STEP] 開始生成會議摘要...
+[2026-08-18 18:05:34][meeting_v1_integrated] 
+============================================================
+[2026-08-18 18:05:34][meeting_v1_integrated]   步驟 5/6: 生成會議摘要 (conda worker)
+[2026-08-18 18:05:34][meeting_v1_integrated] ============================================================
+
+[2026-08-18 18:05:34][meeting_v1_integrated] [MeetingWorkflow][step5_generate_summary] 使用 conda Python 執行 Summary：
+[2026-08-18 18:05:34][meeting_v1_integrated] [MeetingWorkflow][step5_generate_summary]   sudo -u cgu-csie --preserve-env=MEETING_LOG_FILE,PYTHONPATH /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/run_summary_conda.py --output-dir /home/cgu-csie/meeting-assistence/web_output/6f57ac28 --output-prefix output
+
+[2026-08-18 18:05:34][run_summary_conda] [run_summary_conda] 正在初始化 SummaryGenerator（載入模型）...
+[2026-08-18 18:05:34][run_summary_conda] [BaseExtractor][init] Dynamic n_ctx for summary: 8192
+[2026-08-18 18:05:35][run_summary_conda] llama_context: n_ctx_per_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+[2026-08-18 18:05:36][run_summary_conda] [BaseExtractor][init] Loaded model [summary]: /home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf
+[2026-08-18 18:05:36][run_summary_conda] [run_summary_conda] 讀取 cache: /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_cache.json
+
+[2026-08-18 18:05:36][run_summary_conda] [run_summary_conda] 生成 4 個資訊區塊進行濃縮摘要
+
+[2026-08-18 18:09:03][run_summary_conda] [run_summary_conda] SUMMARY OK -> /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_summary_cache.json
+[2026-08-18 18:09:03][run_summary_conda] [run_summary_conda] 計時統計:
+[2026-08-18 18:09:03][run_summary_conda] [run_summary_conda]  模型載入時間: 1.38 秒
+[2026-08-18 18:09:03][run_summary_conda] [run_summary_conda]  推導時間: 207.58 秒
+[2026-08-18 18:09:03][run_summary_conda] [run_summary_conda]  總耗時: 208.97 秒
+[2026-08-18 18:09:03][run_summary_conda] 
+[2026-08-18 18:09:03][meeting_v1_integrated] [MeetingWorkflow][step5_generate_summary] 摘要已輸出: /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_summary.txt
+
+[2026-08-18 18:09:03][meeting_v1_integrated] [MeetingWorkflow][step5_generate_summary] step5 耗時: 209.57 秒
+
+[2026-08-18 18:09:03][meeting_v1_integrated] [SUCCESS] 會議摘要生成完成
+[2026-08-18 18:41:13][meeting_v1_integrated] [STEP] 開始將結果匯出為 TXT 檔案...
+[2026-08-18 18:41:13][meeting_v1_integrated] 
+============================================================
+[2026-08-18 18:41:13][meeting_v1_integrated]   步驟 6/6: 匯出 TXT + 藍牙傳送
+[2026-08-18 18:41:13][meeting_v1_integrated] ============================================================
+
+[2026-08-18 18:41:13][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt] TXT 已輸出: /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_meeting_summary.txt
+
+[2026-08-18 18:41:13][meeting_v1_integrated] [send_to_paired] 藍牙傳送目標: realme X50 5G (C8:16:DA:A0:5C:C2)
+[2026-08-18 18:41:13][meeting_v1_integrated] [send_to_paired] 傳送檔案: output_meeting_summary.txt
+[2026-08-18 18:41:13][meeting_v1_integrated]   [send_file] 檔案路徑: /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_meeting_summary.txt
+[2026-08-18 18:41:13][meeting_v1_integrated]   [send_file] 檔案大小: 5791 bytes (5.66 KB)
+[2026-08-18 18:41:13][meeting_v1_integrated]   [send_file] 檔案名稱: output_meeting_summary.txt
+[2026-08-18 18:41:18][meeting_v1_integrated] [send_to_paired] 傳送失敗: [send_file] D-Bus 錯誤: org.bluez.obex.Error.Failed: Unable to find service record
+[2026-08-18 18:41:18][meeting_v1_integrated] [send_to_paired] 傳送檔案: output_actions.txt
+[2026-08-18 18:41:18][meeting_v1_integrated]   [send_file] 檔案路徑: /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_actions.txt
+[2026-08-18 18:41:18][meeting_v1_integrated]   [send_file] 檔案大小: 644 bytes (0.63 KB)
+[2026-08-18 18:41:18][meeting_v1_integrated]   [send_file] 檔案名稱: output_actions.txt
+[2026-08-18 18:41:23][meeting_v1_integrated] [send_to_paired] 傳送失敗: [send_file] D-Bus 錯誤: org.bluez.obex.Error.Failed: Unable to find service record
+[2026-08-18 18:41:23][meeting_v1_integrated] [send_to_paired] 傳送檔案: output_summary.txt
+[2026-08-18 18:41:23][meeting_v1_integrated]   [send_file] 檔案路徑: /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_summary.txt
+[2026-08-18 18:41:23][meeting_v1_integrated]   [send_file] 檔案大小: 847 bytes (0.83 KB)
+[2026-08-18 18:41:23][meeting_v1_integrated]   [send_file] 檔案名稱: output_summary.txt
+[2026-08-18 18:41:28][meeting_v1_integrated] [send_to_paired] 傳送失敗: [send_file] D-Bus 錯誤: org.bluez.obex.Error.Failed: Unable to find service record
+[2026-08-18 18:41:28][meeting_v1_integrated] 
+============================================================
+[2026-08-18 18:41:28][meeting_v1_integrated] [send_to_paired] 傳送統計:
+[2026-08-18 18:41:28][meeting_v1_integrated] [send_to_paired] 成功: 0/3 個檔案
+[2026-08-18 18:41:28][meeting_v1_integrated] [send_to_paired] 失敗: output_meeting_summary.txt, output_actions.txt, output_summary.txt
+[2026-08-18 18:41:28][meeting_v1_integrated] ============================================================
+
+[2026-08-18 18:41:28][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt] 藍牙傳送失敗: [send_to_paired] 所有檔案傳送失敗
+[2026-08-18 18:41:28][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt]    檢查項目:
+[2026-08-18 18:41:28][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt]      確保藍牙裝置已配對且在範圍內
+[2026-08-18 18:41:28][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt]      執行: systemctl --user status obex
+[2026-08-18 18:41:28][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt]      執行: systemctl --user restart obex
+
+[2026-08-18 18:41:28][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt] step6 耗時: 15.46 秒
+
+[2026-08-18 18:41:28][meeting_v1_integrated] [SUCCESS] TXT 匯出完成，共 3 個檔案
+[2026-08-18 20:08:02][meeting_v1_integrated] [STEP] 開始進行藍牙檔案傳送...
+[2026-08-18 20:08:02][meeting_v1_integrated] [STEP] 未選擇裝置，正在搜尋已配對的藍牙設備...
+[2026-08-18 20:08:02][meeting_v1_integrated] [send_to_paired] 藍牙傳送目標: realme X50 5G (C8:16:DA:A0:5C:C2)
+[2026-08-18 20:08:02][meeting_v1_integrated] [send_to_paired] 傳送檔案: output_meeting_summary.txt
+[2026-08-18 20:08:02][meeting_v1_integrated]   [send_file] 檔案路徑: /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_meeting_summary.txt
+[2026-08-18 20:08:02][meeting_v1_integrated]   [send_file] 檔案大小: 5791 bytes (5.66 KB)
+[2026-08-18 20:08:02][meeting_v1_integrated]   [send_file] 檔案名稱: output_meeting_summary.txt
+[2026-08-18 20:08:07][meeting_v1_integrated] [send_to_paired] 傳送失敗: [send_file] D-Bus 錯誤: org.bluez.obex.Error.Failed: Unable to find service record
+[2026-08-18 20:08:07][meeting_v1_integrated] [send_to_paired] 傳送檔案: output_actions.txt
+[2026-08-18 20:08:07][meeting_v1_integrated]   [send_file] 檔案路徑: /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_actions.txt
+[2026-08-18 20:08:07][meeting_v1_integrated]   [send_file] 檔案大小: 644 bytes (0.63 KB)
+[2026-08-18 20:08:07][meeting_v1_integrated]   [send_file] 檔案名稱: output_actions.txt
+[2026-08-18 20:08:12][meeting_v1_integrated] [send_to_paired] 傳送失敗: [send_file] D-Bus 錯誤: org.bluez.obex.Error.Failed: Unable to find service record
+[2026-08-18 20:08:12][meeting_v1_integrated] [send_to_paired] 傳送檔案: output_summary.txt
+[2026-08-18 20:08:12][meeting_v1_integrated]   [send_file] 檔案路徑: /home/cgu-csie/meeting-assistence/web_output/6f57ac28/output_summary.txt
+[2026-08-18 20:08:12][meeting_v1_integrated]   [send_file] 檔案大小: 847 bytes (0.83 KB)
+[2026-08-18 20:08:12][meeting_v1_integrated]   [send_file] 檔案名稱: output_summary.txt
+[2026-08-18 20:08:18][meeting_v1_integrated] [send_to_paired] 傳送失敗: [send_file] D-Bus 錯誤: org.bluez.obex.Error.Failed: Unable to find service record
+[2026-08-18 20:08:18][meeting_v1_integrated] 
+============================================================
+[2026-08-18 20:08:18][meeting_v1_integrated] [send_to_paired] 傳送統計:
+[2026-08-18 20:08:18][meeting_v1_integrated] [send_to_paired] 成功: 0/3 個檔案
+[2026-08-18 20:08:18][meeting_v1_integrated] [send_to_paired] 失敗: output_meeting_summary.txt, output_actions.txt, output_summary.txt
+[2026-08-18 20:08:18][meeting_v1_integrated] ============================================================
+
+[2026-08-18 20:08:18][meeting_v1_integrated] [ERROR] 藍牙傳送失敗: [send_to_paired] 所有檔案傳送失敗
+[2026-08-18 20:08:58][meeting_v1_integrated] [WEB][6f57ac28] 下載檔案: actions
+[2026-08-18 20:09:03][meeting_v1_integrated] [WEB][6f57ac28] 下載檔案: summary
+[2026-08-18 20:09:31][meeting_v1_integrated] [WEB][6f57ac28] 下載檔案: meeting_summary
+[2026-08-18 20:10:59][meeting_v1_integrated] [WEB] 清除會話: 6f57ac28
+[2026-08-18 21:45:18][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-18 21:45:18][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-18 21:45:18][meeting_v1_integrated] [WEB] 建立會話: 0110e335
+[2026-08-19 13:51:09][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-19 13:51:09][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-19 13:51:09][meeting_v1_integrated] [WEB] 建立會話: 79871332
+[2026-08-19 13:51:20][meeting_v1_integrated] [WEB][79871332] 上傳音頻: /home/cgu-csie/meeting-assistence/web_output/79871332/output_audio.wav
+[2026-08-19 13:51:20][meeting_v1_integrated] [WEB][79871332] 檔案大小: 52.55 MB
+[2026-08-19 13:51:34][meeting_v1_integrated] [STEP] 開始執行 ASR 語音轉文字...
+[2026-08-19 13:51:34][meeting_v1_integrated] 
+============================================================
+[2026-08-19 13:51:34][meeting_v1_integrated]   步驟 2/6: 語音轉文字 (ASR)
+[2026-08-19 13:51:34][meeting_v1_integrated] ============================================================
+
+[2026-08-19 13:51:34][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] 讀取音訊: /home/cgu-csie/meeting-assistence/web_output/79871332/output_audio.wav
+[2026-08-19 13:51:34][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe]  按 Ctrl+C 可提前結束轉錄
+
+[2026-08-19 13:51:34][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] 使用 conda Python 執行 ASR：
+[2026-08-19 13:51:34][meeting_v1_integrated]    sudo -u cgu-csie --preserve-env=MEETING_LOG_FILE,PYTHONPATH /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/speech/run_asr_conda.py --audio /home/cgu-csie/meeting-assistence/web_output/79871332/output_audio.wav --outdir /home/cgu-csie/meeting-assistence/web_output/79871332 --prefix output --alpha 0.0 --overlap 5.0 --verbose
+
+[2026-08-19 13:51:39][run_asr_conda] [run_asr] 開始 ASR 轉錄...
+
+[2026-08-19 13:51:39][run_asr_conda] 載入模型中...
+[2026-08-19 13:51:39][run_asr_conda] funasr version: 1.3.0.
+[2026-08-19 13:53:34][run_asr_conda] 成功載入本地模型
+[2026-08-19 13:53:34][run_asr_conda] funasr version: 1.3.0.
+[2026-08-19 13:53:35][run_asr_conda] 模型載入完成
+============================================================
+[2026-08-19 13:53:35][run_asr_conda] 模型載入耗時: 116.21 秒
+[2026-08-19 13:53:35][run_asr_conda] 等待音訊檔案: /home/cgu-csie/meeting-assistence/web_output/79871332/output_audio.wav
+[2026-08-19 13:53:35][run_asr_conda] 開始處理...
+
+[2026-08-19 13:53:37][run_asr_conda] [30.0s] 處理30.0s語音片段...
+[2026-08-19 13:53:49][run_asr_conda] [30.0s] 獲得 15 個語音片段
+[2026-08-19 13:53:49][run_asr_conda] [0.1s-0.3s] [Speaker 未知] 好，
+[2026-08-19 13:53:49][run_asr_conda] [0.3s-1.4s] [Speaker 未知] 標變更奇怪喲。
+[2026-08-19 13:53:49][run_asr_conda] [3.9s-4.2s] [Speaker 1] 呃，
+[2026-08-19 13:53:49][run_asr_conda] [4.2s-5.0s] [Speaker 1] 大家早安，
+[2026-08-19 13:53:49][run_asr_conda] [5.0s-6.6s] [Speaker 1] 我是總招林子祥。
+[2026-08-19 13:53:49][run_asr_conda] [7.0s-10.2s] [Speaker 1] 今天是我們二零二六校園創畫文藝節，
+[2026-08-19 13:53:49][run_asr_conda] [10.8s-12.6s] [Speaker 1] 第二次正式籌備會議，
+[2026-08-19 13:53:49][run_asr_conda] [12.9s-14.9s] [Speaker 1] 距離活動只剩下兩個半月。
+[2026-08-19 13:53:49][run_asr_conda] [15.3s-18.7s] [Speaker 1] 所以今天主要希望把整個活動方向確認下來，
+[2026-08-19 13:53:49][run_asr_conda] [18.8s-20.0s] [Speaker 1] 包括主題定位、
+[2026-08-19 13:53:49][run_asr_conda] [20.1s-20.9s] [Speaker 1] 流程安排、
+[2026-08-19 13:53:49][run_asr_conda] [21.3s-23.4s] [Speaker 1] 預算控制以及宣傳方式。
+[2026-08-19 13:53:49][run_asr_conda] [24.1s-26.6s] [Speaker 1] 因爲這次學校給我們的資源比去年少。
+[2026-08-19 13:53:49][run_asr_conda] [26.8s-28.4s] [Speaker 1] 所以我們不能再像以前一樣，
+[2026-08-19 13:53:49][run_asr_conda] [28.4s-29.5s] [Speaker 1] 什麼都想做。
+[2026-08-19 13:53:50][run_asr_conda] [55.0s] 處理30.0s語音片段...
+[2026-08-19 13:54:02][run_asr_conda] [55.0s] 獲得 11 個語音片段
+[2026-08-19 13:54:02][run_asr_conda] [25.1s-26.5s] [Speaker 1] 給我們的資源比去年少，
+[2026-08-19 13:54:02][run_asr_conda] [26.9s-29.2s] [Speaker 1] 所以我們不能再像以前一樣什麼都想做。
+[2026-08-19 13:54:02][run_asr_conda] [29.9s-32.8s] [Speaker 1] 我認爲今年最重要的就是把活動品質做好，
+[2026-08-19 13:54:02][run_asr_conda] [33.1s-34.9s] [Speaker 1] 而不是以美追求規模。
+[2026-08-19 13:54:02][run_asr_conda] [36.0s-39.0s] [Speaker 1] 目前學校這邊的活動經費是二十五萬元，
+[2026-08-19 13:54:02][run_asr_conda] [39.5s-41.4s] [Speaker 1] 比去年少了將近八萬。
+[2026-08-19 13:54:02][run_asr_conda] [41.8s-44.3s] [Speaker 1] 而且今年場地使用規定也比較嚴格，
+[2026-08-19 13:54:02][run_asr_conda] [44.6s-46.5s] [Speaker 1] 尤其是音量結束時間，
+[2026-08-19 13:54:02][run_asr_conda] [46.6s-47.6s] [Speaker 1] 還有安全管制，
+[2026-08-19 13:54:02][run_asr_conda] [47.6s-48.8s] [Speaker 1] 都需要重新申請。
+[2026-08-19 13:54:02][run_asr_conda] [49.3s-54.7s] [Speaker 1] 所以今天希望大家可以針對各自負責的部分提出目前狀況與問題。
+[2026-08-19 13:54:03][run_asr_conda] [80.0s] 處理30.0s語音片段...
+[2026-08-19 13:54:15][run_asr_conda] [80.0s] 獲得 12 個語音片段
+[2026-08-19 13:54:15][run_asr_conda] [50.1s-54.6s] [Speaker 1] 天希望大家可以針對各自負責的部分提出目前狀況與問題，
+[2026-08-19 13:54:15][run_asr_conda] [55.1s-57.1s] [Speaker 1] 我們在一起確認最後方向。
+[2026-08-19 13:54:15][run_asr_conda] [57.5s-58.2s] [Speaker 1] 那麼雨涵，
+[2026-08-19 13:54:15][run_asr_conda] [58.5s-60.4s] [Speaker 1] 你從計劃內容開始吧。
+[2026-08-19 13:54:15][run_asr_conda] [62.4s-62.9s] [Speaker 2] 大家好，
+[2026-08-19 13:54:15][run_asr_conda] [62.9s-64.8s] [Speaker 2] 我是細化組長陳雨涵。
+[2026-08-19 13:54:15][run_asr_conda] [65.2s-67.8s] [Speaker 2] 目前我們規劃的主題叫做 recamgts，
+[2026-08-19 13:54:15][run_asr_conda] [68.0s-71.0s] [Speaker 2] 核心概念是希望把校園文化重新連接。
+[2026-08-19 13:54:15][run_asr_conda] [71.5s-72.4s] [Speaker 2] 因爲這些年，
+[2026-08-19 13:54:15][run_asr_conda] [72.5s-75.3s] [Speaker 2] 很多學生其實對校園活動參與度下降，
+[2026-08-19 13:54:15][run_asr_conda] [75.5s-76.8s] [Speaker 2] 尤其疫情之後，
+[2026-08-19 13:54:15][run_asr_conda] [77.1s-79.8s] [Speaker 2] 大家變得比較少參加大型實體活動。
+[2026-08-19 13:54:16][run_asr_conda] [105.0s] 處理30.0s語音片段...
+[2026-08-19 13:54:28][run_asr_conda] [105.0s] 獲得 14 個語音片段
+[2026-08-19 13:54:28][run_asr_conda] [75.2s-76.8s] [Speaker 2] 這樣尤其疫情之後，
+[2026-08-19 13:54:28][run_asr_conda] [77.2s-80.0s] [Speaker 2] 大家變得比較少參加大型實體活動。
+[2026-08-19 13:54:28][run_asr_conda] [80.3s-82.4s] [Speaker 2] 所以我們這次不只是辦演員會，
+[2026-08-19 13:54:28][run_asr_conda] [82.7s-85.6s] [Speaker 2] 而是希望讓學生重新感受到校園互動。
+[2026-08-19 13:54:28][run_asr_conda] [86.1s-86.5s] [Speaker 2] 目前，
+[2026-08-19 13:54:28][run_asr_conda] [86.5s-88.4s] [Speaker 2] 活動內容分成四個區塊，
+[2026-08-19 13:54:28][run_asr_conda] [88.8s-90.7s] [Speaker 2] 第一個是主舞臺表演區。
+[2026-08-19 13:54:28][run_asr_conda] [90.9s-92.7s] [Speaker 2] 第二個是社團展示區，
+[2026-08-19 13:54:28][run_asr_conda] [93.0s-94.7s] [Speaker 2] 第三個是創意設集區。
+[2026-08-19 13:54:28][run_asr_conda] [94.9s-98.4s] [Speaker 2] 第二個是夜間互動活動主舞臺部分，
+[2026-08-19 13:54:28][run_asr_conda] [98.7s-99.7s] [Speaker 2] 我們目前規劃，
+[2026-08-19 13:54:28][run_asr_conda] [99.7s-101.0s] [Speaker 2] 下午是社團演出，
+[2026-08-19 13:54:28][run_asr_conda] [101.1s-104.0s] [Speaker 2] 晚上則安排學生樂團與邀請歌手、
+[2026-08-19 13:54:28][run_asr_conda] [104.5s-104.9s] [Speaker 2] 社團。
+[2026-08-19 13:54:29][run_asr_conda] [130.0s] 處理30.0s語音片段...
+[2026-08-19 13:54:40][run_asr_conda] [130.0s] 獲得 14 個語音片段
+[2026-08-19 13:54:41][run_asr_conda] [100.1s-101.0s] [Speaker 2] 我是社團演出，
+[2026-08-19 13:54:41][run_asr_conda] [101.2s-105.0s] [Speaker 2] 晚上則安排學生樂團與邀請歌手社團，
+[2026-08-19 13:54:41][run_asr_conda] [105.0s-108.1s] [Speaker 2] 展示區則會讓各系學會社團。
+[2026-08-19 13:54:41][run_asr_conda] [108.1s-114.8s] [Speaker 2] 社團參加增加參與感創意是及目前預計招募學校內的學生創作者，
+[2026-08-19 13:54:41][run_asr_conda] [114.8s-115.6s] [Speaker 2] 像手座、
+[2026-08-19 13:54:41][run_asr_conda] [115.8s-116.2s] [Speaker 2] 插畫、
+[2026-08-19 13:54:41][run_asr_conda] [116.3s-117.2s] [Speaker 2] 甜點等等。
+[2026-08-19 13:54:41][run_asr_conda] [117.5s-118.6s] [Speaker 2] 至於夜間活動，
+[2026-08-19 13:54:41][run_asr_conda] [118.7s-120.1s] [Speaker 2] 我們目前有兩個方案，
+[2026-08-19 13:54:41][run_asr_conda] [120.4s-122.2s] [Speaker 2] 第一個是露天電影院，
+[2026-08-19 13:54:41][run_asr_conda] [122.4s-124.2s] [Speaker 2] 第二個是夜間音樂會，
+[2026-08-19 13:54:41][run_asr_conda] [124.5s-126.2s] [Speaker 2] 但這部分還沒確定。
+[2026-08-19 13:54:41][run_asr_conda] [126.4s-128.0s] [Speaker 2] 另外我想提出一個問題，
+[2026-08-19 13:54:41][run_asr_conda] [128.4s-129.8s] [Speaker 2] 我覺得現在內容活。
+[2026-08-19 13:54:42][run_asr_conda] [155.0s] 處理30.0s語音片段...
+[2026-08-19 13:54:52][run_asr_conda] [155.0s] 獲得 13 個語音片段
+[2026-08-19 13:54:53][run_asr_conda] [125.0s-126.2s] [Speaker 2] 部分還沒確定。
+[2026-08-19 13:54:53][run_asr_conda] [126.5s-128.0s] [Speaker 2] 另外我想提出一個問題，
+[2026-08-19 13:54:53][run_asr_conda] [128.5s-131.9s] [Speaker 2] 我覺得現在內容活活動內容其實有點太分散。
+[2026-08-19 13:54:53][run_asr_conda] [132.2s-133.5s] [Speaker 2] 雖然看起來很多元，
+[2026-08-19 13:54:53][run_asr_conda] [133.6s-135.5s] [Speaker 2] 但主題連接不夠強，
+[2026-08-19 13:54:53][run_asr_conda] [135.9s-138.4s] [Speaker 2] 目前比較像是很多活動放在一起，
+[2026-08-19 13:54:53][run_asr_conda] [138.6s-140.3s] [Speaker 2] 而不是一個完整的文化節。
+[2026-08-19 13:54:53][run_asr_conda] [140.8s-141.7s] [Speaker 2] 所以我在想，
+[2026-08-19 13:54:53][run_asr_conda] [141.8s-144.2s] [Speaker 2] 我們是不是需要一個更明確的核心，
+[2026-08-19 13:54:53][run_asr_conda] [144.2s-145.4s] [Speaker 2] 各一核心概念。
+[2026-08-19 13:54:53][run_asr_conda] [145.8s-146.2s] [Speaker 2] 例如，
+[2026-08-19 13:54:53][run_asr_conda] [146.2s-150.2s] [Speaker 2] 每個區域都圍繞青春校園回憶或未來創意去設計，
+[2026-08-19 13:54:53][run_asr_conda] [150.8s-153.2s] [Speaker 2] 不然參加的人可能感受不到整體性。
+[2026-08-19 13:54:54][run_asr_conda] [180.0s] 處理30.0s語音片段...
+[2026-08-19 13:55:05][run_asr_conda] [180.0s] 獲得 17 個語音片段
+[2026-08-19 13:55:07][run_asr_conda] [150.1s-151.2s] [Speaker 2] 計不然，
+[2026-08-19 13:55:07][run_asr_conda] [151.2s-153.2s] [Speaker 2] 參加的人可能感受不到整體性。
+[2026-08-19 13:55:07][run_asr_conda] [155.2s-155.4s] [Speaker 1] 呃，
+[2026-08-19 13:55:07][run_asr_conda] [155.4s-156.3s] [Speaker 1] 我懂你的意思。
+[2026-08-19 13:55:07][run_asr_conda] [156.8s-158.5s] [Speaker 1] 現在比較像大型原油會，
+[2026-08-19 13:55:07][run_asr_conda] [159.1s-162.2s] [Speaker 1] 但還沒有正呃還沒有真正形成品牌感。
+[2026-08-19 13:55:07][run_asr_conda] [162.9s-163.4s] [Speaker 1] 博軍，
+[2026-08-19 13:55:07][run_asr_conda] [163.7s-165.8s] [Speaker 1] 你認爲如果要加強主力，
+[2026-08-19 13:55:07][run_asr_conda] [165.8s-167.4s] [Speaker 1] 宣傳上會有幫助嗎？
+[2026-08-19 13:55:07][run_asr_conda] [169.3s-169.7s] [Speaker 3] 大家好，
+[2026-08-19 13:55:07][run_asr_conda] [169.7s-171.2s] [Speaker 3] 我是公關宣傳組長。
+[2026-08-19 13:55:07][run_asr_conda] [171.2s-171.7s] [Speaker 3] 王博軍，
+[2026-08-19 13:55:07][run_asr_conda] [172.1s-173.1s] [Speaker 3] 我覺得會差很多。
+[2026-08-19 13:55:07][run_asr_conda] [173.4s-175.4s] [Speaker 3] 因爲現在學生看到活動海報，
+[2026-08-19 13:55:07][run_asr_conda] [175.4s-176.6s] [Speaker 3] 最重要的是記憶點，
+[2026-08-19 13:55:07][run_asr_conda] [177.0s-178.5s] [Speaker 3] 如果只有寫校園文化節，
+[2026-08-19 13:55:07][run_asr_conda] [178.5s-179.8s] [Speaker 3] 其實很容易被忽略。
+[2026-08-19 13:55:08][run_asr_conda] [205.0s] 處理30.0s語音片段...
+[2026-08-19 13:55:20][run_asr_conda] [205.0s] 獲得 15 個語音片段
+[2026-08-19 13:55:20][run_asr_conda] [175.1s-176.7s] [Speaker 3] 動海報最重要的是記憶點，
+[2026-08-19 13:55:20][run_asr_conda] [177.0s-178.6s] [Speaker 3] 如果只有寫校園文化節，
+[2026-08-19 13:55:20][run_asr_conda] [178.6s-179.7s] [Speaker 3] 其實很容易被忽略。
+[2026-08-19 13:55:20][run_asr_conda] [180.0s-181.9s] [Speaker 3] 但如果我們能有一個明確概念，
+[2026-08-19 13:55:20][run_asr_conda] [182.2s-184.6s] [Speaker 3] 例如找回大學最自由的時光，
+[2026-08-19 13:55:20][run_asr_conda] [184.8s-186.6s] [Speaker 3] 或是重新連接校園生活，
+[2026-08-19 13:55:20][run_asr_conda] [186.8s-189.4s] [Speaker 3] 這種比較有情感的主題會更容易吸引人。
+[2026-08-19 13:55:20][run_asr_conda] [189.7s-191.6s] [Speaker 3] 而且現在宣傳的方式也跟以前不一樣，
+[2026-08-19 13:55:20][run_asr_conda] [191.8s-193.2s] [Speaker 3] 以前貼海報可能就有效。
+[2026-08-19 13:55:20][run_asr_conda] [193.6s-197.1s] [Speaker 3] 但現在學生大部分都是看 instagram cs 或者是短影音。
+[2026-08-19 13:55:20][run_asr_conda] [197.3s-199.5s] [Speaker 3] 所以我們這次如果還只是傳統宣傳，
+[2026-08-19 13:55:20][run_asr_conda] [199.5s-200.7s] [Speaker 3] 我覺得效果不會太好。
+[2026-08-19 13:55:20][run_asr_conda] [201.0s-202.1s] [Speaker 3] 我目前有幾個方向，
+[2026-08-19 13:55:20][run_asr_conda] [202.9s-203.3s] [Speaker 3] 第一，
+[2026-08-19 13:55:20][run_asr_conda] [203.5s-204.7s] [Speaker 3] 我們可以提前做斷。
+[2026-08-19 13:55:21][run_asr_conda] [230.0s] 處理30.0s語音片段...
+[2026-08-19 13:55:33][run_asr_conda] [230.0s] 獲得 21 個語音片段
+[2026-08-19 13:55:33][run_asr_conda] [200.0s-200.8s] [Speaker 3] 我不會太好，
+[2026-08-19 13:55:33][run_asr_conda] [201.1s-202.2s] [Speaker 3] 我目前有幾個方向，
+[2026-08-19 13:55:33][run_asr_conda] [202.8s-203.3s] [Speaker 3] 第一，
+[2026-08-19 13:55:33][run_asr_conda] [203.5s-205.3s] [Speaker 3] 我們可以提前做段影宣傳，
+[2026-08-19 13:55:33][run_asr_conda] [205.6s-210.3s] [Speaker 3] 例如社團彩排花絮工作人員準備過程校園街坊盜圖。
+[2026-08-19 13:55:33][run_asr_conda] [210.3s-213.0s] [Speaker 3] 影片讓這次知道活動不是突然出現，
+[2026-08-19 13:55:33][run_asr_conda] [213.0s-214.1s] [Speaker 3] 而是慢慢被期待。
+[2026-08-19 13:55:33][run_asr_conda] [214.3s-214.8s] [Speaker 3] 第二，
+[2026-08-19 13:55:33][run_asr_conda] [215.0s-218.2s] [Speaker 3] 我們可以找校內比較有影響力的學生賬號合作，
+[2026-08-19 13:55:33][run_asr_conda] [218.4s-220.3s] [Speaker 3] 像攝影社美食賬號、
+[2026-08-19 13:55:33][run_asr_conda] [220.4s-221.1s] [Speaker 3] 校園媒體。
+[2026-08-19 13:55:33][run_asr_conda] [221.4s-221.8s] [Speaker 3] 第三，
+[2026-08-19 13:55:33][run_asr_conda] [222.1s-223.4s] [Speaker 3] 我認爲這是活動視覺，
+[2026-08-19 13:55:33][run_asr_conda] [223.4s-225.3s] [Speaker 3] 一定要統一包含海報、
+[2026-08-19 13:55:33][run_asr_conda] [225.7s-226.1s] [Speaker 3] IG、
+[2026-08-19 13:55:33][run_asr_conda] [226.1s-226.5s] [Speaker 3] 貼文、
+[2026-08-19 13:55:33][run_asr_conda] [226.7s-227.3s] [Speaker 3] 工作證、
+[2026-08-19 13:55:33][run_asr_conda] [227.5s-227.9s] [Speaker 3] 舞臺、
+[2026-08-19 13:55:33][run_asr_conda] [227.9s-228.3s] [Speaker 3] 背板、
+[2026-08-19 13:55:33][run_asr_conda] [228.3s-228.9s] [Speaker 3] 指示牌。
+[2026-08-19 13:55:33][run_asr_conda] [229.1s-229.9s] [Speaker 3] 如果風格，
+[2026-08-19 13:55:34][run_asr_conda] [255.0s] 處理30.0s語音片段...
+[2026-08-19 13:55:45][run_asr_conda] [255.0s] 獲得 17 個語音片段
+[2026-08-19 13:55:47][run_asr_conda] [225.1s-227.4s] [Speaker 3] 海報 IG 貼文工作證，
+[2026-08-19 13:55:47][run_asr_conda] [227.6s-228.9s] [Speaker 3] 舞臺背板指示牌。
+[2026-08-19 13:55:47][run_asr_conda] [229.2s-230.3s] [Speaker 3] 如果風格不統一，
+[2026-08-19 13:55:47][run_asr_conda] [230.3s-231.9s] [Speaker 3] 整個活動會看起來很零散。
+[2026-08-19 13:55:47][run_asr_conda] [232.9s-233.5s] [Speaker 2] 我同意。
+[2026-08-19 13:55:47][run_asr_conda] [233.7s-235.8s] [Speaker 2] 尤其現在學生很重視活動，
+[2026-08-19 13:55:47][run_asr_conda] [235.8s-236.5s] [Speaker 2] 好不好拍。
+[2026-08-19 13:55:47][run_asr_conda] [236.8s-238.0s] [Speaker 2] 如果場景漂亮、
+[2026-08-19 13:55:47][run_asr_conda] [238.1s-238.8s] [Speaker 2] 燈光好看，
+[2026-08-19 13:55:47][run_asr_conda] [238.8s-240.2s] [Speaker 2] 自然就會有人發現到，
+[2026-08-19 13:55:47][run_asr_conda] [240.6s-244.2s] [Speaker 2] 其實很多活動的擴散都是靠學生自己拍照分享。
+[2026-08-19 13:55:47][run_asr_conda] [244.6s-245.2s] [Speaker 2] 大家好，
+[2026-08-19 13:55:47][run_asr_conda] [245.2s-247.7s] [Speaker 4] 我是財務總部組長李欣雨。
+[2026-08-19 13:55:47][run_asr_conda] [248.1s-250.3s] [Speaker 4] 我先講一下目前的經費狀況。
+[2026-08-19 13:55:47][run_asr_conda] [250.6s-251.2s] [Speaker 4] 老實說，
+[2026-08-19 13:55:47][run_asr_conda] [251.2s-253.3s] [Speaker 4] 現在預算其實蠻喫緊的。
+[2026-08-19 13:55:47][run_asr_conda] [253.4s-254.9s] [Speaker 4] 目前固定支出方，
+[2026-08-19 13:55:48][run_asr_conda] [280.0s] 處理30.0s語音片段...
+[2026-08-19 13:55:59][run_asr_conda] [280.0s] 獲得 15 個語音片段
+[2026-08-19 13:56:00][run_asr_conda] [250.1s-251.3s] [Speaker 4] 狀況老實說，
+[2026-08-19 13:56:00][run_asr_conda] [251.3s-253.3s] [Speaker 4] 現在預算其實蠻喫緊的。
+[2026-08-19 13:56:00][run_asr_conda] [253.5s-253.9s] [Speaker 4] 目前，
+[2026-08-19 13:56:00][run_asr_conda] [254.0s-257.6s] [Speaker 4] 固定支出包含舞臺與音響設備燈光、
+[2026-08-19 13:56:00][run_asr_conda] [257.6s-258.8s] [Speaker 4] 租借場地、
+[2026-08-19 13:56:00][run_asr_conda] [258.8s-262.8s] [Speaker 4] 保證金保險宣傳印刷工作人員不資，
+[2026-08-19 13:56:00][run_asr_conda] [263.2s-265.4s] [Speaker 4] 這些加起來已經接近十八萬。
+[2026-08-19 13:56:00][run_asr_conda] [265.6s-267.5s] [Speaker 4] 如果還要邀請校外歌手，
+[2026-08-19 13:56:00][run_asr_conda] [267.7s-268.1s] [Speaker 4] 費用，
+[2026-08-19 13:56:00][run_asr_conda] [268.1s-270.1s] [Speaker 4] 可能會再增加五到八萬。
+[2026-08-19 13:56:00][run_asr_conda] [270.4s-272.4s] [Speaker 4] 所以我們現在一定要做取捨。
+[2026-08-19 13:56:00][run_asr_conda] [272.7s-274.6s] [Speaker 4] 尤其去年有一個很大的問題，
+[2026-08-19 13:56:00][run_asr_conda] [274.8s-276.5s] [Speaker 4] 就是預算分配不平均，
+[2026-08-19 13:56:00][run_asr_conda] [276.8s-277.9s] [Speaker 4] 舞臺花太多錢，
+[2026-08-19 13:56:00][run_asr_conda] [278.1s-279.9s] [Speaker 4] 但其他區域品質下降。
+[2026-08-19 13:56:00][run_asr_conda] [305.0s] 處理30.0s語音片段...
+[2026-08-19 13:56:12][run_asr_conda] [305.0s] 獲得 12 個語音片段
+[2026-08-19 13:56:13][run_asr_conda] [275.1s-276.5s] [Speaker 5] 是預算分配不平均，
+[2026-08-19 13:56:13][run_asr_conda] [276.8s-278.0s] [Speaker 5] 舞臺花太多錢，
+[2026-08-19 13:56:13][run_asr_conda] [278.2s-279.9s] [Speaker 5] 但其他區域品質下降，
+[2026-08-19 13:56:13][run_asr_conda] [280.2s-282.4s] [Speaker 5] 結果很多學生都擠在子舞臺，
+[2026-08-19 13:56:13][run_asr_conda] [282.6s-284.0s] [Speaker 5] 其他地方几乎沒人。
+[2026-08-19 13:56:13][run_asr_conda] [284.4s-287.6s] [Speaker 5] 所以我覺得今年應該把重點放在整體體驗，
+[2026-08-19 13:56:13][run_asr_conda] [287.8s-289.1s] [Speaker 5] 而不是單一表演。
+[2026-08-19 13:56:13][run_asr_conda] [289.4s-291.2s] [Speaker 5] 另外我也想提醒一件事，
+[2026-08-19 13:56:13][run_asr_conda] [291.6s-294.4s] [Speaker 5] 現在很多企劃內容都還沒有實際的報價，
+[2026-08-19 13:56:13][run_asr_conda] [294.7s-297.6s] [Speaker 5] 如果太晚確認廠商價格可能會變動，
+[2026-08-19 13:56:13][run_asr_conda] [297.9s-300.9s] [Speaker 5] 所以希望這周內能把主要的需求定案，
+[2026-08-19 13:56:13][run_asr_conda] [301.9s-304.0s] [Speaker 1] 那目前贊助狀況怎麼樣？
+[2026-08-19 13:56:13][run_asr_conda] [330.0s] 處理30.0s語音片段...
+[2026-08-19 13:56:25][run_asr_conda] [330.0s] 獲得 16 個語音片段
+[2026-08-19 13:56:28][run_asr_conda] [300.0s-300.9s] [Speaker 3] 他的需求備案。
+[2026-08-19 13:56:28][run_asr_conda] [301.9s-304.0s] [Speaker 3] 那目前贊助狀況怎麼樣？
+[2026-08-19 13:56:28][run_asr_conda] [305.8s-307.0s] [Speaker 3] 目前有接洽幾點，
+[2026-08-19 13:56:28][run_asr_conda] [307.0s-308.8s] [Speaker 3] 廠商包含飲料品牌、
+[2026-08-19 13:56:28][run_asr_conda] [309.0s-310.6s] [Speaker 3] 文創店家跟附近餐廳。
+[2026-08-19 13:56:28][run_asr_conda] [310.9s-311.6s] [Speaker 3] 但問題是，
+[2026-08-19 13:56:28][run_asr_conda] [311.6s-314.2s] [Speaker 3] 今年很多廠商都希望看到流量保證。
+[2026-08-19 13:56:28][run_asr_conda] [314.6s-315.2s] [Speaker 3] 簡單來說，
+[2026-08-19 13:56:28][run_asr_conda] [315.2s-316.7s] [Speaker 3] 他們不只是想要掛 logo，
+[2026-08-19 13:56:28][run_asr_conda] [317.0s-319.0s] [Speaker 3] 而是希望有社羣互光有，
+[2026-08-19 13:56:28][run_asr_conda] [319.0s-319.7s] [Speaker 3] 現場互動，
+[2026-08-19 13:56:28][run_asr_conda] [319.7s-320.5s] [Speaker 3] 有學生參與。
+[2026-08-19 13:56:28][run_asr_conda] [320.8s-322.3s] [Speaker 3] 所以我們活動如果沒有特色，
+[2026-08-19 13:56:28][run_asr_conda] [322.3s-324.1s] [Speaker 3] 其實不太容易達到大型贊助。
+[2026-08-19 13:56:28][run_asr_conda] [325.9s-328.1s] [Speaker 3] 那接下來來談風險問題，
+[2026-08-19 13:56:28][run_asr_conda] [328.4s-329.9s] [Speaker 3] 因爲去年其實發生不少，
+[2026-08-19 13:56:29][run_asr_conda] [355.0s] 處理30.0s語音片段...
+[2026-08-19 13:56:41][run_asr_conda] [355.0s] 獲得 16 個語音片段
+[2026-08-19 13:56:43][run_asr_conda] [325.9s-328.1s] [Speaker 1] 那接下來來談風險問題，
+[2026-08-19 13:56:43][run_asr_conda] [328.4s-330.4s] [Speaker 1] 因爲去年其實發生不少狀況，
+[2026-08-19 13:56:43][run_asr_conda] [330.7s-331.8s] [Speaker 1] 像排線呃，
+[2026-08-19 13:56:43][run_asr_conda] [331.8s-332.5s] [Speaker 1] 排隊動、
+[2026-08-19 13:56:43][run_asr_conda] [332.8s-333.6s] [Speaker 1] 動線混亂，
+[2026-08-19 13:56:43][run_asr_conda] [333.9s-334.8s] [Speaker 1] 音響延遲、
+[2026-08-19 13:56:43][run_asr_conda] [335.1s-336.8s] [Speaker 1] 樂色處理不足，
+[2026-08-19 13:56:43][run_asr_conda] [337.1s-339.6s] [Speaker 1] 甚至還有臨呃攤位臨時缺電，
+[2026-08-19 13:56:43][run_asr_conda] [339.9s-340.5s] [Speaker 1] 這些問題，
+[2026-08-19 13:56:43][run_asr_conda] [340.5s-341.8s] [Speaker 1] 今年不能再發生。
+[2026-08-19 13:56:43][run_asr_conda] [342.4s-345.2s] [Speaker 1] 新余總務這邊目前有改善方案嗎？
+[2026-08-19 13:56:43][run_asr_conda] [346.8s-347.0s] [Speaker 4] 有，
+[2026-08-19 13:56:43][run_asr_conda] [347.1s-348.3s] [Speaker 4] 首先釋放一下，
+[2026-08-19 13:56:43][run_asr_conda] [348.9s-351.2s] [Speaker 4] 去年最大問題是入口在集中，
+[2026-08-19 13:56:43][run_asr_conda] [351.5s-353.4s] [Speaker 4] 所以人流全部都卡在這裏。
+[2026-08-19 13:56:43][run_asr_conda] [353.6s-354.9s] [Speaker 4] 今年我打算改成，
+[2026-08-19 13:56:43][run_asr_conda] [380.0s] 處理30.0s語音片段...
+[2026-08-19 13:56:55][run_asr_conda] [380.0s] 獲得 14 個語音片段
+[2026-08-19 13:56:55][run_asr_conda] [350.1s-351.6s] [Speaker 6] 是入口在其中，
+[2026-08-19 13:56:55][run_asr_conda] [351.6s-353.4s] [Speaker 6] 所以人流全部都卡在這門。
+[2026-08-19 13:56:55][run_asr_conda] [353.7s-355.7s] [Speaker 6] 今年我打算改成雙路口，
+[2026-08-19 13:56:55][run_asr_conda] [356.1s-358.4s] [Speaker 6] 另外會增加指示排雨工作人員。
+[2026-08-19 13:56:55][run_asr_conda] [358.6s-360.1s] [Speaker 6] 第二是熱色問題。
+[2026-08-19 13:56:55][run_asr_conda] [360.3s-361.9s] [Speaker 6] 去年熱色桶數量不足，
+[2026-08-19 13:56:55][run_asr_conda] [362.2s-363.8s] [Speaker 6] 而且清理頻率太低。
+[2026-08-19 13:56:55][run_asr_conda] [364.1s-367.1s] [Speaker 6] 今年我規劃每個區域都有固定熱色點，
+[2026-08-19 13:56:55][run_asr_conda] [367.4s-368.9s] [Speaker 6] 並安排輪班清潔。
+[2026-08-19 13:56:55][run_asr_conda] [369.4s-370.9s] [Speaker 6] 第三是供電問題。
+[2026-08-19 13:56:55][run_asr_conda] [371.1s-373.5s] [Speaker 6] 去年很多攤會臨時增加設備，
+[2026-08-19 13:56:55][run_asr_conda] [373.7s-375.0s] [Speaker 6] 但沒有提前申請，
+[2026-08-19 13:56:55][run_asr_conda] [375.3s-376.5s] [Speaker 6] 導致現場跳電。
+[2026-08-19 13:56:55][run_asr_conda] [376.8s-379.9s] [Speaker 6] 所以今年我們會要求所有攤位提前登進用。
+[2026-08-19 13:56:56][run_asr_conda] [405.0s] 處理30.0s語音片段...
+[2026-08-19 13:57:07][run_asr_conda] [405.0s] 獲得 15 個語音片段
+[2026-08-19 13:57:09][run_asr_conda] [375.4s-376.6s] [Speaker 6] 導致現場跳電。
+[2026-08-19 13:57:09][run_asr_conda] [376.8s-381.7s] [Speaker 6] 所以今年我會要求所有單位提前登記用電需求超過限制，
+[2026-08-19 13:57:09][run_asr_conda] [381.7s-383.4s] [Speaker 6] 就不能自行增加設備。
+[2026-08-19 13:57:09][run_asr_conda] [384.4s-385.5s] [Speaker 2] 我還有一個擔心，
+[2026-08-19 13:57:09][run_asr_conda] [385.8s-386.8s] [Speaker 2] 如果下雨怎麼辦？
+[2026-08-19 13:57:09][run_asr_conda] [387.1s-389.2s] [Speaker 2] 因爲現在很多活動都在戶外。
+[2026-08-19 13:57:09][run_asr_conda] [390.4s-390.7s] [Speaker 1] 嗯，
+[2026-08-19 13:57:09][run_asr_conda] [390.7s-392.3s] [Speaker 1] 這部分我有跟小校確認，
+[2026-08-19 13:57:09][run_asr_conda] [392.6s-394.5s] [Speaker 1] 如果只是小雨活動造成，
+[2026-08-19 13:57:09][run_asr_conda] [394.9s-395.8s] [Speaker 1] 如果是大雨，
+[2026-08-19 13:57:09][run_asr_conda] [395.9s-397.3s] [Speaker 1] 我們需要啓動備案。
+[2026-08-19 13:57:09][run_asr_conda] [397.8s-399.2s] [Speaker 1] 目前備案有兩個方向，
+[2026-08-19 13:57:09][run_asr_conda] [399.6s-400.9s] [Speaker 1] 第一是改到體育館，
+[2026-08-19 13:57:09][run_asr_conda] [401.1s-402.8s] [Speaker 1] 第二是縮小活動規模，
+[2026-08-19 13:57:09][run_asr_conda] [403.4s-404.7s] [Speaker 1] 但這兩個都有問題。
+[2026-08-19 13:57:10][run_asr_conda] [430.0s] 處理30.0s語音片段...
+[2026-08-19 13:57:22][run_asr_conda] [430.0s] 獲得 15 個語音片段
+[2026-08-19 13:57:24][run_asr_conda] [400.1s-401.0s] [Speaker 1] 是改到體育館。
+[2026-08-19 13:57:24][run_asr_conda] [401.2s-402.9s] [Speaker 1] 第二是縮小活動規模。
+[2026-08-19 13:57:24][run_asr_conda] [403.4s-404.6s] [Speaker 1] 但這兩個都有問題，
+[2026-08-19 13:57:24][run_asr_conda] [404.9s-406.6s] [Speaker 1] 因爲體育館空間有限，
+[2026-08-19 13:57:24][run_asr_conda] [406.8s-408.9s] [Speaker 1] 而且很多設備需要重新搭建，
+[2026-08-19 13:57:24][run_asr_conda] [409.7s-412.4s] [Speaker 1] 所以我們最好還是提前準備防雨設備。
+[2026-08-19 13:57:24][run_asr_conda] [414.7s-417.2s] [Speaker 3] 我覺得現在最大的挑戰其實不是辦活動，
+[2026-08-19 13:57:24][run_asr_conda] [417.4s-419.0s] [Speaker 3] 而是讓學生願意參加。
+[2026-08-19 13:57:24][run_asr_conda] [419.4s-422.1s] [Speaker 3] 因爲現在很多學生對學校活動很冷淡，
+[2026-08-19 13:57:24][run_asr_conda] [422.4s-424.3s] [Speaker 3] 尤其大學生生活變得很分散，
+[2026-08-19 13:57:24][run_asr_conda] [424.6s-425.2s] [Speaker 3] 有人打工，
+[2026-08-19 13:57:24][run_asr_conda] [425.2s-425.9s] [Speaker 3] 有人實習，
+[2026-08-19 13:57:24][run_asr_conda] [426.1s-427.5s] [Speaker 3] 有人根本不想要待在學校，
+[2026-08-19 13:57:24][run_asr_conda] [427.8s-429.2s] [Speaker 3] 所以如果活動沒有吸引力，
+[2026-08-19 13:57:24][run_asr_conda] [429.2s-429.9s] [Speaker 3] 很容易變成，
+[2026-08-19 13:57:25][run_asr_conda] [455.0s] 處理30.0s語音片段...
+[2026-08-19 13:57:36][run_asr_conda] [455.0s] 獲得 14 個語音片段
+[2026-08-19 13:57:37][run_asr_conda] [425.1s-425.9s] [Speaker 3] 打工有人實習，
+[2026-08-19 13:57:37][run_asr_conda] [426.1s-427.8s] [Speaker 3] 有人根本不想要待在學校哦，
+[2026-08-19 13:57:37][run_asr_conda] [427.9s-429.2s] [Speaker 3] 這如果活動沒有吸引力，
+[2026-08-19 13:57:37][run_asr_conda] [429.2s-431.6s] [Speaker 3] 很容易變成只有工作人員自己感動。
+[2026-08-19 13:57:37][run_asr_conda] [432.8s-435.2s] [Speaker 2] 這其實也是我最近一直在想的事情。
+[2026-08-19 13:57:37][run_asr_conda] [435.5s-436.3s] [Speaker 2] 以前辦活動，
+[2026-08-19 13:57:37][run_asr_conda] [436.4s-438.5s] [Speaker 2] 大家可能因爲熱鬧就會來，
+[2026-08-19 13:57:37][run_asr_conda] [438.8s-443.3s] [Speaker 2] 但現在學生會考慮值不值得花時間有沒有新鮮感？
+[2026-08-19 13:57:37][run_asr_conda] [443.4s-444.3s] [Speaker 2] 能不能拍照，
+[2026-08-19 13:57:37][run_asr_conda] [444.4s-445.4s] [Speaker 2] 有沒有互動性？
+[2026-08-19 13:57:37][run_asr_conda] [445.6s-448.2s] [Speaker 2] 所以我覺得我們不能只做看錶演，
+[2026-08-19 13:57:37][run_asr_conda] [448.2s-449.5s] [Speaker 2] 應該增加參與感。
+[2026-08-19 13:57:37][run_asr_conda] [449.6s-454.1s] [Speaker 2] 例如集張活動及時互動遊戲現場抽獎社羣任務，
+[2026-08-19 13:57:37][run_asr_conda] [454.1s-454.9s] [Speaker 2] 讓大家不，
+[2026-08-19 13:57:38][run_asr_conda] [480.0s] 處理30.0s語音片段...
+[2026-08-19 13:57:49][run_asr_conda] [480.0s] 獲得 14 個語音片段
+[2026-08-19 13:57:51][run_asr_conda] [450.3s-454.1s] [Speaker 2] 集張活動及時互動遊戲現場抽獎社羣任務，
+[2026-08-19 13:57:51][run_asr_conda] [454.2s-455.7s] [Speaker 2] 讓大家不只是觀衆，
+[2026-08-19 13:57:51][run_asr_conda] [456.4s-457.8s] [Speaker 7] 但互動活動越多，
+[2026-08-19 13:57:51][run_asr_conda] [457.9s-459.4s] [Speaker 7] 人力需求也會增加。
+[2026-08-19 13:57:51][run_asr_conda] [459.6s-461.9s] [Speaker 6] 我們目前職工數量其實不太夠，
+[2026-08-19 13:57:51][run_asr_conda] [462.2s-463.7s] [Speaker 6] 現在只有四十幾位，
+[2026-08-19 13:57:51][run_asr_conda] [464.0s-465.7s] [Speaker 6] 但如果活動範圍太大，
+[2026-08-19 13:57:51][run_asr_conda] [465.8s-467.6s] [Speaker 6] 我怕現場管理會失控。
+[2026-08-19 13:57:51][run_asr_conda] [469.7s-470.6s] [Speaker 1] 既然提到人力，
+[2026-08-19 13:57:51][run_asr_conda] [470.9s-471.7s] [Speaker 1] 我想談呃，
+[2026-08-19 13:57:51][run_asr_conda] [471.7s-473.6s] [Speaker 1] 我也想談一下最近團隊狀況。
+[2026-08-19 13:57:51][run_asr_conda] [474.1s-474.7s] [Speaker 1] 老實說，
+[2026-08-19 13:57:51][run_asr_conda] [474.9s-476.7s] [Speaker 1] 我感覺大家最近有點疲憊，
+[2026-08-19 13:57:51][run_asr_conda] [477.0s-479.9s] [Speaker 1] 尤其很多事情一直修改像海報版本。
+[2026-08-19 13:57:52][run_asr_conda] [505.0s] 處理30.0s語音片段...
+[2026-08-19 13:58:04][run_asr_conda] [505.0s] 獲得 17 個語音片段
+[2026-08-19 13:58:05][run_asr_conda] [475.1s-476.8s] [Speaker 1] 我感覺大家最近有點疲憊，
+[2026-08-19 13:58:05][run_asr_conda] [477.0s-478.6s] [Speaker 1] 遊戲很多事情一直修改，
+[2026-08-19 13:58:05][run_asr_conda] [479.0s-480.9s] [Speaker 1] 像海報版本已經改了四次，
+[2026-08-19 13:58:05][run_asr_conda] [481.8s-482.1s] [Speaker 1] 呃，
+[2026-08-19 13:58:05][run_asr_conda] [482.1s-483.1s] [Speaker 1] 流程表也一直變。
+[2026-08-19 13:58:05][run_asr_conda] [483.6s-485.4s] [Speaker 1] 我知道大家想把活動做好，
+[2026-08-19 13:58:05][run_asr_conda] [485.7s-487.1s] [Speaker 1] 但如果溝通沒整理好，
+[2026-08-19 13:58:05][run_asr_conda] [487.2s-488.1s] [Speaker 1] 只會越來越亂。
+[2026-08-19 13:58:05][run_asr_conda] [488.6s-490.6s] [Speaker 1] 所以從今天開始我希望。
+[2026-08-19 13:58:05][run_asr_conda] [490.9s-491.4s] [Speaker 1] 第一，
+[2026-08-19 13:58:05][run_asr_conda] [491.9s-493.9s] [Speaker 1] 所有需求修改必須先確認。
+[2026-08-19 13:58:05][run_asr_conda] [494.1s-494.6s] [Speaker 1] 第二，
+[2026-08-19 13:58:05][run_asr_conda] [494.9s-496.8s] [Speaker 1] 不要臨時增加大型內容。
+[2026-08-19 13:58:05][run_asr_conda] [497.0s-497.4s] [Speaker 1] 第三，
+[2026-08-19 13:58:05][run_asr_conda] [497.8s-499.8s] [Speaker 1] 每組每週固定回報進度。
+[2026-08-19 13:58:05][run_asr_conda] [500.0s-501.7s] [Speaker 1] 第然後面一定會出問題。
+[2026-08-19 13:58:05][run_asr_conda] [503.8s-505.0s] [Speaker 未知] 我認同遊戲。
+[2026-08-19 13:58:06][run_asr_conda] [530.0s] 處理30.0s語音片段...
+[2026-08-19 13:58:18][run_asr_conda] [530.0s] 獲得 16 個語音片段
+[2026-08-19 13:58:21][run_asr_conda] [500.1s-501.7s] [Speaker 8] 不然後面一定會出問題。
+[2026-08-19 13:58:21][run_asr_conda] [503.8s-505.5s] [Speaker 3] 我認同尤其宣傳，
+[2026-08-19 13:58:21][run_asr_conda] [505.5s-506.8s] [Speaker 3] 其實很怕方向一直改。
+[2026-08-19 13:58:21][run_asr_conda] [507.1s-509.0s] [Speaker 3] 因爲我們很多素材都需要提前做，
+[2026-08-19 13:58:21][run_asr_conda] [509.2s-510.2s] [Speaker 3] 如果主題一直變，
+[2026-08-19 13:58:21][run_asr_conda] [510.3s-513.1s] [Speaker 3] 整個社羣內容都要重做計劃，
+[2026-08-19 13:58:21][run_asr_conda] [513.1s-515.6s] [Speaker 2] 這邊也會盡快打固流程固定。
+[2026-08-19 13:58:21][run_asr_conda] [515.9s-518.7s] [Speaker 2] 我覺得現在最重要的是先穩定可信內容，
+[2026-08-19 13:58:21][run_asr_conda] [518.7s-520.1s] [Speaker 2] 不要一直往外加東西。
+[2026-08-19 13:58:21][run_asr_conda] [521.4s-521.6s] [Speaker 8] 好，
+[2026-08-19 13:58:21][run_asr_conda] [521.8s-523.1s] [Speaker 8] 那我最後整理呃，
+[2026-08-19 13:58:21][run_asr_conda] [523.1s-524.2s] [Speaker 8] 整理一下今天結論，
+[2026-08-19 13:58:21][run_asr_conda] [524.5s-525.0s] [Speaker 8] 第一，
+[2026-08-19 13:58:21][run_asr_conda] [525.3s-527.4s] [Speaker 8] 活動主題方向維持 recampus。
+[2026-08-19 13:58:21][run_asr_conda] [527.5s-528.0s] [Speaker 8] 第二，
+[2026-08-19 13:58:21][run_asr_conda] [528.1s-529.8s] [Speaker 8] 強化整體品牌感與，
+[2026-08-19 13:58:22][run_asr_conda] [555.0s] 處理30.0s語音片段...
+[2026-08-19 13:58:33][run_asr_conda] [555.0s] 獲得 18 個語音片段
+[2026-08-19 13:58:35][run_asr_conda] [525.3s-527.4s] [Speaker 1] 活動主題方向維持 recampus。
+[2026-08-19 13:58:35][run_asr_conda] [527.5s-528.0s] [Speaker 1] 第二，
+[2026-08-19 13:58:35][run_asr_conda] [528.1s-530.7s] [Speaker 1] 強化整體品牌感與視覺統一。
+[2026-08-19 13:58:35][run_asr_conda] [530.9s-531.3s] [Speaker 1] 第三，
+[2026-08-19 13:58:35][run_asr_conda] [531.7s-532.8s] [Speaker 1] 主打學生參與，
+[2026-08-19 13:58:35][run_asr_conda] [533.2s-534.5s] [Speaker 1] 而不是單純表演。
+[2026-08-19 13:58:35][run_asr_conda] [534.8s-535.3s] [Speaker 1] 第四，
+[2026-08-19 13:58:35][run_asr_conda] [535.8s-536.5s] [Speaker 1] 控制預算，
+[2026-08-19 13:58:35][run_asr_conda] [536.6s-538.0s] [Speaker 1] 避免資源過度集中。
+[2026-08-19 13:58:35][run_asr_conda] [538.5s-539.0s] [Speaker 1] 第五，
+[2026-08-19 13:58:35][run_asr_conda] [539.2s-542.0s] [Speaker 1] 本週確認主要廠商與設備需求。
+[2026-08-19 13:58:35][run_asr_conda] [542.4s-542.9s] [Speaker 1] 第六，
+[2026-08-19 13:58:35][run_asr_conda] [543.2s-545.4s] [Speaker 1] 加強備案與現場管理規劃。
+[2026-08-19 13:58:35][run_asr_conda] [546.0s-547.4s] [Speaker 1] 我知道現在壓力很大，
+[2026-08-19 13:58:35][run_asr_conda] [547.6s-550.4s] [Speaker 1] 但我覺得大家至少已經開始有共同方向。
+[2026-08-19 13:58:35][run_asr_conda] [551.0s-551.3s] [Speaker 1] 其實，
+[2026-08-19 13:58:35][run_asr_conda] [551.3s-554.1s] [Speaker 1] 辦活動最難的不是設備或預算，
+[2026-08-19 13:58:35][run_asr_conda] [554.4s-554.9s] [Speaker 1] 而是讓，
+[2026-08-19 13:58:39][run_asr_conda] [檔案結束] 連續10次讀取失敗，且錄音已結束
+[2026-08-19 13:58:39][run_asr_conda] 
+處理剩餘的 long_buffer 資料...
+[2026-08-19 13:58:45][run_asr_conda] 
+處理剩餘的 7 個語音片段
+[2026-08-19 13:58:45][run_asr_conda] [550.1s-551.4s] [Speaker 1] 方向其實，
+[2026-08-19 13:58:45][run_asr_conda] [551.4s-554.2s] [Speaker 1] 辦活動最難的不是設備或預算，
+[2026-08-19 13:58:45][run_asr_conda] [554.4s-556.7s] [Speaker 1] 而是讓所有人往同一個目標前進。
+[2026-08-19 13:58:45][run_asr_conda] [557.3s-559.4s] [Speaker 1] 希望接下來大家能夠繼續互相配合，
+[2026-08-19 13:58:45][run_asr_conda] [559.7s-562.9s] [Speaker 1] 把這次文化節做出真正屬於我們學校的特色。
+[2026-08-19 13:58:45][run_asr_conda] [563.3s-564.5s] [Speaker 1] 今天會議先到這邊，
+[2026-08-19 13:58:45][run_asr_conda] [564.5s-565.5s] [Speaker 1] 大家辛苦了。
+[2026-08-19 13:58:45][run_asr_conda] 程式結束，已清理所有資源
+[2026-08-19 13:58:45][run_asr_conda] 
+[run_asr] ASR 結束
+[2026-08-19 13:58:45][run_asr_conda] [run_asr] ASR 總耗時: 426.77 秒 
+[2026-08-19 13:58:47][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] ASR 轉錄完成
+[2026-08-19 13:58:47][meeting_v1_integrated] [MeetingWorkflow][step2_transcribe] step2 耗時: 432.26 秒
+
+[2026-08-19 13:58:47][meeting_v1_integrated] [SUCCESS] ASR 轉錄完成
+[2026-08-19 13:59:53][meeting_v1_integrated] [STEP] 開始執行 PKD 報告提取...
+[2026-08-19 13:59:53][meeting_v1_integrated] 
+============================================================
+[2026-08-19 13:59:53][meeting_v1_integrated]   步驟 3/6: 生成 People/Keypoints/Decisions 報告 (conda worker)
+[2026-08-19 13:59:53][meeting_v1_integrated] ============================================================
+
+[2026-08-19 13:59:53][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] 使用 conda Python 執行 PKD：
+[2026-08-19 13:59:53][meeting_v1_integrated]    sudo -u cgu-csie --preserve-env=MEETING_LOG_FILE,PYTHONPATH /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/run_pkd_conda.py --output-dir /home/cgu-csie/meeting-assistence/web_output/79871332 --output-prefix output --model-path /home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf --interval-minutes 5 --overlap-seconds 60
+
+[2026-08-19 13:59:53][run_pkd_conda] [PKD] 正在導入模型...
+[2026-08-19 13:59:54][run_pkd_conda] [LlamaCppQwen3Extractor][init] Qwen3-4B-Q8_0 核心引擎載入中...
+[2026-08-19 13:59:54][run_pkd_conda] [LlamaCppQwen3Extractor] Pi 5 16GB 模式 (n_ctx=8192)
+[2026-08-19 13:59:55][run_pkd_conda] llama_context: n_ctx_per_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+[2026-08-19 13:59:55][run_pkd_conda] [LlamaCppQwen3Extractor] 模型載入成功
+[2026-08-19 13:59:55][run_pkd_conda] [PKD] 模型導入完成 (耗時: 1.83 秒)
+
+[2026-08-19 14:31:35][run_pkd_conda] 
+⏱️  PKD 任務詳細統計
+[2026-08-19 14:31:35][run_pkd_conda] ============================================================
+[2026-08-19 14:31:35][run_pkd_conda]  1. 模型導入時間 :     1.83 秒
+[2026-08-19 14:31:35][run_pkd_conda]  2. People 任務  :   337.21 秒
+[2026-08-19 14:31:35][run_pkd_conda]  3. Keypoints 任務:   974.61 秒
+[2026-08-19 14:31:35][run_pkd_conda]  4. Decisions 任務:   587.84 秒
+[2026-08-19 14:31:35][run_pkd_conda] ------------------------------------------------------------
+[2026-08-19 14:31:35][run_pkd_conda]  總執行耗時      :  1901.55 秒
+[2026-08-19 14:31:35][run_pkd_conda] ============================================================
+
+[2026-08-19 14:31:35][run_pkd_conda] [run_pkd_conda] PKD OK -> /home/cgu-csie/meeting-assistence/web_output/79871332/output_pkd_cache.json
+[2026-08-19 14:31:35][run_pkd_conda] [run_pkd_conda] 總耗時: 1901.89 秒
+
+[2026-08-19 14:31:35][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] cache 已寫入: /home/cgu-csie/meeting-assistence/web_output/79871332/output_cache.json
+
+[2026-08-19 14:31:35][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] step3 完成：P/K/D 已寫入 cache
+[2026-08-19 14:31:35][meeting_v1_integrated] [MeetingWorkflow][step3_run_pkd_reports] step3 耗時: 1902.12 秒
+
+[2026-08-19 14:31:35][meeting_v1_integrated] [SUCCESS] PKD 報告生成完成
+[2026-08-19 14:34:05][meeting_v1_integrated] [STEP] 開始提取行動項目...
+[2026-08-19 14:34:05][meeting_v1_integrated] 
+============================================================
+[2026-08-19 14:34:05][meeting_v1_integrated]   步驟 4/6: 提取行動項目 (conda worker)
+[2026-08-19 14:34:05][meeting_v1_integrated] ============================================================
+
+[2026-08-19 14:34:05][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions] 使用 conda Python 執行 Actions：
+[2026-08-19 14:34:05][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions]   sudo -u cgu-csie --preserve-env=MEETING_LOG_FILE,PYTHONPATH /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/run_actions_conda.py --output-dir /home/cgu-csie/meeting-assistence/web_output/79871332 --output-prefix output
+
+[2026-08-19 14:34:06][run_actions_conda] llama_context: n_ctx_per_seq (2048) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+[2026-08-19 14:34:06][run_actions_conda] [BaseExtractor][init] Loaded model [actions]: /home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf
+[2026-08-19 14:37:18][run_actions_conda] [run_actions_conda] ACTIONS OK -> /home/cgu-csie/meeting-assistence/web_output/79871332/output_actions_cache.json
+[2026-08-19 14:37:18][run_actions_conda] [run_actions_conda] 模型載入時間: 1.09 秒
+[2026-08-19 14:37:18][run_actions_conda] [run_actions_conda] 生成時間: 192.04 秒
+[2026-08-19 14:37:18][run_actions_conda] [run_actions_conda] run_actions_conda 總耗時: 193.13 秒
+
+[2026-08-19 14:37:18][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions] cache 已更新: /home/cgu-csie/meeting-assistence/web_output/79871332/output_cache.json
+
+[2026-08-19 14:37:18][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions] 行動項目已輸出: /home/cgu-csie/meeting-assistence/web_output/79871332/output_actions.txt
+[2026-08-19 14:37:18][meeting_v1_integrated] [MeetingWorkflow][step4_extract_actions] step4 耗時: 193.70 秒
+
+[2026-08-19 14:37:18][meeting_v1_integrated] [SUCCESS] 行動項目提取完成
+[2026-08-19 14:38:43][meeting_v1_integrated] [STEP] 開始生成會議摘要...
+[2026-08-19 14:38:43][meeting_v1_integrated] 
+============================================================
+[2026-08-19 14:38:43][meeting_v1_integrated]   步驟 5/6: 生成會議摘要 (conda worker)
+[2026-08-19 14:38:43][meeting_v1_integrated] ============================================================
+
+[2026-08-19 14:38:43][meeting_v1_integrated] [MeetingWorkflow][step5_generate_summary] 使用 conda Python 執行 Summary：
+[2026-08-19 14:38:43][meeting_v1_integrated] [MeetingWorkflow][step5_generate_summary]   sudo -u cgu-csie --preserve-env=MEETING_LOG_FILE,PYTHONPATH /home/cgu-csie/miniconda3/bin/python3 /home/cgu-csie/meeting-assistence/run_summary_conda.py --output-dir /home/cgu-csie/meeting-assistence/web_output/79871332 --output-prefix output
+
+[2026-08-19 14:38:44][run_summary_conda] [run_summary_conda] 正在初始化 SummaryGenerator（載入模型）...
+[2026-08-19 14:38:44][run_summary_conda] [BaseExtractor][init] Dynamic n_ctx for summary: 8192
+[2026-08-19 14:38:45][run_summary_conda] llama_context: n_ctx_per_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+[2026-08-19 14:38:45][run_summary_conda] [BaseExtractor][init] Loaded model [summary]: /home/cgu-csie/qwen3-4b-instruct-2507-q8_0.gguf
+[2026-08-19 14:38:45][run_summary_conda] [run_summary_conda] 讀取 cache: /home/cgu-csie/meeting-assistence/web_output/79871332/output_cache.json
+
+[2026-08-19 14:38:45][run_summary_conda] [run_summary_conda] 生成 4 個資訊區塊進行濃縮摘要
+
+[2026-08-19 14:42:12][run_summary_conda] [run_summary_conda] SUMMARY OK -> /home/cgu-csie/meeting-assistence/web_output/79871332/output_summary_cache.json
+[2026-08-19 14:42:12][run_summary_conda] [run_summary_conda] 計時統計:
+[2026-08-19 14:42:12][run_summary_conda] [run_summary_conda]  模型載入時間: 1.41 秒
+[2026-08-19 14:42:12][run_summary_conda] [run_summary_conda]  推導時間: 206.91 秒
+[2026-08-19 14:42:12][run_summary_conda] [run_summary_conda]  總耗時: 208.32 秒
+[2026-08-19 14:42:12][run_summary_conda] 
+[2026-08-19 14:42:12][meeting_v1_integrated] [MeetingWorkflow][step5_generate_summary] 摘要已輸出: /home/cgu-csie/meeting-assistence/web_output/79871332/output_summary.txt
+
+[2026-08-19 14:42:12][meeting_v1_integrated] [MeetingWorkflow][step5_generate_summary] step5 耗時: 208.98 秒
+
+[2026-08-19 14:42:12][meeting_v1_integrated] [SUCCESS] 會議摘要生成完成
+[2026-08-19 14:49:42][meeting_v1_integrated] [STEP] 開始將結果匯出為 TXT 檔案...
+[2026-08-19 14:49:42][meeting_v1_integrated] 
+============================================================
+[2026-08-19 14:49:42][meeting_v1_integrated]   步驟 6/6: 匯出 TXT + 藍牙傳送
+[2026-08-19 14:49:42][meeting_v1_integrated] ============================================================
+
+[2026-08-19 14:49:42][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt] TXT 已輸出: /home/cgu-csie/meeting-assistence/web_output/79871332/output_meeting_summary.txt
+
+[2026-08-19 14:49:42][meeting_v1_integrated] [send_to_paired] 藍牙傳送目標: realme X50 5G (C8:16:DA:A0:5C:C2)
+[2026-08-19 14:49:42][meeting_v1_integrated] [send_to_paired] 傳送檔案: output_meeting_summary.txt
+[2026-08-19 14:49:42][meeting_v1_integrated]   [send_file] 檔案路徑: /home/cgu-csie/meeting-assistence/web_output/79871332/output_meeting_summary.txt
+[2026-08-19 14:49:42][meeting_v1_integrated]   [send_file] 檔案大小: 5740 bytes (5.61 KB)
+[2026-08-19 14:49:42][meeting_v1_integrated]   [send_file] 檔案名稱: output_meeting_summary.txt
+[2026-08-19 14:49:47][meeting_v1_integrated] [send_to_paired] 傳送失敗: [send_file] D-Bus 錯誤: org.bluez.obex.Error.Failed: Unable to find service record
+[2026-08-19 14:49:47][meeting_v1_integrated] [send_to_paired] 傳送檔案: output_actions.txt
+[2026-08-19 14:49:47][meeting_v1_integrated]   [send_file] 檔案路徑: /home/cgu-csie/meeting-assistence/web_output/79871332/output_actions.txt
+[2026-08-19 14:49:47][meeting_v1_integrated]   [send_file] 檔案大小: 644 bytes (0.63 KB)
+[2026-08-19 14:49:47][meeting_v1_integrated]   [send_file] 檔案名稱: output_actions.txt
+[2026-08-19 14:49:52][meeting_v1_integrated] [send_to_paired] 傳送失敗: [send_file] D-Bus 錯誤: org.bluez.obex.Error.Failed: Unable to find service record
+[2026-08-19 14:49:52][meeting_v1_integrated] [send_to_paired] 傳送檔案: output_summary.txt
+[2026-08-19 14:49:52][meeting_v1_integrated]   [send_file] 檔案路徑: /home/cgu-csie/meeting-assistence/web_output/79871332/output_summary.txt
+[2026-08-19 14:49:52][meeting_v1_integrated]   [send_file] 檔案大小: 796 bytes (0.78 KB)
+[2026-08-19 14:49:52][meeting_v1_integrated]   [send_file] 檔案名稱: output_summary.txt
+[2026-08-19 14:49:57][meeting_v1_integrated] [send_to_paired] 傳送失敗: [send_file] D-Bus 錯誤: org.bluez.obex.Error.Failed: Unable to find service record
+[2026-08-19 14:49:57][meeting_v1_integrated] 
+============================================================
+[2026-08-19 14:49:57][meeting_v1_integrated] [send_to_paired] 傳送統計:
+[2026-08-19 14:49:57][meeting_v1_integrated] [send_to_paired] 成功: 0/3 個檔案
+[2026-08-19 14:49:57][meeting_v1_integrated] [send_to_paired] 失敗: output_meeting_summary.txt, output_actions.txt, output_summary.txt
+[2026-08-19 14:49:57][meeting_v1_integrated] ============================================================
+
+[2026-08-19 14:49:57][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt] 藍牙傳送失敗: [send_to_paired] 所有檔案傳送失敗
+[2026-08-19 14:49:57][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt]    檢查項目:
+[2026-08-19 14:49:57][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt]      確保藍牙裝置已配對且在範圍內
+[2026-08-19 14:49:57][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt]      執行: systemctl --user status obex
+[2026-08-19 14:49:57][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt]      執行: systemctl --user restart obex
+
+[2026-08-19 14:49:57][meeting_v1_integrated] [MeetingWorkflow][step6_export_txt] step6 耗時: 15.47 秒
+
+[2026-08-19 14:49:57][meeting_v1_integrated] [SUCCESS] TXT 匯出完成，共 3 個檔案
+[2026-08-19 14:53:55][meeting_v1_integrated] [STEP] 開始進行藍牙檔案傳送...
+[2026-08-19 14:53:55][meeting_v1_integrated] [STEP] 未選擇裝置，正在搜尋已配對的藍牙設備...
+[2026-08-19 14:53:55][meeting_v1_integrated] [send_to_paired] 藍牙傳送目標: realme X50 5G (C8:16:DA:A0:5C:C2)
+[2026-08-19 14:53:55][meeting_v1_integrated] [send_to_paired] 傳送檔案: output_meeting_summary.txt
+[2026-08-19 14:53:55][meeting_v1_integrated]   [send_file] 檔案路徑: /home/cgu-csie/meeting-assistence/web_output/79871332/output_meeting_summary.txt
+[2026-08-19 14:53:55][meeting_v1_integrated]   [send_file] 檔案大小: 5740 bytes (5.61 KB)
+[2026-08-19 14:53:55][meeting_v1_integrated]   [send_file] 檔案名稱: output_meeting_summary.txt
+[2026-08-19 14:54:00][meeting_v1_integrated] [send_to_paired] 傳送失敗: [send_file] D-Bus 錯誤: org.bluez.obex.Error.Failed: Unable to find service record
+[2026-08-19 14:54:00][meeting_v1_integrated] [send_to_paired] 傳送檔案: output_actions.txt
+[2026-08-19 14:54:00][meeting_v1_integrated]   [send_file] 檔案路徑: /home/cgu-csie/meeting-assistence/web_output/79871332/output_actions.txt
+[2026-08-19 14:54:00][meeting_v1_integrated]   [send_file] 檔案大小: 644 bytes (0.63 KB)
+[2026-08-19 14:54:00][meeting_v1_integrated]   [send_file] 檔案名稱: output_actions.txt
+[2026-08-19 14:54:05][meeting_v1_integrated] [send_to_paired] 傳送失敗: [send_file] D-Bus 錯誤: org.bluez.obex.Error.Failed: Unable to find service record
+[2026-08-19 14:54:05][meeting_v1_integrated] [send_to_paired] 傳送檔案: output_summary.txt
+[2026-08-19 14:54:05][meeting_v1_integrated]   [send_file] 檔案路徑: /home/cgu-csie/meeting-assistence/web_output/79871332/output_summary.txt
+[2026-08-19 14:54:05][meeting_v1_integrated]   [send_file] 檔案大小: 796 bytes (0.78 KB)
+[2026-08-19 14:54:05][meeting_v1_integrated]   [send_file] 檔案名稱: output_summary.txt
+[2026-08-19 14:54:10][meeting_v1_integrated] [send_to_paired] 傳送失敗: [send_file] D-Bus 錯誤: org.bluez.obex.Error.Failed: Unable to find service record
+[2026-08-19 14:54:10][meeting_v1_integrated] 
+============================================================
+[2026-08-19 14:54:10][meeting_v1_integrated] [send_to_paired] 傳送統計:
+[2026-08-19 14:54:10][meeting_v1_integrated] [send_to_paired] 成功: 0/3 個檔案
+[2026-08-19 14:54:10][meeting_v1_integrated] [send_to_paired] 失敗: output_meeting_summary.txt, output_actions.txt, output_summary.txt
+[2026-08-19 14:54:10][meeting_v1_integrated] ============================================================
+
+[2026-08-19 14:54:10][meeting_v1_integrated] [ERROR] 藍牙傳送失敗: [send_to_paired] 所有檔案傳送失敗
+[2026-08-19 14:58:20][meeting_v1_integrated] [WEB][79871332] 下載檔案: actions
+[2026-08-19 14:58:23][meeting_v1_integrated] [WEB][79871332] 下載檔案: meeting_summary
+[2026-08-19 14:58:25][meeting_v1_integrated] [WEB][79871332] 下載檔案: summary
+[2026-08-19 14:58:45][meeting_v1_integrated] [WEB] 清除會話: 79871332

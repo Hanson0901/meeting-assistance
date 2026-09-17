@@ -452,3 +452,6 @@
 [2026-08-10 18:55:30][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
 [2026-08-10 18:55:30][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
 [2026-08-10 18:55:30][meeting_v1_integrated] [WEB] 恢復會話: 00205e8b, 已完成步驟: ['asr'], 音訊存在: True
+[2026-08-10 19:04:07][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-10 19:04:07][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-10 19:04:07][meeting_v1_integrated] [WEB] 建立會話: ce5bd338

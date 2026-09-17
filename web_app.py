@@ -24,7 +24,7 @@ project_root = Path(__file__).parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from meeting_v1_integrated import MeetingWorkflow
+from meeting_v1_integrated import MeetingWorkflow, ObexPushError
 from print_log_utils import (
     setup_print_logging,
     set_log_callback,
@@ -54,6 +54,7 @@ workflows: Dict[str, MeetingWorkflow] = {}
 workflow_states: Dict[str, Dict[str, Any]] = {}
 session_logs: Dict[str, list] = {}  # 存儲每個會話的日誌
 step_logs: Dict[str, Dict[str, list]] = {}  # 存儲每個會話每個步驟的日誌：{session_id: {step_name: [logs]}}
+recording_threads: Dict[str, threading.Thread] = {}  # 存儲每個會話目前執行中的錄音背景執行緒
 
 # 進程名前綴到步驟的映射
 PROCESS_TO_STEP = {
@@ -154,7 +155,9 @@ def create_session():
             'errors': [],
             'messages': [],
             'audio_file': None,
-            'files': {}
+            'files': {},
+            'is_recording': False,
+            'bluetooth_target': None
         }
         
         # 初始化會話日誌
@@ -210,6 +213,92 @@ def upload_audio(session_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
+@app.route('/api/session/<session_id>/record/start', methods=['POST'])
+def start_recording(session_id):
+    """使用樹梅派麥克風開始錄音"""
+    if session_id not in workflows:
+        return jsonify({'success': False, 'error': '會話不存在'}), 404
+
+    try:
+        workflow = workflows[session_id]
+        state = workflow_states[session_id]
+
+        if workflow.is_recording:
+            return jsonify({'success': False, 'error': '目前已在錄音中'}), 400
+
+        # 重設為預設錄音路徑，避免覆蓋之前上傳的檔案（可能庫尾不同）
+        workflow.audio_file = os.path.join(workflow.output_dir, f"{workflow.output_prefix}_audio.mkv")
+
+        state['current_step'] = 'recording'
+        state['is_recording'] = True
+
+        def record_task():
+            log_collection_callback.current_session_id = session_id
+            try:
+                log_message(session_id, f"[STEP] 開始使用麥克風錄音（裝置: {workflow.audio_device}）...")
+                result = workflow.step1_record()
+
+                if result and os.path.exists(workflow.audio_file):
+                    workflow_states[session_id]['audio_file'] = workflow.audio_file
+                    state['messages'].append('麥克風錄音已完成')
+                    log_message(session_id, f"[SUCCESS] 錄音完成，檔案: {workflow.audio_file}")
+                else:
+                    state['errors'].append('錄音失敗，找不到輸出檔案')
+                    log_message(session_id, f"[ERROR] 錄音失敗，找不到輸出檔案")
+            except Exception as e:
+                state['errors'].append(f'錄音錯誤: {str(e)}')
+                log_message(session_id, f"[ERROR] 錄音異常: {e}")
+            finally:
+                state['is_recording'] = False
+                state['current_step'] = None
+                if hasattr(log_collection_callback, 'current_session_id'):
+                    delattr(log_collection_callback, 'current_session_id')
+
+        thread = threading.Thread(target=record_task, daemon=True)
+        recording_threads[session_id] = thread
+        thread.start()
+
+        return jsonify({
+            'success': True,
+            'message': '錄音已開始',
+            'session_id': session_id
+        }), 200
+    except Exception as e:
+        print(f"[WEB][start_recording] 錯誤: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/session/<session_id>/record/stop', methods=['POST'])
+def stop_recording(session_id):
+    """停止麥克風錄音"""
+    if session_id not in workflows:
+        return jsonify({'success': False, 'error': '會話不存在'}), 404
+
+    try:
+        workflow = workflows[session_id]
+
+        if not workflow.is_recording:
+            return jsonify({'success': False, 'error': '目前不在錄音中'}), 400
+
+        log_message(session_id, "[STEP] 收到停止錄音指令，正在完成檔案封裝...")
+        workflow.is_recording = False
+
+        thread = recording_threads.get(session_id)
+        if thread:
+            thread.join(timeout=10)
+
+        ready = os.path.exists(workflow.audio_file)
+
+        return jsonify({
+            'success': True,
+            'ready': ready,
+            'audio_file': workflow.audio_file if ready else None
+        }), 200
+    except Exception as e:
+        print(f"[WEB][stop_recording] 錯誤: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @app.route('/api/session/<session_id>/step/asr', methods=['POST'])
 def run_asr(session_id):
     """執行 ASR 轉錄"""
@@ -222,7 +311,7 @@ def run_asr(session_id):
         
         # 驗證音頻檔案是否存在
         if not workflow.audio_file or not os.path.exists(workflow.audio_file):
-            error_msg = '❌ 未找到音頻檔案。請先上傳音頻檔案後再執行 ASR'
+            error_msg = '未找到音頻檔案。請先上傳音頻檔案後再執行 ASR'
             state['errors'].append(error_msg)
             log_message(session_id, f"[WEB][{session_id}] ASR 前置檢查失敗: 音頻檔案不存在")
             return jsonify({
@@ -242,10 +331,10 @@ def run_asr(session_id):
                 
                 if result:
                     state['steps_completed'].append('asr')
-                    state['messages'].append('✓ ASR 轉錄完成')
+                    state['messages'].append('ASR 轉錄完成')
                     log_message(session_id, f"[SUCCESS] ASR 轉錄完成")
                 else:
-                    state['errors'].append('❌ ASR 轉錄失敗 - 請檢查音頻檔案格式')
+                    state['errors'].append('ASR 轉錄失敗 - 請檢查音頻檔案格式')
                     log_message(session_id, f"[ERROR] ASR 轉錄失敗 - 請檢查音頻檔案格式")
                 
                 state['current_step'] = None
@@ -253,7 +342,7 @@ def run_asr(session_id):
                 if hasattr(log_collection_callback, 'current_session_id'):
                     delattr(log_collection_callback, 'current_session_id')
             except Exception as e:
-                state['errors'].append(f'❌ ASR 錯誤: {str(e)}')
+                state['errors'].append(f'ASR 錯誤: {str(e)}')
                 log_message(session_id, f"[ERROR] ASR 異常: {e}")
                 state['current_step'] = None
                 # 清除當前會話 ID
@@ -295,10 +384,10 @@ def run_pkd(session_id):
                 
                 if result:
                     state['steps_completed'].append('pkd')
-                    state['messages'].append('✓ PKD 報告完成')
+                    state['messages'].append('PKD 報告完成')
                     log_message(session_id, f"[SUCCESS] PKD 報告生成完成")
                 else:
-                    state['errors'].append('❌ PKD 報告生成失敗')
+                    state['errors'].append('PKD 報告生成失敗')
                     log_message(session_id, f"[ERROR] PKD 報告生成失敗")
                 
                 state['current_step'] = None
@@ -306,7 +395,7 @@ def run_pkd(session_id):
                 if hasattr(log_collection_callback, 'current_session_id'):
                     delattr(log_collection_callback, 'current_session_id')
             except Exception as e:
-                state['errors'].append(f'❌ PKD 錯誤: {str(e)}')
+                state['errors'].append(f'PKD 錯誤: {str(e)}')
                 log_message(session_id, f"[ERROR] PKD 異常: {e}")
                 state['current_step'] = None
                 # 清除當前會話 ID
@@ -348,10 +437,10 @@ def run_actions(session_id):
                 
                 if result:
                     state['steps_completed'].append('actions')
-                    state['messages'].append('✓ 行動項目提取完成')
+                    state['messages'].append('行動項目提取完成')
                     log_message(session_id, f"[SUCCESS] 行動項目提取完成")
                 else:
-                    state['errors'].append('❌ 行動項目提取失敗')
+                    state['errors'].append('行動項目提取失敗')
                     log_message(session_id, f"[ERROR] 行動項目提取失敗")
                 
                 state['current_step'] = None
@@ -359,7 +448,7 @@ def run_actions(session_id):
                 if hasattr(log_collection_callback, 'current_session_id'):
                     delattr(log_collection_callback, 'current_session_id')
             except Exception as e:
-                state['errors'].append(f'❌ Actions 錯誤: {str(e)}')
+                state['errors'].append(f'Actions 錯誤: {str(e)}')
                 log_message(session_id, f"[ERROR] Actions 異常: {e}")
                 state['current_step'] = None
                 # 清除當前會話 ID
@@ -401,10 +490,10 @@ def run_summary(session_id):
                 
                 if result:
                     state['steps_completed'].append('summary')
-                    state['messages'].append('✓ 會議摘要已生成')
+                    state['messages'].append('會議摘要已生成')
                     log_message(session_id, f"[SUCCESS] 會議摘要生成完成")
                 else:
-                    state['errors'].append('❌ 會議摘要生成失敗')
+                    state['errors'].append('會議摘要生成失敗')
                     log_message(session_id, f"[ERROR] 會議摘要生成失敗")
                 
                 state['current_step'] = None
@@ -412,7 +501,7 @@ def run_summary(session_id):
                 if hasattr(log_collection_callback, 'current_session_id'):
                     delattr(log_collection_callback, 'current_session_id')
             except Exception as e:
-                state['errors'].append(f'❌ Summary 錯誤: {str(e)}')
+                state['errors'].append(f'Summary 錯誤: {str(e)}')
                 log_message(session_id, f"[ERROR] Summary 異常: {e}")
                 state['current_step'] = None
                 # 清除當前會話 ID
@@ -454,7 +543,7 @@ def run_export(session_id):
                 
                 if result:
                     state['steps_completed'].append('export')
-                    state['messages'].append('✓ TXT 已匯出')
+                    state['messages'].append('TXT 已匯出')
                     
                     # 收集輸出文件
                     output_dir = workflow.output_dir
@@ -473,7 +562,7 @@ def run_export(session_id):
                     state['files'] = files
                     log_message(session_id, f"[SUCCESS] TXT 匯出完成，共 {len(files)} 個檔案")
                 else:
-                    state['errors'].append('❌ TXT 匯出失敗')
+                    state['errors'].append('TXT 匯出失敗')
                     log_message(session_id, f"[ERROR] TXT 匯出失敗")
                 
                 state['current_step'] = None
@@ -481,7 +570,7 @@ def run_export(session_id):
                 if hasattr(log_collection_callback, 'current_session_id'):
                     delattr(log_collection_callback, 'current_session_id')
             except Exception as e:
-                state['errors'].append(f'❌ Export 錯誤: {str(e)}')
+                state['errors'].append(f'Export 錯誤: {str(e)}')
                 log_message(session_id, f"[ERROR] Export 異常: {e}")
                 state['current_step'] = None
                 # 清除當前會話 ID
@@ -521,7 +610,7 @@ def run_bluetooth(session_id):
                 log_message(session_id, f"[STEP] 開始進行藍牙檔案傳送...")
                 
                 if not workflow.enable_bluetooth:
-                    state['messages'].append('⚠ 藍牙功能未啟用')
+                    state['messages'].append('藍牙功能未啟用')
                     log_message(session_id, f"[WARN] 藍牙功能未啟用")
                     state['current_step'] = None
                     # 清除當前會話 ID
@@ -536,7 +625,7 @@ def run_bluetooth(session_id):
                         files_to_send.append(filepath)
                 
                 if not files_to_send:
-                    state['errors'].append('❌ 沒有檔案可傳送')
+                    state['errors'].append('沒有檔案可傳送')
                     log_message(session_id, f"[ERROR] 沒有檔案可傳送")
                     state['current_step'] = None
                     # 清除當前會話 ID
@@ -546,13 +635,36 @@ def run_bluetooth(session_id):
                 
                 # 執行藍牙傳送
                 try:
-                    log_message(session_id, f"[STEP] 正在搜尋已配對的藍牙設備...")
-                    mac, name = workflow.bt_sender.auto_send_to_first_paired(files_to_send)
-                    state['steps_completed'].append('bluetooth')
-                    state['messages'].append(f'✓ 已傳送至 {name} ({mac})')
-                    log_message(session_id, f"[SUCCESS] 藍牙傳送完成，目標設備: {name} ({mac})")
+                    target = state.get('bluetooth_target')
+                    if target and target.get('mac'):
+                        mac = target['mac']
+                        name = target.get('name') or mac
+                        log_message(session_id, f"[STEP] 使用已選擇的裝置: {name} ({mac})...")
+                        success_count = 0
+                        failed_files = []
+                        for file_path in files_to_send:
+                            try:
+                                workflow.bt_sender.send_file(file_path, mac)
+                                success_count += 1
+                            except Exception as fe:
+                                failed_files.append(os.path.basename(file_path))
+                                log_message(session_id, f"[ERROR] 傳送 {os.path.basename(file_path)} 失敗: {fe}")
+                        if success_count == 0:
+                            raise ObexPushError('所有檔案傳送失敗')
+                        state['steps_completed'].append('bluetooth')
+                        if failed_files:
+                            state['messages'].append(f'已傳送至 {name} ({mac})，部分檔案失敗: ' + ', '.join(failed_files))
+                        else:
+                            state['messages'].append(f'已傳送至 {name} ({mac})')
+                        log_message(session_id, f"[SUCCESS] 藍牙傳送完成，目標設備: {name} ({mac})")
+                    else:
+                        log_message(session_id, f"[STEP] 未選擇裝置，正在搜尋已配對的藍牙設備...")
+                        mac, name = workflow.bt_sender.auto_send_to_first_paired(files_to_send)
+                        state['steps_completed'].append('bluetooth')
+                        state['messages'].append(f'已傳送至 {name} ({mac})')
+                        log_message(session_id, f"[SUCCESS] 藍牙傳送完成，目標設備: {name} ({mac})")
                 except Exception as e:
-                    state['errors'].append(f'❌ 藍牙傳送失敗: {str(e)}')
+                    state['errors'].append(f'藍牙傳送失敗: {str(e)}')
                     log_message(session_id, f"[ERROR] 藍牙傳送失敗: {e}")
                 
                 state['current_step'] = None
@@ -560,7 +672,7 @@ def run_bluetooth(session_id):
                 if hasattr(log_collection_callback, 'current_session_id'):
                     delattr(log_collection_callback, 'current_session_id')
             except Exception as e:
-                state['errors'].append(f'❌ Bluetooth 錯誤: {str(e)}')
+                state['errors'].append(f'Bluetooth 錯誤: {str(e)}')
                 log_message(session_id, f"[ERROR] Bluetooth 異常: {e}")
                 state['current_step'] = None
                 # 清除當前會話 ID
@@ -577,6 +689,71 @@ def run_bluetooth(session_id):
         }), 200
     except Exception as e:
         print(f"[WEB][run_bluetooth] 錯誤: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/session/<session_id>/bluetooth/scan', methods=['POST'])
+def scan_bluetooth_devices(session_id):
+    """搜尋附近的藍牙裝置 (含已配對與尚未配對)"""
+    if session_id not in workflows:
+        return jsonify({'success': False, 'error': '會話不存在'}), 404
+
+    try:
+        workflow = workflows[session_id]
+
+        if not workflow.enable_bluetooth or not hasattr(workflow, 'bt_sender'):
+            return jsonify({
+                'success': False,
+                'error': '此會話未啟用藍牙功能，請於設置面板勾選「啟用藍牙傳送」後重新建立會話'
+            }), 400
+
+        log_message(session_id, "[STEP] 開始搜尋附近的藍牙裝置...")
+        devices = workflow.bt_sender.scan_devices(duration=6.0)
+        log_message(session_id, f"[SUCCESS] 藍牙搜尋完成，找到 {len(devices)} 個裝置")
+
+        return jsonify({'success': True, 'devices': devices}), 200
+    except ObexPushError as e:
+        log_message(session_id, f"[ERROR] 藍牙搜尋失敗: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    except Exception as e:
+        print(f"[WEB][scan_bluetooth_devices] 錯誤: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/session/<session_id>/bluetooth/select', methods=['POST'])
+def select_bluetooth_device(session_id):
+    """選擇藍牙目標裝置 (若尚未配對則自動嘗試配對並信任)"""
+    if session_id not in workflows:
+        return jsonify({'success': False, 'error': '會話不存在'}), 404
+
+    try:
+        workflow = workflows[session_id]
+        state = workflow_states[session_id]
+
+        if not workflow.enable_bluetooth or not hasattr(workflow, 'bt_sender'):
+            return jsonify({'success': False, 'error': '此會話未啟用藍牙功能'}), 400
+
+        data = request.json or {}
+        mac = (data.get('mac') or '').strip()
+        name = (data.get('name') or mac).strip()
+
+        if not mac:
+            return jsonify({'success': False, 'error': '缺少裝置 MAC 位址'}), 400
+
+        log_message(session_id, f"[STEP] 選擇藍牙目標裝置: {name} ({mac})")
+
+        try:
+            workflow.bt_sender.pair_and_trust(mac)
+        except ObexPushError as e:
+            log_message(session_id, f"[ERROR] 配對裝置失敗: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
+
+        state['bluetooth_target'] = {'mac': mac, 'name': name}
+        log_message(session_id, f"[SUCCESS] 已設定藍牙目標裝置: {name} ({mac})")
+
+        return jsonify({'success': True, 'mac': mac, 'name': name}), 200
+    except Exception as e:
+        print(f"[WEB][select_bluetooth_device] 錯誤: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
@@ -639,7 +816,9 @@ def get_status(session_id):
             'steps_completed': state['steps_completed'],
             'messages': state['messages'],
             'errors': state['errors'],
-            'files': state['files']
+            'files': state['files'],
+            'is_recording': state.get('is_recording', False),
+            'bluetooth_target': state.get('bluetooth_target')
         }), 200
     except Exception as e:
         print(f"[WEB][get_status] 錯誤: {e}")
@@ -1028,7 +1207,7 @@ def resume_session(session_id):
             'current_step': None,
             'errors': [],
             'messages': [
-                f"✓ 已恢復歷史 session（已完成步驟: {', '.join(steps_completed) if steps_completed else '無'}）"
+                f"已恢復歷史 session（已完成步驟: {', '.join(steps_completed) if steps_completed else '無'}）"
             ],
             'audio_file': workflow.audio_file if audio_exists else None,
             'files': files,
@@ -1080,7 +1259,30 @@ if __name__ == '__main__':
     print(f"[WEB] 上傳資料夾: {UPLOAD_FOLDER}")
     print(f"[WEB] 輸出資料夾: {OUTPUT_FOLDER}")
     print("[WEB] 訪問 http://localhost:5000")
-    
+
+    # SSL 憑證設定（用於直接以 HTTPS 存取，例如區網內不透過 Nginx 的情境）
+    SSL_CERT_PATH = '/etc/nginx/ssl/hyang.icu.pem'
+    SSL_KEY_PATH = '/etc/nginx/ssl/hyang.icu.key'
+    HTTPS_PORT = 5443
+
+    if os.path.exists(SSL_CERT_PATH) and os.path.exists(SSL_KEY_PATH):
+        def run_https():
+            print(f"[WEB] 訪問 https://localhost:{HTTPS_PORT} (直接 HTTPS，不經過 Nginx)")
+            app.run(
+                host='0.0.0.0',
+                port=HTTPS_PORT,
+                debug=False,
+                use_reloader=False,
+                threaded=True,
+                ssl_context=(SSL_CERT_PATH, SSL_KEY_PATH)
+            )
+
+        https_thread = threading.Thread(target=run_https, daemon=True)
+        https_thread.start()
+    else:
+        print(f"[WEB] 警告: 找不到 SSL 憑證檔案 ({SSL_CERT_PATH} / {SSL_KEY_PATH})，僅啟用 HTTP")
+
+    # 原有 HTTP 服務維持不變（供 Nginx 反向代理使用，port 5000）
     app.run(
         host='0.0.0.0',
         port=5000,

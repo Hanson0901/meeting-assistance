@@ -1,0 +1,7 @@
+[2026-08-10 19:17:44][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-10 19:17:44][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-10 19:17:44][meeting_v1_integrated] [WEB] 建立會話: e1ccc040
+[2026-08-10 19:21:57][meeting_v1_integrated] [WEB] 清除會話: e1ccc040
+[2026-08-10 19:22:39][meeting_v1_integrated] [OBEX] 使用 SessionBus 連接 OBEX
+[2026-08-10 19:22:39][meeting_v1_integrated] [MeetingWorkflow][init] 藍牙傳送模組已啟用
+[2026-08-10 19:22:39][meeting_v1_integrated] [WEB] 恢復會話: 428a905e, 已完成步驟: ['asr', 'pkd', 'actions'], 音訊存在: True
